@@ -668,7 +668,7 @@
 
     /* gallery / image lightbox (any [data-full]) */
     (function(){ const lb=document.getElementById('pcbLightbox'); if(!lb) return; const img=lb.querySelector('img');
-      document.querySelectorAll('[data-full]').forEach(el=>el.addEventListener('click',()=>{ img.src=el.dataset.full; lb.classList.add('open'); lb.setAttribute('aria-hidden','false'); lockScroll(true); }));
+      document.querySelectorAll('[data-full]').forEach(el=>el.addEventListener('click',()=>{ img.src=el.dataset.full; lb.classList.add('open'); lb.setAttribute('aria-hidden','false'); lockScroll(true); })); const _lbX=()=>{ lb.classList.remove('open'); lb.setAttribute('aria-hidden','true'); lockScroll(false); }; lb.querySelectorAll('[data-lb-close]').forEach(x=>x.addEventListener('click',_lbX)); addEventListener('keydown',e=>{ if(e.key==='Escape'&&lb.classList.contains('open'))_lbX(); });
     })();
 
     /* interactive 3D adapters viewer (GLB; falls back to render image on file://) */

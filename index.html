@@ -27,6 +27,8 @@
   </script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js" defer></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/ScrollTrigger.min.js" defer></script>
+  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+  <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" defer></script>
 
   <style>
     /* ===== TOKENS ===== */
@@ -719,6 +721,65 @@
       </div>
     </section>
 
+    <!-- ===== LOCATION (standalone, above footer) ===== -->
+    <section class="map-section" aria-label="Our location" data-reveal>
+      <div class="container">
+        <div class="map-shell card">
+          <div id="nyna-map" class="map-canvas" role="img" aria-label="Map of NYNA's office at Croxley Business Park, WD18 8YA"></div>
+          <div class="map-badge">
+            <span class="map-eyebrow">Find us</span>
+            <span class="map-addr">Office 1.42, Building 2<br>Croxley Business Park, WD18 8YA</span>
+            <a class="map-link" href="https://www.google.com/maps/search/?api=1&amp;query=Croxley%20Business%20Park%20WD18%208YA" target="_blank" rel="noopener" data-cursor="hover">Open in Maps
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M7 17 17 7M7 7h10v10"/></svg>
+            </a>
+          </div>
+        </div>
+      </div>
+    </section>
+    <style>
+      .map-section { position: relative; z-index: 2; padding: clamp(1rem,3vw,2rem) 0 clamp(3.5rem,7vw,6rem); }
+      .map-shell { position: relative; height: clamp(340px,46vw,520px); padding: 0; overflow: hidden; border-radius: var(--r-lg); }
+      .map-canvas { position: absolute; inset: 0; background: var(--surface); }
+      .map-badge { position: absolute; left: clamp(1rem,3vw,2rem); bottom: clamp(1rem,3vw,2rem); z-index: 600; max-width: min(86%,360px); padding: 1.05rem 1.2rem; border-radius: var(--r-md); background: rgba(13,17,22,0.72); border: 1px solid var(--hairline-2); -webkit-backdrop-filter: blur(14px) saturate(140%); backdrop-filter: blur(14px) saturate(140%); box-shadow: 0 20px 50px rgba(0,0,0,0.4); display: flex; flex-direction: column; gap: 0.5rem; }
+      html.light .map-badge { background: rgba(248,249,251,0.82); box-shadow: 0 20px 50px rgba(20,20,20,0.14); }
+      .map-eyebrow { font-family: var(--f-head); font-weight: 700; font-size: 0.64rem; letter-spacing: 0.24em; text-transform: uppercase; color: var(--accent); }
+      .map-addr { font-family: var(--f-head); font-weight: 500; font-size: 0.92rem; line-height: 1.5; color: var(--text); }
+      .map-link { display: inline-flex; align-items: center; gap: 0.4rem; width: fit-content; margin-top: 0.15rem; font-family: var(--f-head); font-weight: 600; font-size: 0.76rem; color: var(--text-muted); text-decoration: none; transition: color var(--t); }
+      .map-link:hover { color: var(--accent); }
+      .map-link svg { width: 13px; height: 13px; }
+      #nyna-map.leaflet-container { font-family: var(--f-body); background: var(--surface); }
+      .leaflet-bar { border: 1px solid var(--hairline-2) !important; box-shadow: 0 8px 22px rgba(0,0,0,0.3) !important; }
+      .leaflet-control-zoom a { background: rgba(13,17,22,0.82) !important; color: var(--text) !important; border-color: var(--hairline-2) !important; }
+      .leaflet-control-zoom a:hover { background: rgba(13,17,22,0.96) !important; color: var(--accent) !important; }
+      html.light .leaflet-control-zoom a { background: rgba(255,255,255,0.92) !important; color: var(--ink) !important; }
+      .leaflet-control-attribution { background: rgba(13,17,22,0.55) !important; color: var(--text-dim) !important; }
+      .leaflet-control-attribution a { color: var(--text-muted) !important; }
+      html.light .leaflet-control-attribution { background: rgba(255,255,255,0.7) !important; }
+      html.light .leaflet-control-attribution a { color: var(--ink) !important; }
+      .nyna-pin span { position: absolute; top: 50%; left: 50%; width: 15px; height: 15px; margin: -7.5px 0 0 -7.5px; border-radius: 50%; background: var(--accent); box-shadow: 0 0 0 5px rgba(94,207,249,0.22), 0 0 16px 3px rgba(94,207,249,0.55); }
+      .nyna-pin span::after { content: ""; position: absolute; inset: -5px; border-radius: 50%; border: 1px solid var(--accent); animation: nynaPulse 2.4s ease-out infinite; }
+      @keyframes nynaPulse { 0% { transform: scale(0.55); opacity: 0.75; } 100% { transform: scale(2.4); opacity: 0; } }
+      @media (prefers-reduced-motion: reduce) { .nyna-pin span::after { animation: none; opacity: 0; } }
+    </style>
+    <script>
+      document.addEventListener('DOMContentLoaded', function () {
+        var el = document.getElementById('nyna-map');
+        if (!el || typeof L === 'undefined') return;
+        var LAT = 51.645826, LON = -0.42766;
+        var dark = 'https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png';
+        var light = 'https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png';
+        var attr = '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> &copy; <a href="https://carto.com/attributions">CARTO</a>';
+        var isLight = function () { return document.documentElement.classList.contains('light'); };
+        var map = L.map(el, { scrollWheelZoom: false, zoomControl: true, attributionControl: true, dragging: !L.Browser.mobile, tap: false }).setView([LAT, LON], 15);
+        var layer = L.tileLayer(isLight() ? light : dark, { maxZoom: 19, subdomains: 'abcd', attribution: attr }).addTo(map);
+        var icon = L.divIcon({ className: 'nyna-pin', html: '<span></span>', iconSize: [15, 15], iconAnchor: [7, 7] });
+        L.marker([LAT, LON], { icon: icon, keyboard: false, title: 'NYNA, Croxley Business Park' }).addTo(map);
+        new MutationObserver(function () { layer.setUrl(isLight() ? light : dark); }).observe(document.documentElement, { attributes: true, attributeFilter: ['class'] });
+        if ('IntersectionObserver' in window) { new IntersectionObserver(function (es) { if (es[0].isIntersecting) map.invalidateSize(); }).observe(el); }
+        setTimeout(function () { map.invalidateSize(); }, 200);
+      });
+    </script>
+
     <footer>
       <div class="container">
         <div class="footer-top">
@@ -870,7 +931,7 @@
 
     /* gallery / image lightbox (any [data-full]) */
     (function(){ const lb=document.getElementById('pcbLightbox'); if(!lb) return; const img=lb.querySelector('img');
-      document.querySelectorAll('[data-full]').forEach(el=>el.addEventListener('click',()=>{ img.src=el.dataset.full; lb.classList.add('open'); lb.setAttribute('aria-hidden','false'); lockScroll(true); }));
+      document.querySelectorAll('[data-full]').forEach(el=>el.addEventListener('click',()=>{ img.src=el.dataset.full; lb.classList.add('open'); lb.setAttribute('aria-hidden','false'); lockScroll(true); })); const _lbX=()=>{ lb.classList.remove('open'); lb.setAttribute('aria-hidden','true'); lockScroll(false); }; lb.querySelectorAll('[data-lb-close]').forEach(x=>x.addEventListener('click',_lbX)); addEventListener('keydown',e=>{ if(e.key==='Escape'&&lb.classList.contains('open'))_lbX(); });
     })();
 
     /* interactive 3D adapters viewer (GLB; falls back to render image on file://) */

@@ -119,8 +119,8 @@
     .cur-ring { width: 38px; height: 38px; border: 1px solid rgba(255,255,255,0.7); border-radius: 50%; display: grid; place-items: center; transition: width var(--t) var(--ease), height var(--t) var(--ease), border-color var(--t), opacity var(--t-fast); }
     .cur-ring .lbl { font-family: var(--f-head); font-weight: 700; font-size: 10px; letter-spacing: 0.14em; text-transform: uppercase; color: #fff; opacity: 0; transition: opacity var(--t-fast); mix-blend-mode: normal; }
     body.c-hover .cur-ring { width: 60px; height: 60px; border-color: #fff; } body.c-hover .cur-dot { opacity: 0; }
-    body.c-view .cur-ring { width: 84px; height: 84px; mix-blend-mode: normal; border-color: var(--accent-line); background: var(--accent-soft); -webkit-backdrop-filter: blur(2px); backdrop-filter: blur(2px); }
-    body.c-view .cur-ring .lbl { opacity: 1; } body.c-view .cur-dot { opacity: 0; }
+    body.c-view .cur-ring, body.c-drag .cur-ring { width: 84px; height: 84px; mix-blend-mode: normal; border-color: var(--accent-line); background: var(--accent-soft); -webkit-backdrop-filter: blur(2px); backdrop-filter: blur(2px); }
+    body.c-view .cur-ring .lbl, body.c-drag .cur-ring .lbl { opacity: 1; } body.c-view .cur-dot, body.c-drag .cur-dot { opacity: 0; }
     @media (hover: none), (pointer: coarse) { .cur-dot, .cur-ring { display: none !important; } }
     .progress { position: fixed; top: 0; left: 0; height: 2px; width: 100%; transform-origin: 0 50%; transform: scaleX(0); z-index: 120; background: var(--accent); }
 
@@ -529,7 +529,7 @@
           <h3 class="h3">Adapters I designed &amp; printed.</h3>
         </div>
         <div class="adapters-wrap" data-reveal>
-          <div class="adapters-stage" id="adaptersStage" data-cursor="hover">
+          <div class="adapters-stage" id="adaptersStage" data-cursor="drag">
             <span class="pcb-badge caps" style="color:var(--accent)">Drag to rotate</span>
             <canvas id="adapters"></canvas>
             <div class="adapters-loading" id="adaptersLoading">Loading model</div>
@@ -678,9 +678,9 @@
       addEventListener('mousemove',e=>{mx=e.clientX;my=e.clientY;},{passive:true});
       (function loop(){ dx=lerp(dx,mx,0.5);dy=lerp(dy,my,0.5);rx=lerp(rx,mx,0.2);ry=lerp(ry,my,0.2);
         dot.style.transform=`translate(${dx}px,${dy}px) translate(-50%,-50%)`; ring.style.transform=`translate(${rx}px,${ry}px) translate(-50%,-50%)`; requestAnimationFrame(loop); })();
-      const set=el=>{document.body.classList.remove('c-hover','c-view'); if(!el)return; const t=el.getAttribute('data-cursor'); if(t==='view')document.body.classList.add('c-view'); else if(t==='hover')document.body.classList.add('c-hover');};
+      const lbl=ring?ring.querySelector('.lbl'):null; const set=el=>{document.body.classList.remove('c-hover','c-view','c-drag'); if(!el)return; const t=el.getAttribute('data-cursor'); if(t==='view'){document.body.classList.add('c-view'); if(lbl)lbl.textContent='View';} else if(t==='drag'){document.body.classList.add('c-drag'); if(lbl)lbl.textContent='Drag';} else if(t==='hover')document.body.classList.add('c-hover');};
       document.addEventListener('mouseover',e=>set(e.target.closest('[data-cursor]')));
-      document.addEventListener('mouseout',e=>{const t=e.relatedTarget; if(!t||!t.closest||!t.closest('[data-cursor]'))document.body.classList.remove('c-hover','c-view');});
+      document.addEventListener('mouseout',e=>{const t=e.relatedTarget; if(!t||!t.closest||!t.closest('[data-cursor]'))document.body.classList.remove('c-hover','c-view','c-drag');});
     }
     if (fine && !reduce) document.querySelectorAll('[data-magnetic]').forEach(el=>{
       el.addEventListener('mousemove',e=>{const r=el.getBoundingClientRect();el.style.transform=`translate(${(e.clientX-(r.left+r.width/2))*0.22}px,${(e.clientY-(r.top+r.height/2))*0.36}px)`;});
@@ -747,7 +747,7 @@
 
     /* gallery / image lightbox (any [data-full]) */
     (function(){ const lb=document.getElementById('pcbLightbox'); if(!lb) return; const img=lb.querySelector('img');
-      document.querySelectorAll('[data-full]').forEach(el=>el.addEventListener('click',()=>{ img.src=el.dataset.full; lb.classList.add('open'); lb.setAttribute('aria-hidden','false'); lockScroll(true); }));
+      document.querySelectorAll('[data-full]').forEach(el=>el.addEventListener('click',()=>{ img.src=el.dataset.full; lb.classList.add('open'); lb.setAttribute('aria-hidden','false'); lockScroll(true); })); const _lbX=()=>{ lb.classList.remove('open'); lb.setAttribute('aria-hidden','true'); lockScroll(false); }; lb.querySelectorAll('[data-lb-close]').forEach(x=>x.addEventListener('click',_lbX)); addEventListener('keydown',e=>{ if(e.key==='Escape'&&lb.classList.contains('open'))_lbX(); });
     })();
 
     /* interactive 3D adapters viewer (GLB; falls back to render image on file://) */
