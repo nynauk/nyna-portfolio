@@ -135,14 +135,9 @@
 
     /* ===== TOP BAR ===== */
     .bar { position: fixed; top: 0; left: 0; right: 0; z-index: 130; display: flex; align-items: center; justify-content: space-between; padding: clamp(1.1rem, 2.2vw, 1.7rem) var(--gutter); transition: transform 0.5s var(--ease); }
-    .bar-blur { --bt: 13,17,22; position: absolute; top: 0; left: 0; right: 0; height: 300%; pointer-events: none; z-index: -1; opacity: 0; transition: opacity 0.55s var(--ease); }
-    html.light .bar-blur { --bt: 236,239,243; }
-    .bar-blur span { position: absolute; inset: 0; display: block; }
-    .bar-blur span:nth-child(1) { background: rgba(var(--bt),0.2); -webkit-backdrop-filter: blur(12px); backdrop-filter: blur(12px); -webkit-mask-image: linear-gradient(to bottom, #000, #000 13%, transparent 33%); mask-image: linear-gradient(to bottom, #000, #000 13%, transparent 33%); }
-    .bar-blur span:nth-child(2) { background: rgba(var(--bt),0.12); -webkit-backdrop-filter: blur(7px); backdrop-filter: blur(7px); -webkit-mask-image: linear-gradient(to bottom, transparent 11%, #000 27%, transparent 47%); mask-image: linear-gradient(to bottom, transparent 11%, #000 27%, transparent 47%); }
-    .bar-blur span:nth-child(3) { background: rgba(var(--bt),0.07); -webkit-backdrop-filter: blur(3.5px); backdrop-filter: blur(3.5px); -webkit-mask-image: linear-gradient(to bottom, transparent 27%, #000 43%, transparent 63%); mask-image: linear-gradient(to bottom, transparent 27%, #000 43%, transparent 63%); }
-    .bar-blur span:nth-child(4) { background: rgba(var(--bt),0.035); -webkit-backdrop-filter: blur(1.6px); backdrop-filter: blur(1.6px); -webkit-mask-image: linear-gradient(to bottom, transparent 43%, #000 59%, transparent 81%); mask-image: linear-gradient(to bottom, transparent 43%, #000 59%, transparent 81%); }
-    .bar-blur span:nth-child(5) { -webkit-backdrop-filter: blur(0.6px); backdrop-filter: blur(0.6px); -webkit-mask-image: linear-gradient(to bottom, transparent 59%, #000 77%, transparent 97%); mask-image: linear-gradient(to bottom, transparent 59%, #000 77%, transparent 97%); }
+    .bar-blur { position: absolute; top: 0; left: 0; right: 0; height: 230%; pointer-events: none; z-index: -1; opacity: 0; transition: opacity 0.55s var(--ease); background: linear-gradient(to bottom, rgba(13,17,22,0.66) 0%, rgba(13,17,22,0.4) 34%, rgba(13,17,22,0.14) 64%, rgba(13,17,22,0) 100%); }
+    html.light .bar-blur { background: linear-gradient(to bottom, rgba(236,239,243,0.78) 0%, rgba(236,239,243,0.5) 34%, rgba(236,239,243,0.18) 64%, rgba(236,239,243,0) 100%); }
+    .bar-blur span { display: none; }
     .bar.solid:not(.hide) .bar-blur { opacity: 1; }
     .bar.hide { transform: translateY(-130%); }
     .brand { font-family: var(--f-logo); font-weight: 500; font-size: 1.4rem; letter-spacing: 0.06em; color: var(--light); text-shadow: var(--logo-shadow); transition: opacity var(--t); }
