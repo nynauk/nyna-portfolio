@@ -7,7 +7,7 @@
   <meta name="description" content="An information-security assessment of Peg DHCP (RFC 2322) for guest WiFi, with DREAD threat-modelling of three firewall architectures. Royal Holloway IY2840." />
   <meta name="keywords" content="Peg DHCP, RFC 2322, guest WiFi security, DREAD threat modelling, firewall architecture, information security assessment, network security, Royal Holloway, NYNA" />
   <meta name="theme-color" content="#181D24" />
-  <script>try{if(localStorage.getItem('nyna-theme')==='light')document.documentElement.classList.add('light');}catch(e){}</script>
+  <script>try{if(localStorage.getItem('nyna-theme-v2')==='light')document.documentElement.classList.add('light');}catch(e){}</script>
   <link rel="icon" href="/icons/favicon.ico" sizes="any" />
   <link rel="icon" type="image/png" sizes="32x32" href="/icons/favicon-32.png" />
   <link rel="icon" type="image/png" sizes="16x16" href="/icons/favicon-16.png" />
@@ -1023,7 +1023,7 @@
 
     if(document.readyState==='loading')addEventListener('DOMContentLoaded',boot); else boot();
   </script>
-<script>(function(){var root=document.documentElement;var opts=document.querySelectorAll('.theme-opt');var mc=document.querySelector('meta[name=theme-color]');function apply(mode){root.classList.toggle('light',mode==='light');if(mc)mc.setAttribute('content',mode==='light'?'#ECEFF3':'#181D24');try{localStorage.setItem('nyna-theme',mode);}catch(e){}opts.forEach(function(o){if(o.dataset.theme===mode){o.setAttribute('aria-current','true');}else{o.removeAttribute('aria-current');}});}opts.forEach(function(o){o.addEventListener('click',function(){apply(o.dataset.theme);});});apply(root.classList.contains('light')?'light':'dark');})();</script>
+<script>(function(){var root=document.documentElement;var opts=document.querySelectorAll('.theme-opt');var mc=document.querySelector('meta[name=theme-color]');function apply(mode){root.classList.toggle('light',mode==='light');if(mc)mc.setAttribute('content',mode==='light'?'#ECEFF3':'#181D24');try{localStorage.setItem('nyna-theme-v2',mode);}catch(e){}opts.forEach(function(o){if(o.dataset.theme===mode){o.setAttribute('aria-current','true');}else{o.removeAttribute('aria-current');}});}opts.forEach(function(o){o.addEventListener('click',function(){apply(o.dataset.theme);});});apply(root.classList.contains('light')?'light':'dark');})();</script>
   <!-- Vercel Speed Insights -->
   <script>window.si=window.si||function(){(window.siq=window.siq||[]).push(arguments);};</script>
   <script defer src="/_vercel/speed-insights/script.js"></script>

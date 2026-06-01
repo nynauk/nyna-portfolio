@@ -7,7 +7,7 @@
   <meta name="description" content="A resilient ring network topology designed and deployed for OnWay LDD, improving redundancy and uptime across day-to-day operations." />
   <meta name="keywords" content="network ring, ring topology, network redundancy, network uptime, resilient network, infrastructure design, OnWay LDD, NYNA networking" />
   <meta name="theme-color" content="#181D24" />
-  <script>try{if(localStorage.getItem('nyna-theme')==='light')document.documentElement.classList.add('light');}catch(e){}</script>
+  <script>try{if(localStorage.getItem('nyna-theme-v2')==='light')document.documentElement.classList.add('light');}catch(e){}</script>
   <link rel="icon" href="/icons/favicon.ico" sizes="any" />
   <link rel="icon" type="image/png" sizes="32x32" href="/icons/favicon-32.png" />
   <link rel="icon" type="image/png" sizes="16x16" href="/icons/favicon-16.png" />
@@ -963,7 +963,7 @@
 
     if(document.readyState==='loading')addEventListener('DOMContentLoaded',boot); else boot();
   </script>
-<script>(function(){var root=document.documentElement;var opts=document.querySelectorAll('.theme-opt');var mc=document.querySelector('meta[name=theme-color]');function apply(mode){root.classList.toggle('light',mode==='light');if(mc)mc.setAttribute('content',mode==='light'?'#ECEFF3':'#181D24');try{localStorage.setItem('nyna-theme',mode);}catch(e){}opts.forEach(function(o){if(o.dataset.theme===mode){o.setAttribute('aria-current','true');}else{o.removeAttribute('aria-current');}});}opts.forEach(function(o){o.addEventListener('click',function(){apply(o.dataset.theme);});});apply(root.classList.contains('light')?'light':'dark');})();</script>
+<script>(function(){var root=document.documentElement;var opts=document.querySelectorAll('.theme-opt');var mc=document.querySelector('meta[name=theme-color]');function apply(mode){root.classList.toggle('light',mode==='light');if(mc)mc.setAttribute('content',mode==='light'?'#ECEFF3':'#181D24');try{localStorage.setItem('nyna-theme-v2',mode);}catch(e){}opts.forEach(function(o){if(o.dataset.theme===mode){o.setAttribute('aria-current','true');}else{o.removeAttribute('aria-current');}});}opts.forEach(function(o){o.addEventListener('click',function(){apply(o.dataset.theme);});});apply(root.classList.contains('light')?'light':'dark');})();</script>
   <!-- Vercel Speed Insights -->
   <script>window.si=window.si||function(){(window.siq=window.siq||[]).push(arguments);};</script>
   <script defer src="/_vercel/speed-insights/script.js"></script>
