@@ -133,12 +133,14 @@
 
     /* ===== TOP BAR ===== */
     .bar { position: fixed; top: 0; left: 0; right: 0; z-index: 130; display: flex; align-items: center; justify-content: space-between; padding: clamp(1.1rem, 2.2vw, 1.7rem) var(--gutter); transition: transform 0.5s var(--ease); }
-    .bar-blur { position: absolute; top: 0; left: 0; right: 0; height: 210%; pointer-events: none; z-index: -1; opacity: 0; transition: opacity 0.4s var(--ease); background: linear-gradient(to bottom, rgba(13,17,22,0.55), rgba(13,17,22,0) 72%); }
-    html.light .bar-blur { background: linear-gradient(to bottom, rgba(236,239,243,0.66), rgba(236,239,243,0) 72%); }
+    .bar-blur { position: absolute; top: 0; left: 0; right: 0; height: 220%; pointer-events: none; z-index: -1; opacity: 0; transition: opacity 0.4s var(--ease); background: linear-gradient(to bottom, rgba(13,17,22,0.5) 0%, rgba(13,17,22,0.2) 42%, rgba(13,17,22,0) 100%); }
+    html.light .bar-blur { background: linear-gradient(to bottom, rgba(236,239,243,0.62) 0%, rgba(236,239,243,0.24) 42%, rgba(236,239,243,0) 100%); }
     .bar-blur span { position: absolute; inset: 0; display: block; }
-    .bar-blur span:nth-child(1) { -webkit-backdrop-filter: blur(8px); backdrop-filter: blur(8px); -webkit-mask-image: linear-gradient(to bottom, #000, #000 16%, transparent 40%); mask-image: linear-gradient(to bottom, #000, #000 16%, transparent 40%); }
-    .bar-blur span:nth-child(2) { -webkit-backdrop-filter: blur(4px); backdrop-filter: blur(4px); -webkit-mask-image: linear-gradient(to bottom, transparent 12%, #000 30%, #000 44%, transparent 62%); mask-image: linear-gradient(to bottom, transparent 12%, #000 30%, #000 44%, transparent 62%); }
-    .bar-blur span:nth-child(3) { -webkit-backdrop-filter: blur(2px); backdrop-filter: blur(2px); -webkit-mask-image: linear-gradient(to bottom, transparent 36%, #000 54%, transparent 86%); mask-image: linear-gradient(to bottom, transparent 36%, #000 54%, transparent 86%); }
+    .bar-blur span:nth-child(1) { -webkit-backdrop-filter: blur(10px); backdrop-filter: blur(10px); -webkit-mask-image: linear-gradient(to bottom, #000, #000 8%, transparent 26%); mask-image: linear-gradient(to bottom, #000, #000 8%, transparent 26%); }
+    .bar-blur span:nth-child(2) { -webkit-backdrop-filter: blur(6px); backdrop-filter: blur(6px); -webkit-mask-image: linear-gradient(to bottom, transparent 6%, #000 19%, transparent 38%); mask-image: linear-gradient(to bottom, transparent 6%, #000 19%, transparent 38%); }
+    .bar-blur span:nth-child(3) { -webkit-backdrop-filter: blur(3px); backdrop-filter: blur(3px); -webkit-mask-image: linear-gradient(to bottom, transparent 19%, #000 33%, transparent 52%); mask-image: linear-gradient(to bottom, transparent 19%, #000 33%, transparent 52%); }
+    .bar-blur span:nth-child(4) { -webkit-backdrop-filter: blur(1.5px); backdrop-filter: blur(1.5px); -webkit-mask-image: linear-gradient(to bottom, transparent 33%, #000 48%, transparent 70%); mask-image: linear-gradient(to bottom, transparent 33%, #000 48%, transparent 70%); }
+    .bar-blur span:nth-child(5) { -webkit-backdrop-filter: blur(0.6px); backdrop-filter: blur(0.6px); -webkit-mask-image: linear-gradient(to bottom, transparent 48%, #000 66%, transparent 92%); mask-image: linear-gradient(to bottom, transparent 48%, #000 66%, transparent 92%); }
     .bar.solid:not(.hide) .bar-blur { opacity: 1; }
     .bar.hide { transform: translateY(-130%); }
     .brand { font-family: var(--f-logo); font-weight: 500; font-size: 1.4rem; letter-spacing: 0.06em; color: var(--light); transition: opacity var(--t); }
@@ -351,12 +353,14 @@
     .work-grid { position: relative; transition: max-height 0.7s var(--ease); }
     .work-grid.collapsed { overflow: hidden; }
     .work-fade { display: none; }
-    .work-grid.collapsed .work-fade { display: block; position: absolute; left: 0; right: 0; bottom: 0; height: 150px; pointer-events: none; z-index: 5; }
+    .work-grid.collapsed .work-fade { display: block; position: absolute; left: 0; right: 0; bottom: 0; height: 210px; pointer-events: none; z-index: 5; }
     .work-fade span { position: absolute; inset: 0; display: block; }
-    .work-fade span:nth-child(1) { -webkit-backdrop-filter: blur(4px); backdrop-filter: blur(4px); -webkit-mask-image: linear-gradient(to bottom, transparent, #000 22%, #000 40%, transparent 56%); mask-image: linear-gradient(to bottom, transparent, #000 22%, #000 40%, transparent 56%); }
-    .work-fade span:nth-child(2) { -webkit-backdrop-filter: blur(8px); backdrop-filter: blur(8px); -webkit-mask-image: linear-gradient(to bottom, transparent 22%, #000 42%, #000 58%, transparent 74%); mask-image: linear-gradient(to bottom, transparent 22%, #000 42%, #000 58%, transparent 74%); }
-    .work-fade span:nth-child(3) { -webkit-backdrop-filter: blur(14px); backdrop-filter: blur(14px); -webkit-mask-image: linear-gradient(to bottom, transparent 44%, #000 64%, #000 80%, transparent 94%); mask-image: linear-gradient(to bottom, transparent 44%, #000 64%, #000 80%, transparent 94%); }
-    .work-fade span:nth-child(4) { -webkit-backdrop-filter: blur(24px); backdrop-filter: blur(24px); -webkit-mask-image: linear-gradient(to bottom, transparent 64%, #000 86%); mask-image: linear-gradient(to bottom, transparent 64%, #000 86%); }
+    .work-fade span:nth-child(1) { -webkit-backdrop-filter: blur(4px); backdrop-filter: blur(4px); -webkit-mask-image: linear-gradient(to bottom, transparent 14%, #000 34%, #000 48%, transparent 68%); mask-image: linear-gradient(to bottom, transparent 14%, #000 34%, #000 48%, transparent 68%); }
+    .work-fade span:nth-child(2) { -webkit-backdrop-filter: blur(8px); backdrop-filter: blur(8px); -webkit-mask-image: linear-gradient(to bottom, transparent 34%, #000 52%, #000 66%, transparent 84%); mask-image: linear-gradient(to bottom, transparent 34%, #000 52%, #000 66%, transparent 84%); }
+    .work-fade span:nth-child(3) { -webkit-backdrop-filter: blur(14px); backdrop-filter: blur(14px); -webkit-mask-image: linear-gradient(to bottom, transparent 52%, #000 72%, transparent 94%); mask-image: linear-gradient(to bottom, transparent 52%, #000 72%, transparent 94%); }
+    .work-fade span:nth-child(4) { -webkit-backdrop-filter: blur(22px); backdrop-filter: blur(22px); -webkit-mask-image: linear-gradient(to bottom, transparent 70%, #000 90%); mask-image: linear-gradient(to bottom, transparent 70%, #000 90%); }
+    .work-fade::after { content: ""; position: absolute; inset: 0; background: linear-gradient(to bottom, transparent 30%, var(--dark) 94%); }
+    html.light .work-fade::after { background: linear-gradient(to bottom, transparent 30%, #eef1f6 94%); }
     .proj-extra { order: 2; transition: opacity 0.45s var(--ease); }
     .work-grid.collapsed .proj-extra { pointer-events: none; }
     .work-more { display: flex; justify-content: center; margin-top: clamp(1.6rem, 3vw, 2.4rem); }
@@ -482,7 +486,7 @@
   <div class="grain" aria-hidden="true"></div>
 
   <header class="bar" id="bar">
-    <div class="bar-blur" aria-hidden="true"><span></span><span></span><span></span></div>
+    <div class="bar-blur" aria-hidden="true"><span></span><span></span><span></span><span></span><span></span></div>
     <a href="#top" class="brand logo-type" data-cursor="hover">NYNA</a>
     <button class="menu-btn" id="menuOpen" data-cursor="hover" aria-haspopup="true" aria-expanded="false"><span>Menu</span><span class="bars" aria-hidden="true"><span></span><span></span></span></button>
   </header>
@@ -1096,7 +1100,7 @@
     /* filter */
     (function(){ const chips=document.querySelectorAll('.chip'),projs=document.querySelectorAll('.proj');
       const grid=document.getElementById('workGrid'),moreWrap=document.querySelector('.work-more'),moreBtn=document.getElementById('workMore');
-      const extras=[...document.querySelectorAll('.proj-extra')]; const feat=[...document.querySelectorAll('.proj:not(.proj-extra)')]; const PEEK=150; let expanded=false,filter='all';
+      const extras=[...document.querySelectorAll('.proj-extra')]; const feat=[...document.querySelectorAll('.proj:not(.proj-extra)')]; const PEEK=110; let expanded=false,filter='all';
       const anyExtra=()=>extras.some(e=>!e.classList.contains('hidden'));
       function featBottom(){ let b=0; feat.forEach(e=>{ if(!e.classList.contains('hidden')){ const bb=e.offsetTop+e.offsetHeight; if(bb>b)b=bb; } }); return b; }
       function apply(){
