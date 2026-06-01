@@ -129,7 +129,7 @@
     body.c-view .cur-ring { width: 84px; height: 84px; mix-blend-mode: normal; border-color: var(--accent-line); background: var(--accent-soft); -webkit-backdrop-filter: blur(2px); backdrop-filter: blur(2px); }
     body.c-view .cur-ring .lbl { opacity: 1; } body.c-view .cur-dot { opacity: 0; }
     @media (hover: none), (pointer: coarse) { .cur-dot, .cur-ring { display: none !important; } }
-    .progress { position: fixed; top: 0; left: 0; height: 2px; width: 100%; transform-origin: 0 50%; transform: scaleX(0); z-index: 120; background: var(--accent); }
+    .progress { position: fixed; top: 0; left: 0; height: 2px; width: 100%; transform-origin: 0 50%; transform: scaleX(0); z-index: 150; background: var(--accent); }
 
     /* ===== TOP BAR ===== */
     .bar { position: fixed; top: 0; left: 0; right: 0; z-index: 130; display: flex; align-items: center; justify-content: space-between; padding: clamp(1.1rem, 2.2vw, 1.7rem) var(--gutter); transition: transform 0.5s var(--ease); }
@@ -345,7 +345,8 @@
     .chip.active { color: var(--ink); background: var(--light); border-color: var(--light); }
     /* work: show-more collapse + blur teaser */
     .work-grid { position: relative; transition: max-height 0.7s var(--ease); }
-    .work-grid.collapsed { overflow: hidden; -webkit-mask-image: linear-gradient(to bottom, #000 60%, transparent 98%); mask-image: linear-gradient(to bottom, #000 60%, transparent 98%); }
+    .work-grid.collapsed { overflow: hidden; }
+    .work-grid.collapsed::after { content: ""; position: absolute; left: 0; right: 0; bottom: 0; height: 165px; -webkit-backdrop-filter: blur(9px); backdrop-filter: blur(9px); -webkit-mask-image: linear-gradient(to bottom, transparent, transparent 18%, #000 88%); mask-image: linear-gradient(to bottom, transparent, transparent 18%, #000 88%); pointer-events: none; z-index: 4; }
     .proj-extra { order: 2; transition: filter 0.55s var(--ease), opacity 0.55s var(--ease); }
     .work-grid.collapsed .proj-extra { filter: blur(11px); opacity: 0.42 !important; pointer-events: none; }
     .work-more { display: flex; justify-content: center; margin-top: clamp(1.6rem, 3vw, 2.4rem); }
@@ -1083,7 +1084,7 @@
     /* filter */
     (function(){ const chips=document.querySelectorAll('.chip'),projs=document.querySelectorAll('.proj');
       const grid=document.getElementById('workGrid'),moreWrap=document.querySelector('.work-more'),moreBtn=document.getElementById('workMore');
-      const extras=[...document.querySelectorAll('.proj-extra')]; const feat=[...document.querySelectorAll('.proj:not(.proj-extra)')]; const PEEK=46; let expanded=false,filter='all';
+      const extras=[...document.querySelectorAll('.proj-extra')]; const feat=[...document.querySelectorAll('.proj:not(.proj-extra)')]; const PEEK=150; let expanded=false,filter='all';
       const anyExtra=()=>extras.some(e=>!e.classList.contains('hidden'));
       function featBottom(){ let b=0; feat.forEach(e=>{ if(!e.classList.contains('hidden')){ const bb=e.offsetTop+e.offsetHeight; if(bb>b)b=bb; } }); return b; }
       function apply(){
