@@ -587,6 +587,31 @@
             <ul><li>3D CAD, SolidWorks, Fusion 360</li><li>3D printing / rapid prototyping</li><li>UI / UX &amp; web design</li><li>Oscilloscope &amp; lab instrumentation</li><li>Networks &amp; IT infrastructure</li><li>Technical writing</li></ul>
           </article>
         </div>
+        <style>
+          .edu { margin-top: clamp(2.4rem,5vw,3.6rem); padding-top: clamp(2.2rem,4vw,3rem); border-top: 1px solid var(--hairline); }
+          .edu-head { max-width: 760px; margin-bottom: 1.4rem; }
+          .edu-head .eyebrow { margin-bottom: .55rem; }
+          .edu-chips { display: flex; flex-wrap: wrap; gap: .7rem; }
+          .edu-chip { display: inline-flex; flex-direction: column; gap: .14rem; padding: .7rem 1.05rem; border: 1px solid var(--hairline); border-radius: var(--r-md); background: var(--surface); transition: border-color var(--t), transform var(--t) var(--ease), background var(--t); }
+          .edu-chip:hover { border-color: var(--accent-line); transform: translateY(-3px); background: var(--surface-2); }
+          .edu-chip b { font-family: var(--f-head); font-weight: 600; font-size: .9rem; color: var(--light); }
+          html.light .edu-chip b { color: var(--ink); }
+          .edu-chip i { font-family: var(--f-head); font-style: normal; font-weight: 500; font-size: .64rem; letter-spacing: .1em; text-transform: uppercase; color: var(--text-dim); }
+        </style>
+        <div class="edu" data-reveal>
+          <div class="edu-head">
+            <span class="eyebrow"><span class="ln"></span><span class="caps">Education</span></span>
+            <p class="muted">BEng Electronic Engineering, Royal Holloway, University of London. Selected modules:</p>
+          </div>
+          <div class="edu-chips" data-stagger>
+            <span class="edu-chip"><b>Signals &amp; Systems</b><i>EE2020</i></span>
+            <span class="edu-chip"><b>Algorithms &amp; Complexity</b><i>CS2860</i></span>
+            <span class="edu-chip"><b>Information Security</b><i>IY2760 / IY2840</i></span>
+            <span class="edu-chip"><b>Embedded Systems</b><i>STM32 / C</i></span>
+            <span class="edu-chip"><b>Software Engineering</b><i>EE2010 · C++</i></span>
+            <span class="edu-chip"><b>Optical Communications</b><i>Dissertation</i></span>
+          </div>
+        </div>
       </div>
     </section>
 
