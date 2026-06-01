@@ -48,7 +48,7 @@
       --r-sm: 10px; --r-md: 16px; --r-lg: 22px; --r-pill: 999px;
       --ease: cubic-bezier(0.16,1,0.3,1); --ease-io: cubic-bezier(0.66,0,0.34,1); --t-fast: 0.25s; --t: 0.45s; --t-slow: 0.8s;
       --container: 1280px; --gutter: clamp(1.25rem, 5vw, 3.5rem);
-      --logo-shadow: 0 1px 2px rgba(0,0,0,0.5), 0 4px 16px rgba(0,0,0,0.32); --icon-shadow: drop-shadow(0 1px 2px rgba(0,0,0,0.55));
+      --logo-shadow: 0 2px 4px rgba(0,0,0,0.62), 0 6px 20px rgba(0,0,0,0.45); --icon-shadow: drop-shadow(0 2px 4px rgba(0,0,0,0.62));
     }
     html.light {
       --dark: #ECEFF3; --dark-2: #E2E6EC; --dark-3: #DADFE6;
@@ -57,7 +57,7 @@
       --surface: rgba(20,28,40,0.045); --surface-2: rgba(20,28,40,0.08);
       --hairline: rgba(20,28,40,0.13); --hairline-2: rgba(20,28,40,0.24);
       --text: #1A212B; --text-muted: rgba(26,33,43,0.64); --text-dim: rgba(26,33,43,0.44);
-      --logo-shadow: 0 1px 2px rgba(20,26,34,0.22), 0 4px 14px rgba(20,26,34,0.12); --icon-shadow: drop-shadow(0 1px 2px rgba(20,26,34,0.26));
+      --logo-shadow: 0 2px 4px rgba(20,26,34,0.32), 0 6px 18px rgba(20,26,34,0.18); --icon-shadow: drop-shadow(0 2px 4px rgba(20,26,34,0.34));
     }
     body { transition: background 0.5s var(--ease), color 0.5s var(--ease); }
     .footer-row .variant button { color: var(--text-muted); transition: color var(--t); cursor: pointer; font: inherit; }
@@ -74,7 +74,7 @@
     html.light .service:hover, html.light .proj:hover { box-shadow: 0 22px 48px -30px rgba(20,30,45,0.42); }
     html.light .btn-solid:hover { box-shadow: 0 16px 40px rgba(20,30,45,0.22); }
     html.light .adapters-stage { background: radial-gradient(circle at 50% 40%, rgba(56,86,120,0.13), rgba(30,45,65,0.05) 70%); border-color: var(--hairline-2); }
-    html.light .pcb-stage { background: radial-gradient(circle at 50% 44%, rgba(var(--pcb-glow,94,207,249),0.18), rgba(30,45,65,0.05) 70%); border-color: var(--hairline-2); }
+    html.light .pcb-stage { background: radial-gradient(circle at 50% 42%, rgba(var(--pcb-glow,94,207,249),0.26), rgba(30,45,65,0.05) 72%); border-color: var(--hairline-2); }
     *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
     html.js { scroll-behavior: auto; } html:not(.js) { scroll-behavior: smooth; }
     img, svg, canvas { display: block; max-width: 100%; }
@@ -232,9 +232,9 @@
 
     /* ===== PCB SHOWCASE ===== */
     .pcb-wrap { display: grid; grid-template-columns: 1.1fr 0.9fr; gap: clamp(2rem,5vw,4rem); align-items: center; }
-    .pcb-stage { position: relative; aspect-ratio: 1/1; border-radius: var(--r-lg); overflow: hidden; border: 1px solid var(--hairline); background: radial-gradient(circle at 50% 44%, rgba(var(--pcb-glow,94,207,249),0.16), transparent 66%); perspective: 1400px; }
+    .pcb-stage { position: relative; aspect-ratio: 1/1; border-radius: var(--r-lg); overflow: hidden; border: 1px solid var(--hairline); background: radial-gradient(circle at 50% 42%, rgba(var(--pcb-glow,94,207,249),0.24), transparent 70%); perspective: 1400px; }
     .pcb-viewer { position: absolute; inset: 0; padding: 9% 8% 15%; transform-style: preserve-3d; }
-    .pcb-board { width: 100%; height: 100%; object-fit: contain; object-position: center; transform: rotateX(8deg); transition: transform 0.4s var(--ease), opacity 0.45s var(--ease); will-change: transform; animation: pcbFloat 7s ease-in-out infinite; filter: drop-shadow(0 22px 40px rgba(0,0,0,0.5)) drop-shadow(0 0 30px rgba(var(--pcb-glow,94,207,249),0.42)); }
+    .pcb-board { width: 100%; height: 100%; object-fit: contain; object-position: center; transform: rotateX(8deg); transition: transform 0.4s var(--ease), opacity 0.45s var(--ease); will-change: transform; animation: pcbFloat 7s ease-in-out infinite; filter: drop-shadow(0 20px 38px rgba(0,0,0,0.55)); }
     .pcb-board.swapping { opacity: 0; }
     @keyframes pcbFloat { 0%,100% { translate: 0 -6px; } 50% { translate: 0 10px; } }
     @media (prefers-reduced-motion: reduce) { .pcb-board { animation: none; } }
