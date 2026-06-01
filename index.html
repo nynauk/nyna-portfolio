@@ -589,27 +589,57 @@
         </div>
         <style>
           .edu { margin-top: clamp(2.4rem,5vw,3.6rem); padding-top: clamp(2.2rem,4vw,3rem); border-top: 1px solid var(--hairline); }
-          .edu-head { max-width: 760px; margin-bottom: 1.4rem; }
+          .edu-head { max-width: 820px; margin-bottom: 1.6rem; }
           .edu-head .eyebrow { margin-bottom: .55rem; }
-          .edu-chips { display: flex; flex-wrap: wrap; gap: .7rem; }
-          .edu-chip { display: inline-flex; flex-direction: column; gap: .14rem; padding: .7rem 1.05rem; border: 1px solid var(--hairline); border-radius: var(--r-md); background: var(--surface); transition: border-color var(--t), transform var(--t) var(--ease), background var(--t); }
-          .edu-chip:hover { border-color: var(--accent-line); transform: translateY(-3px); background: var(--surface-2); }
-          .edu-chip b { font-family: var(--f-head); font-weight: 600; font-size: .9rem; color: var(--light); }
-          html.light .edu-chip b { color: var(--ink); }
-          .edu-chip i { font-family: var(--f-head); font-style: normal; font-weight: 500; font-size: .64rem; letter-spacing: .1em; text-transform: uppercase; color: var(--text-dim); }
+          .edu-grid { display: grid; grid-template-columns: repeat(3,1fr); gap: clamp(1rem,2vw,1.4rem); }
+          @media (max-width: 880px){ .edu-grid { grid-template-columns: 1fr; } }
+          .edu-year { padding: 1.3rem 1.4rem; }
+          .edu-year .yr { display:flex; align-items:baseline; justify-content:space-between; gap:.6rem; margin-bottom:.7rem; }
+          .edu-year h4 { font-family: var(--f-head); font-weight:700; font-size:.92rem; color:var(--light); margin:0; }
+          html.light .edu-year h4 { color: var(--ink); }
+          .edu-year .yr span { font-family:var(--f-head); font-weight:600; font-size:.6rem; letter-spacing:.1em; text-transform:uppercase; color:var(--text-dim); }
+          .edu-year .yr .ip { color: var(--accent); }
+          .edu-mod { display:flex; gap:.65rem; padding:.5rem 0; border-bottom:1px solid var(--hairline); }
+          .edu-mod:last-child { border-bottom:none; padding-bottom:0; }
+          .edu-mod .code { font-family:var(--f-head); font-weight:700; font-size:.62rem; letter-spacing:.03em; color:var(--accent); min-width:56px; padding-top:.2em; }
+          .edu-mod .name { font-size:.85rem; color:var(--text-muted); line-height:1.4; }
         </style>
         <div class="edu" data-reveal>
           <div class="edu-head">
             <span class="eyebrow"><span class="ln"></span><span class="caps">Education</span></span>
-            <p class="muted">BEng Electronic Engineering, Royal Holloway, University of London. Selected modules:</p>
+            <p class="muted">BEng Electronic Engineering, Royal Holloway, University of London. The modules behind the work above:</p>
           </div>
-          <div class="edu-chips" data-stagger>
-            <span class="edu-chip"><b>Signals &amp; Systems</b><i>EE2020</i></span>
-            <span class="edu-chip"><b>Algorithms &amp; Complexity</b><i>CS2860</i></span>
-            <span class="edu-chip"><b>Information Security</b><i>IY2760 / IY2840</i></span>
-            <span class="edu-chip"><b>Embedded Systems</b><i>STM32 / C</i></span>
-            <span class="edu-chip"><b>Software Engineering</b><i>EE2010 · C++</i></span>
-            <span class="edu-chip"><b>Optical Communications</b><i>Dissertation</i></span>
+          <div class="edu-grid" data-stagger>
+            <article class="card edu-year">
+              <div class="yr"><h4>Year 1</h4><span>2023/24</span></div>
+              <div class="edu-mod"><span class="code">EE1000</span><span class="name">Embedded Systems Creative Team Project 1</span></div>
+              <div class="edu-mod"><span class="code">EE1010</span><span class="name">Programming in C++</span></div>
+              <div class="edu-mod"><span class="code">EE1020</span><span class="name">Electronic Circuits &amp; Components</span></div>
+              <div class="edu-mod"><span class="code">EE1030</span><span class="name">Communications Engineering</span></div>
+              <div class="edu-mod"><span class="code">EE1110</span><span class="name">Mathematics for Engineers 1</span></div>
+              <div class="edu-mod"><span class="code">EE1120</span><span class="name">Mathematics for Engineers 2</span></div>
+              <div class="edu-mod"><span class="code">CS1840</span><span class="name">Internet Services</span></div>
+            </article>
+            <article class="card edu-year">
+              <div class="yr"><h4>Year 2</h4><span>2024/25</span></div>
+              <div class="edu-mod"><span class="code">CS2860</span><span class="name">Algorithms &amp; Complexity</span></div>
+              <div class="edu-mod"><span class="code">EE2010</span><span class="name">Software Engineering for Electronics</span></div>
+              <div class="edu-mod"><span class="code">EE2020</span><span class="name">Signals, Systems &amp; Communications</span></div>
+              <div class="edu-mod"><span class="code">EE2000</span><span class="name">Embedded Systems Creative Team Project 2</span></div>
+              <div class="edu-mod"><span class="code">IY2760</span><span class="name">Introduction to Information Security</span></div>
+              <div class="edu-mod"><span class="code">IY2840</span><span class="name">Computer &amp; Network Security</span></div>
+              <div class="edu-mod"><span class="code">EE2080</span><span class="name">Professional &amp; Sustainable Engineering</span></div>
+            </article>
+            <article class="card edu-year">
+              <div class="yr"><h4>Year 3</h4><span class="ip">In progress &middot; 2025/26</span></div>
+              <div class="edu-mod"><span class="code">EE3000</span><span class="name">Individual Project (dissertation)</span></div>
+              <div class="edu-mod"><span class="code">EE3080</span><span class="name">Advanced Communication Systems</span></div>
+              <div class="edu-mod"><span class="code">EE3010</span><span class="name">Digital Signal Processing Design</span></div>
+              <div class="edu-mod"><span class="code">EE3070</span><span class="name">Digital Systems Design</span></div>
+              <div class="edu-mod"><span class="code">CS3920</span><span class="name">Machine Learning</span></div>
+              <div class="edu-mod"><span class="code">IY3612</span><span class="name">Critical Infrastructure Security</span></div>
+              <div class="edu-mod"><span class="code">EE3030</span><span class="name">Principles of Engineering Management</span></div>
+            </article>
           </div>
         </div>
       </div>
@@ -650,7 +680,7 @@
         </div>
         <div class="work-grid" id="workGrid" data-stagger>
           <article class="card proj" data-category="embedded" data-cursor="view" data-href="owc.html">
-            <div class="proj-img"><span class="proj-cat">Featured</span><img src="projects/build_assembled.jpeg" alt="Optical wireless communication transceiver" loading="lazy"></div>
+            <div class="proj-img"><span class="proj-cat">Featured</span><img src="projects/owc_transceiver.jpg" alt="Optical wireless communication transceiver" loading="lazy"></div>
             <div class="proj-body"><span class="client">Dissertation · Royal Holloway</span><h3>Optical Wireless Comms</h3><p>650nm laser + BPW34 link streaming data &amp; audio over light. View case study →</p><div class="proj-tags"><span>ESP32</span><span>Optics</span><span>PCB</span></div></div>
           </article>
           <article class="card proj" data-category="software" data-cursor="view" data-href="trading-bot.html" data-img="1611974789855-9c2a0a7236a3" data-more="A personal R&amp;D project: a Python trading bot that models price-action structure, detects higher- and lower-timeframe bias, and reasons about liquidity sweeps. Built with a backtesting harness for rapid iteration.">
