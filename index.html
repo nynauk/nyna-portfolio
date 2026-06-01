@@ -133,13 +133,13 @@
 
     /* ===== TOP BAR ===== */
     .bar { position: fixed; top: 0; left: 0; right: 0; z-index: 130; display: flex; align-items: center; justify-content: space-between; padding: clamp(1.1rem, 2.2vw, 1.7rem) var(--gutter); transition: transform 0.5s var(--ease); }
-    .bar-blur { position: absolute; top: 0; left: 0; right: 0; height: 300%; pointer-events: none; z-index: -1; opacity: 0; transition: opacity 0.55s var(--ease); background: linear-gradient(to bottom, rgba(13,17,22,0.5) 0%, rgba(13,17,22,0.13) 48%, rgba(13,17,22,0) 100%); }
-    html.light .bar-blur { background: linear-gradient(to bottom, rgba(236,239,243,0.6) 0%, rgba(236,239,243,0.16) 48%, rgba(236,239,243,0) 100%); }
+    .bar-blur { --bt: 13,17,22; position: absolute; top: 0; left: 0; right: 0; height: 300%; pointer-events: none; z-index: -1; opacity: 0; transition: opacity 0.55s var(--ease); }
+    html.light .bar-blur { --bt: 236,239,243; }
     .bar-blur span { position: absolute; inset: 0; display: block; }
-    .bar-blur span:nth-child(1) { -webkit-backdrop-filter: blur(12px); backdrop-filter: blur(12px); -webkit-mask-image: linear-gradient(to bottom, #000, #000 13%, transparent 33%); mask-image: linear-gradient(to bottom, #000, #000 13%, transparent 33%); }
-    .bar-blur span:nth-child(2) { -webkit-backdrop-filter: blur(7px); backdrop-filter: blur(7px); -webkit-mask-image: linear-gradient(to bottom, transparent 11%, #000 27%, transparent 47%); mask-image: linear-gradient(to bottom, transparent 11%, #000 27%, transparent 47%); }
-    .bar-blur span:nth-child(3) { -webkit-backdrop-filter: blur(3.5px); backdrop-filter: blur(3.5px); -webkit-mask-image: linear-gradient(to bottom, transparent 27%, #000 43%, transparent 63%); mask-image: linear-gradient(to bottom, transparent 27%, #000 43%, transparent 63%); }
-    .bar-blur span:nth-child(4) { -webkit-backdrop-filter: blur(1.6px); backdrop-filter: blur(1.6px); -webkit-mask-image: linear-gradient(to bottom, transparent 43%, #000 59%, transparent 81%); mask-image: linear-gradient(to bottom, transparent 43%, #000 59%, transparent 81%); }
+    .bar-blur span:nth-child(1) { background: rgba(var(--bt),0.2); -webkit-backdrop-filter: blur(12px); backdrop-filter: blur(12px); -webkit-mask-image: linear-gradient(to bottom, #000, #000 13%, transparent 33%); mask-image: linear-gradient(to bottom, #000, #000 13%, transparent 33%); }
+    .bar-blur span:nth-child(2) { background: rgba(var(--bt),0.12); -webkit-backdrop-filter: blur(7px); backdrop-filter: blur(7px); -webkit-mask-image: linear-gradient(to bottom, transparent 11%, #000 27%, transparent 47%); mask-image: linear-gradient(to bottom, transparent 11%, #000 27%, transparent 47%); }
+    .bar-blur span:nth-child(3) { background: rgba(var(--bt),0.07); -webkit-backdrop-filter: blur(3.5px); backdrop-filter: blur(3.5px); -webkit-mask-image: linear-gradient(to bottom, transparent 27%, #000 43%, transparent 63%); mask-image: linear-gradient(to bottom, transparent 27%, #000 43%, transparent 63%); }
+    .bar-blur span:nth-child(4) { background: rgba(var(--bt),0.035); -webkit-backdrop-filter: blur(1.6px); backdrop-filter: blur(1.6px); -webkit-mask-image: linear-gradient(to bottom, transparent 43%, #000 59%, transparent 81%); mask-image: linear-gradient(to bottom, transparent 43%, #000 59%, transparent 81%); }
     .bar-blur span:nth-child(5) { -webkit-backdrop-filter: blur(0.6px); backdrop-filter: blur(0.6px); -webkit-mask-image: linear-gradient(to bottom, transparent 59%, #000 77%, transparent 97%); mask-image: linear-gradient(to bottom, transparent 59%, #000 77%, transparent 97%); }
     .bar.solid:not(.hide) .bar-blur { opacity: 1; }
     .bar.hide { transform: translateY(-130%); }
@@ -359,8 +359,7 @@
     .work-fade span:nth-child(2) { -webkit-backdrop-filter: blur(3px); backdrop-filter: blur(3px); -webkit-mask-image: linear-gradient(to bottom, transparent 24%, #000 50%, transparent 82%); mask-image: linear-gradient(to bottom, transparent 24%, #000 50%, transparent 82%); }
     .work-fade span:nth-child(3) { -webkit-backdrop-filter: blur(6px); backdrop-filter: blur(6px); -webkit-mask-image: linear-gradient(to bottom, transparent 44%, #000 68%, transparent 92%); mask-image: linear-gradient(to bottom, transparent 44%, #000 68%, transparent 92%); }
     .work-fade span:nth-child(4) { -webkit-backdrop-filter: blur(11px); backdrop-filter: blur(11px); -webkit-mask-image: linear-gradient(to bottom, transparent 62%, #000 88%); mask-image: linear-gradient(to bottom, transparent 62%, #000 88%); }
-    .work-fade::after { content: ""; position: absolute; inset: 0; background: linear-gradient(to bottom, transparent 46%, var(--dark) 100%); }
-    html.light .work-fade::after { background: linear-gradient(to bottom, transparent 46%, #eef1f6 100%); }
+    /* no color scrim — the grid's own content alpha-fades, so the peek dissolves into the real background with nothing to mismatch the blur */
     .proj-extra { order: 2; transition: opacity 0.45s var(--ease); }
     .work-grid.collapsed .proj-extra { pointer-events: none; }
     .work-more { display: flex; justify-content: center; margin-top: clamp(1.6rem, 3vw, 2.4rem); }
@@ -430,10 +429,13 @@
     .modal-tags span { font-family: var(--f-head); font-weight: 500; font-size: 0.72rem; color: var(--text-muted); border: 1px solid var(--hairline); border-radius: var(--r-sm); padding: 0.25rem 0.6rem; }
 
     /* ===== REVEAL ===== */
-    .js [data-reveal] { opacity: 0; transform: translateY(24px); transition: opacity 0.55s var(--ease-io), transform 0.55s var(--ease-io); }
+    .js [data-reveal] { opacity: 0; transform: translateY(24px); }
     .js [data-reveal].in { opacity: 1; transform: none; }
-    .js [data-stagger] > * { opacity: 0; transform: translateY(24px); transition: opacity 0.5s var(--ease-io), transform 0.5s var(--ease-io); }
+    .js [data-stagger] > * { opacity: 0; transform: translateY(24px); }
     .js [data-stagger].in > * { opacity: 1; transform: none; }
+    /* CSS transitions only for the non-GSAP fallback + hero (GSAP owns these props otherwise, so CSS must not fight it) */
+    .js.no-gsap [data-reveal], .js .hero [data-reveal] { transition: opacity 0.55s var(--ease-io), transform 0.55s var(--ease-io); }
+    .js.no-gsap [data-stagger] > * { transition: opacity 0.5s var(--ease-io), transform 0.5s var(--ease-io); }
     .js [data-stagger].in > *:nth-child(2){transition-delay:.07s;} .js [data-stagger].in > *:nth-child(3){transition-delay:.14s;}
     .js [data-stagger].in > *:nth-child(4){transition-delay:.21s;} .js [data-stagger].in > *:nth-child(5){transition-delay:.28s;}
     .js [data-stagger].in > *:nth-child(6){transition-delay:.35s;} .js [data-stagger].in > *:nth-child(7){transition-delay:.42s;}
@@ -1018,7 +1020,10 @@
     /* bar + progress */
     const bar=document.getElementById('bar'),progress=document.querySelector('.progress'); let lastY=0;
     function baseScroll(y){ const max=document.documentElement.scrollHeight-innerHeight; progress.style.transform=`scaleX(${max>0?y/max:0})`;
-      if(y>lastY&&y>240)bar.classList.add('hide'); else bar.classList.remove('hide'); bar.classList.toggle('solid',y>240); lastY=y;
+      bar.classList.toggle('solid',y>240);
+      if(y<=240){ bar.classList.remove('hide'); lastY=y; }
+      else if(y>lastY+8){ bar.classList.add('hide'); lastY=y; }
+      else if(y<lastY-8){ bar.classList.remove('hide'); lastY=y; }
       const c=document.getElementById('wave'); if(c&&c.classList.contains('ready'))c.style.opacity=String(clamp(1-y/(innerHeight*1.2),0.25,1));
     }
 
@@ -1142,12 +1147,13 @@
         if(lenis){ lenis.on('scroll',ST.update); gsap.ticker.add(t=>lenis.raf(t*1000)); gsap.ticker.lagSmoothing(0); }
         ST.create({start:0,end:'max',onUpdate:self=>baseScroll(self.scroll())});
         gsap.utils.toArray('[data-reveal]').forEach(el=>{ if(el.closest('.hero'))return; gsap.fromTo(el,{y:24,autoAlpha:0},{y:0,autoAlpha:1,duration:0.55,ease:'power2.inOut',scrollTrigger:{trigger:el,start:'top 90%'}}); });
-        gsap.utils.toArray('[data-stagger]').forEach(el=>gsap.fromTo(el.children,{y:24,autoAlpha:0},{y:0,autoAlpha:1,duration:0.5,ease:'power2.inOut',stagger:0.06,scrollTrigger:{trigger:el,start:'top 90%'}}));
+        gsap.utils.toArray('[data-stagger]').forEach(el=>{ const kids=[...el.children].filter(c=>!c.classList.contains('work-fade')); gsap.fromTo(kids,{y:24,autoAlpha:0},{y:0,autoAlpha:1,duration:0.5,ease:'power2.inOut',stagger:0.06,scrollTrigger:{trigger:el,start:'top 88%'}}); });
         gsap.utils.toArray('[data-split]').forEach(h=>ST.create({trigger:h,start:'top 90%',once:true,onEnter:()=>playSplit(h)}));
         gsap.utils.toArray('.accent-underline').forEach(u=>{if(u.closest('.hero'))return;ST.create({trigger:u,start:'top 92%',once:true,onEnter:()=>u.classList.add('lit')});});
         gsap.to('.footer-mark',{yPercent:-12,ease:'none',scrollTrigger:{trigger:'footer',start:'top bottom',end:'bottom bottom',scrub:true}});
         ST.refresh(); if(document.fonts)document.fonts.ready.then(()=>ST.refresh());
       } else {
+        document.documentElement.classList.add('no-gsap');
         if(lenis)requestAnimationFrame(function r(t){lenis.raf(t);requestAnimationFrame(r);});
         ioReveals(); gsapless();
         if(lenis)lenis.on('scroll',({scroll})=>baseScroll(scroll)); else addEventListener('scroll',()=>baseScroll(scrollY),{passive:true});
