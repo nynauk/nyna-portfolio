@@ -133,9 +133,13 @@
 
     /* ===== TOP BAR ===== */
     .bar { position: fixed; top: 0; left: 0; right: 0; z-index: 130; display: flex; align-items: center; justify-content: space-between; padding: clamp(1.1rem, 2.2vw, 1.7rem) var(--gutter); transition: transform 0.5s var(--ease); }
-    .bar::before { content: ""; position: absolute; inset: 0; bottom: auto; height: 200%; background: linear-gradient(to bottom, rgba(13,17,22,0.5), rgba(13,17,22,0)); -webkit-backdrop-filter: blur(9px) saturate(130%); backdrop-filter: blur(9px) saturate(130%); -webkit-mask-image: linear-gradient(to bottom, #000 0%, #000 24%, transparent 72%); mask-image: linear-gradient(to bottom, #000 0%, #000 24%, transparent 72%); opacity: 0; transition: opacity 0.4s var(--ease); pointer-events: none; z-index: -1; }
-    html.light .bar::before { background: linear-gradient(to bottom, rgba(236,239,243,0.64), rgba(236,239,243,0)); }
-    .bar.solid:not(.hide)::before { opacity: 1; }
+    .bar-blur { position: absolute; top: 0; left: 0; right: 0; height: 210%; pointer-events: none; z-index: -1; opacity: 0; transition: opacity 0.4s var(--ease); background: linear-gradient(to bottom, rgba(13,17,22,0.55), rgba(13,17,22,0) 72%); }
+    html.light .bar-blur { background: linear-gradient(to bottom, rgba(236,239,243,0.66), rgba(236,239,243,0) 72%); }
+    .bar-blur span { position: absolute; inset: 0; display: block; }
+    .bar-blur span:nth-child(1) { -webkit-backdrop-filter: blur(8px); backdrop-filter: blur(8px); -webkit-mask-image: linear-gradient(to bottom, #000, #000 16%, transparent 40%); mask-image: linear-gradient(to bottom, #000, #000 16%, transparent 40%); }
+    .bar-blur span:nth-child(2) { -webkit-backdrop-filter: blur(4px); backdrop-filter: blur(4px); -webkit-mask-image: linear-gradient(to bottom, transparent 12%, #000 30%, #000 44%, transparent 62%); mask-image: linear-gradient(to bottom, transparent 12%, #000 30%, #000 44%, transparent 62%); }
+    .bar-blur span:nth-child(3) { -webkit-backdrop-filter: blur(2px); backdrop-filter: blur(2px); -webkit-mask-image: linear-gradient(to bottom, transparent 36%, #000 54%, transparent 86%); mask-image: linear-gradient(to bottom, transparent 36%, #000 54%, transparent 86%); }
+    .bar.solid:not(.hide) .bar-blur { opacity: 1; }
     .bar.hide { transform: translateY(-130%); }
     .brand { font-family: var(--f-logo); font-weight: 500; font-size: 1.4rem; letter-spacing: 0.06em; color: var(--light); transition: opacity var(--t); }
     .brand:hover { opacity: 0.7; }
@@ -346,9 +350,15 @@
     /* work: show-more collapse + blur teaser */
     .work-grid { position: relative; transition: max-height 0.7s var(--ease); }
     .work-grid.collapsed { overflow: hidden; }
-    .work-grid.collapsed::after { content: ""; position: absolute; left: 0; right: 0; bottom: 0; height: 165px; -webkit-backdrop-filter: blur(9px); backdrop-filter: blur(9px); -webkit-mask-image: linear-gradient(to bottom, transparent, transparent 18%, #000 88%); mask-image: linear-gradient(to bottom, transparent, transparent 18%, #000 88%); pointer-events: none; z-index: 4; }
-    .proj-extra { order: 2; transition: filter 0.55s var(--ease), opacity 0.55s var(--ease); }
-    .work-grid.collapsed .proj-extra { filter: blur(11px); opacity: 0.42 !important; pointer-events: none; }
+    .work-fade { display: none; }
+    .work-grid.collapsed .work-fade { display: block; position: absolute; left: 0; right: 0; bottom: 0; height: 150px; pointer-events: none; z-index: 5; }
+    .work-fade span { position: absolute; inset: 0; display: block; }
+    .work-fade span:nth-child(1) { -webkit-backdrop-filter: blur(4px); backdrop-filter: blur(4px); -webkit-mask-image: linear-gradient(to bottom, transparent, #000 22%, #000 40%, transparent 56%); mask-image: linear-gradient(to bottom, transparent, #000 22%, #000 40%, transparent 56%); }
+    .work-fade span:nth-child(2) { -webkit-backdrop-filter: blur(8px); backdrop-filter: blur(8px); -webkit-mask-image: linear-gradient(to bottom, transparent 22%, #000 42%, #000 58%, transparent 74%); mask-image: linear-gradient(to bottom, transparent 22%, #000 42%, #000 58%, transparent 74%); }
+    .work-fade span:nth-child(3) { -webkit-backdrop-filter: blur(14px); backdrop-filter: blur(14px); -webkit-mask-image: linear-gradient(to bottom, transparent 44%, #000 64%, #000 80%, transparent 94%); mask-image: linear-gradient(to bottom, transparent 44%, #000 64%, #000 80%, transparent 94%); }
+    .work-fade span:nth-child(4) { -webkit-backdrop-filter: blur(24px); backdrop-filter: blur(24px); -webkit-mask-image: linear-gradient(to bottom, transparent 64%, #000 86%); mask-image: linear-gradient(to bottom, transparent 64%, #000 86%); }
+    .proj-extra { order: 2; transition: opacity 0.45s var(--ease); }
+    .work-grid.collapsed .proj-extra { pointer-events: none; }
     .work-more { display: flex; justify-content: center; margin-top: clamp(1.6rem, 3vw, 2.4rem); }
     #workMore.is-open svg { transform: rotate(180deg); }
 
@@ -472,6 +482,7 @@
   <div class="grain" aria-hidden="true"></div>
 
   <header class="bar" id="bar">
+    <div class="bar-blur" aria-hidden="true"><span></span><span></span><span></span></div>
     <a href="#top" class="brand logo-type" data-cursor="hover">NYNA</a>
     <button class="menu-btn" id="menuOpen" data-cursor="hover" aria-haspopup="true" aria-expanded="false"><span>Menu</span><span class="bars" aria-hidden="true"><span></span><span></span></span></button>
   </header>
@@ -761,6 +772,7 @@
             <div class="proj-img"><span class="proj-cat">IT</span><img src="https://images.unsplash.com/photo-1517336714731-489689fd1ca8?auto=format&fit=crop&w=700&q=80" alt="Workstation setup" loading="lazy"></div>
             <div class="proj-body"><span class="client">OnWay LDD</span><h3>Computer System Setup</h3><p>Office-wide workstation configuration &amp; onboarding.</p><div class="proj-tags"><span>Setup</span><span>Migration</span></div></div>
           </article>
+          <div class="work-fade" aria-hidden="true"><span></span><span></span><span></span><span></span></div>
         </div>
         <div class="work-more" data-reveal>
           <button class="btn btn-line" id="workMore" data-cursor="hover" aria-expanded="false"><span class="lbl">Show more</span><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M6 9l6 6 6-6"/></svg></button>
