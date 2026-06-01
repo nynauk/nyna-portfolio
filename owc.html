@@ -39,7 +39,7 @@
       --text: #F2F2F2; --text-muted: rgba(242,242,242,0.58); --text-dim: rgba(242,242,242,0.38);
       --f-logo: "Unbounded", system-ui, sans-serif; --f-head: "Satoshi", system-ui, sans-serif; --f-body: "DM Sans", system-ui, sans-serif;
       --r-sm: 10px; --r-md: 16px; --r-lg: 22px; --r-pill: 999px;
-      --ease: cubic-bezier(0.16,1,0.3,1); --t-fast: 0.25s; --t: 0.45s; --t-slow: 0.8s;
+      --ease: cubic-bezier(0.16,1,0.3,1); --ease-io: cubic-bezier(0.66,0,0.34,1); --t-fast: 0.25s; --t: 0.45s; --t-slow: 0.8s;
       --container: 1280px; --gutter: clamp(1.25rem, 5vw, 3.5rem);
     }
     html.light {
@@ -259,8 +259,8 @@
     .owc-sub .h3 { margin-top: 0.4rem; }
     .adapters-wrap { display: grid; grid-template-columns: 1.05fr 0.95fr; gap: clamp(1.5rem,4vw,3rem); align-items: center; }
     @media (max-width: 900px) { .adapters-wrap { grid-template-columns: 1fr; } }
-    .adapters-stage { position: relative; aspect-ratio: 1/1; border-radius: var(--r-lg); overflow: hidden; border: 1px solid var(--hairline); background: radial-gradient(circle at 50% 42%, rgba(94,207,249,0.1), transparent 68%); }
-    .adapters-stage canvas { width: 100% !important; height: 100% !important; display: block; }
+    .adapters-stage { position: relative; aspect-ratio: 1/1; border-radius: var(--r-lg); overflow: hidden; touch-action: pan-y; border: 1px solid var(--hairline); background: radial-gradient(circle at 50% 42%, rgba(94,207,249,0.1), transparent 68%); }
+    .adapters-stage canvas { width: 100% !important; height: 100% !important; display: block; touch-action: pan-y; }
     .adapters-loading { position: absolute; inset: 0; display: grid; place-items: center; font-family: var(--f-head); font-weight: 700; font-size: 0.72rem; letter-spacing: 0.22em; text-transform: uppercase; color: var(--text-dim); opacity: 0; transition: opacity var(--t); pointer-events: none; z-index: 2; }
     .adapters-fallback { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: contain; padding: 13%; opacity: 1; transition: opacity 0.5s; pointer-events: none; }
     .adapters-stage.has3d .adapters-fallback { opacity: 0; }
@@ -288,7 +288,11 @@
     .pcb-chip:hover { color: #fff; }
     .pcb-chip.active { color: #0c1117; background: var(--accent); }
     .pcb-loading { position: absolute; inset: 0; display: grid; place-items: center; z-index: 2; font-family: var(--f-head); font-weight: 700; font-size: 0.72rem; letter-spacing: 0.22em; text-transform: uppercase; color: var(--text-dim); opacity: 0; transition: opacity var(--t); pointer-events: none; }
-    @media (max-width: 520px) { .pcb-switch { flex-wrap: wrap; justify-content: center; width: calc(100% - 2rem); } }
+    @media (max-width: 560px) {
+      .pcb-switch { flex-wrap: nowrap; justify-content: flex-start; width: calc(100% - 1.4rem); overflow-x: auto; overflow-y: hidden; scroll-snap-type: x proximity; -webkit-overflow-scrolling: touch; scrollbar-width: none; -ms-overflow-style: none; }
+      .pcb-switch::-webkit-scrollbar { display: none; }
+      .pcb-switch .pcb-chip { flex: 0 0 auto; scroll-snap-align: center; }
+    }
     .tst-logo { height: 38px; width: auto; max-width: 130px; object-fit: contain; object-position: left center; opacity: 0.92; }
     .pcb-feats { display: grid; gap: 1rem; margin-top: 1.8rem; }
     .pcb-feat { display: flex; gap: 1rem; align-items: flex-start; }
@@ -396,9 +400,9 @@
     .modal-tags span { font-family: var(--f-head); font-weight: 500; font-size: 0.72rem; color: var(--text-muted); border: 1px solid var(--hairline); border-radius: var(--r-sm); padding: 0.25rem 0.6rem; }
 
     /* ===== REVEAL ===== */
-    .js [data-reveal] { opacity: 0; transform: translateY(28px); transition: opacity 0.9s var(--ease), transform 0.9s var(--ease); }
+    .js [data-reveal] { opacity: 0; transform: translateY(28px); transition: opacity 1.2s var(--ease-io), transform 1.2s var(--ease-io); }
     .js [data-reveal].in { opacity: 1; transform: none; }
-    .js [data-stagger] > * { opacity: 0; transform: translateY(28px); transition: opacity 0.7s var(--ease), transform 0.7s var(--ease); }
+    .js [data-stagger] > * { opacity: 0; transform: translateY(28px); transition: opacity 1s var(--ease-io), transform 1s var(--ease-io); }
     .js [data-stagger].in > * { opacity: 1; transform: none; }
     .js [data-stagger].in > *:nth-child(2){transition-delay:.07s;} .js [data-stagger].in > *:nth-child(3){transition-delay:.14s;}
     .js [data-stagger].in > *:nth-child(4){transition-delay:.21s;} .js [data-stagger].in > *:nth-child(5){transition-delay:.28s;}
@@ -477,36 +481,36 @@
         <div class="sec-head" data-reveal>
           <span class="eyebrow"><span class="ln"></span><span class="caps">Featured project · Final-year dissertation</span></span>
           <h2 class="h2" data-split>Sending data through light.</h2>
-          <p class="lead">An optical wireless communication system that transmits data, and live audio, over a 650&nbsp;nm laser beam to a BPW34 photodiode, decoded in real time on dual ESP32s. BEng Computer Systems Engineering, Royal Holloway, University of London.</p>
+          <p class="lead">A low-cost, bidirectional fibre-optic link that carries digital data, and digital audio, between two ESP32 nodes over 1&nbsp;m of TOSLINK plastic optical fibre, a 650&nbsp;nm KY-008 laser into a BPW34 photodiode, recovered through a discrete analogue front end and the ESP32's hardware pulse counter. BEng Electronic Engineering, Royal Holloway, University of London. Supervisor: Dr Shyqyri Haxha.</p>
         </div>
 
         <figure class="owc-hero card" data-reveal data-cursor="view" data-full="projects/build_assembled.jpeg">
           <img src="projects/build_assembled.jpeg" alt="Assembled NYNA optical wireless transceiver with dual touchscreens and speakers" loading="lazy">
-          <figcaption class="owc-hero-cap"><span class="caps">The transceiver</span><span class="muted">Dual touchscreen UI · ESP32 · laser TX / photodiode RX · 3D-printed TOSLINK optics</span></figcaption>
+          <figcaption class="owc-hero-cap"><span class="caps">The transceiver</span><span class="muted">Two ESP32 nodes · KY-008 laser TX / BPW34 RX · OPA356 TIA + TLV3501 comparator · 1&nbsp;m TOSLINK fibre</span></figcaption>
         </figure>
 
         <div class="owc-specs" data-stagger>
-          <div class="spec card"><span class="spec-n">650<small>nm</small></span><span class="spec-l">Red laser diode transmitter</span></div>
-          <div class="spec card"><span class="spec-n">BPW34</span><span class="spec-l">PIN photodiode receiver</span></div>
-          <div class="spec card"><span class="spec-n">OOK</span><span class="spec-l">Framed packets · XOR parity</span></div>
-          <div class="spec card"><span class="spec-n">TIA</span><span class="spec-l">+ LM393 comparator front-end</span></div>
-          <div class="spec card"><span class="spec-n">&lt;10⁻³</span><span class="spec-l">Bit error rate @ 2400 bps</span></div>
-          <div class="spec card"><span class="spec-n">A2DP</span><span class="spec-l">Bluetooth audio over light</span></div>
+          <div class="spec card"><span class="spec-n">650<small>nm</small></span><span class="spec-l">KY-008 laser diode transmitter</span></div>
+          <div class="spec card"><span class="spec-n">BPW34</span><span class="spec-l">Vishay PIN photodiode receiver</span></div>
+          <div class="spec card"><span class="spec-n">OPA356</span><span class="spec-l">200 MHz TIA · R<sub>f</sub> 22 k&Omega;</span></div>
+          <div class="spec card"><span class="spec-n">TLV3501</span><span class="spec-l">4.5 ns rail-to-rail comparator</span></div>
+          <div class="spec card"><span class="spec-n">128<small>kbps</small></span><span class="spec-l">Sustained · 640 kbps peak</span></div>
+          <div class="spec card"><span class="spec-n">1<small>m</small></span><span class="spec-l">TOSLINK plastic optical fibre</span></div>
         </div>
 
         <div class="owc-cols">
           <div data-reveal>
             <h3 class="h3">How it works</h3>
-            <p class="muted">The transmitter encodes bytes into UART-style frames and modulates a 650&nbsp;nm laser through a transistor driver (on-off keying). Across the optical path, a reverse-biased BPW34 photodiode feeds a transimpedance amplifier and an LM393 comparator, recovering the bitstream on the receiving ESP32 with start-bit synchronisation, mid-bit sampling, parity checking and live BER/PER statistics. A Bluetooth A2DP path streams audio through the same optical link to onboard speakers.</p>
+            <p class="muted">Each byte is framed (0x7E start · length · payload · XOR checksum) and sent as on-off keying: the ESP32 switches a 650&nbsp;nm KY-008 laser through a 2N2222A driver, coupled into 1&nbsp;m of TOSLINK fibre. At the far end a reverse-biased BPW34 photodiode feeds an OPA356 transimpedance amplifier (R<sub>f</sub> 22&nbsp;k&Omega;, C<sub>f</sub> 2.2&nbsp;pF) and a TLV3501 comparator with 100&nbsp;k&Omega; Schmitt-trigger hysteresis. The recovered edges are counted by the ESP32's PCNT hardware pulse-counter over 100&nbsp;ms windows (1&nbsp;&micro;s glitch filter) on GPIO34. A separate Bluetooth A2DP path streams audio through a MAX98357A I&sup2;S amplifier.</p>
           </div>
           <div data-reveal>
             <h3 class="h3">What I built</h3>
             <ul class="owc-list">
-              <li>A custom 4-board PCB set in EasyEDA, transceiver, TIA comparator and voltage divider</li>
-              <li>Transmitter &amp; receiver firmware in C++ (Arduino / ESP32)</li>
-              <li>Bespoke 3D-printed optical adapters for the laser, photodiode &amp; TOSLINK fibre</li>
-              <li>A touchscreen UI (ILI9341) showing live link telemetry</li>
-              <li>Characterised BER against distance, baud rate &amp; ambient light</li>
+              <li>A custom two-layer PCB carrying both transceiver nodes, designed in EasyEDA and fabricated by JLCPCB</li>
+              <li>Transmitter &amp; receiver firmware in C++ (Arduino / ESP32) with a framed, XOR-checked protocol</li>
+              <li>CAD-modelled, 3D-printed PLA optics for the laser, BPW34 photodiode &amp; TOSLINK ferrule (roughly six iterations)</li>
+              <li>A 2.8&quot; ILI9341 touchscreen UI (XPT2046 touch) showing live telemetry &amp; recovered text</li>
+              <li>End-to-end characterisation: DC levels, comparator swing &amp; a PCNT data-rate sweep (8 to 640 kbps)</li>
             </ul>
           </div>
         </div>
@@ -516,7 +520,7 @@
           <h3 class="h3">The initial transceiver circuit.</h3>
         </div>
         <div class="adapters-info" data-reveal style="margin-bottom:clamp(2rem,4vw,3rem)">
-          <p class="muted">Before any boards were fabricated, the whole optical link began on breadboards, an ESP32 driving the 650&nbsp;nm laser on one side, a BPW34 photodiode feeding a transimpedance amplifier and LM393 comparator on the other, with live link telemetry and Bluetooth pairing surfaced on an ILI9341 touchscreen. This is the prototype I characterised, measuring BER, timing and sensitivity, before committing the design to PCB.</p>
+          <p class="muted">Before any boards were fabricated, the whole optical link began on breadboards, an ESP32 driving the 650&nbsp;nm laser on one side; a BPW34 photodiode feeding the OPA356 transimpedance amplifier and TLV3501 comparator on the other, with live telemetry and Bluetooth pairing surfaced on an ILI9341 touchscreen. This is the prototype I characterised, DC levels, timing and the data-rate sweep, before committing the design to a fabricated PCB.</p>
         </div>
         <div class="owc-gallery" data-stagger style="margin-bottom:clamp(3rem,6vw,5rem)">
           <img src="projects/init_breadboard2.jpg" data-cursor="view" data-full="projects/init_breadboard2.jpg" alt="Breadboard transceiver prototype with 650nm laser and touchscreen showing NYNA_AUDIO pairing" loading="lazy">
@@ -543,7 +547,7 @@
             </div>
           </div>
           <div class="adapters-info" data-reveal>
-            <p class="muted">Modelled in CAD (SolidWorks / Fusion 360) and 3D-printed to couple the laser, BPW34 photodiode and TOSLINK fibre, holding the optics in precise alignment for a stable link.</p>
+            <p class="muted">CAD-modelled and 3D-printed in PLA across roughly six iterations, coupling the KY-008 laser, BPW34 photodiode and TOSLINK ferrule and holding them in precise alignment. Mechanical alignment of this free-space coupling, plus shielding the photodiode from ambient light, proved to be the dominant factor in link stability.</p>
           </div>
         </div>
         <div class="owc-render-grid" data-stagger>
@@ -552,6 +556,21 @@
           <img src="projects/render_bpw34_spdif.png" data-cursor="view" data-full="projects/render_bpw34_spdif.png" alt="BPW34 TOSLINK coupling render" loading="lazy">
           <img src="projects/render_laser_adapter.png" data-cursor="view" data-full="projects/render_laser_adapter.png" alt="650 nm laser coupler render" loading="lazy">
           <img src="projects/render_laser_module.png" data-cursor="view" data-full="projects/render_laser_module.png" alt="KY-008 laser module render" loading="lazy">
+        </div>
+
+        <div class="owc-sub" data-reveal>
+          <span class="eyebrow"><span class="ln"></span><span class="caps">Results · Measured</span></span>
+          <h3 class="h3">What the link actually does.</h3>
+        </div>
+        <div class="owc-cols">
+          <div data-reveal>
+            <h3 class="h3">Demonstrated</h3>
+            <p class="muted">Bidirectional binary text was sent end-to-end across the 1&nbsp;m TOSLINK link and shown live on the receiver's touchscreen and the host serial monitor, with 1,000-packet integrity tests passing at 8, 64 and 128&nbsp;kbps. The PCNT sweep held a stable 128&nbsp;kbps under hand-held alignment and briefly peaked at 640&nbsp;kbps in a dark room. On the populated PCB the comparator swung a clean 3.3&nbsp;V / 0.05&nbsp;V, fast enough to read with digitalRead().</p>
+          </div>
+          <div data-reveal>
+            <h3 class="h3">Honest limits</h3>
+            <p class="muted">Those rates reflect hand-held fibre alignment rather than the 7.2&nbsp;MHz closed-loop bandwidth the front end can support. A Bluetooth A2DP path (MAX98357A I&sup2;S amp) reproduces tones and voice-band audio over the link; wide-band music stays partial, limited by the 8&nbsp;kHz firmware sample rate. Residual comparator spikes traced to SOIC solder joints and ambient-light pickup at the BPW34 are the next revision's targets.</p>
+          </div>
         </div>
 
         <div class="owc-sub" data-reveal>
@@ -790,10 +809,11 @@
       }));
       let lazy=false; new IntersectionObserver(es=>{ if(es[0].isIntersecting&&!lazy){ lazy=true; loadIt('final'); } },{threshold:0.15}).observe(stage);
       let vis=true; new IntersectionObserver(es=>vis=es[0].isIntersecting,{threshold:0}).observe(stage);
-      const tm={x:0,y:0},mm={x:0,y:0}; let drag=false,px=0;
-      stage.addEventListener('mousemove',e=>{ const b=stage.getBoundingClientRect(); tm.x=((e.clientX-b.left)/b.width)*2-1; tm.y=((e.clientY-b.top)/b.height)*2-1; if(drag){ grp.rotation.y+=(e.clientX-px)*0.01; px=e.clientX; } });
-      stage.addEventListener('mousedown',e=>{ drag=true; px=e.clientX; }); addEventListener('mouseup',()=>drag=false);
-      stage.addEventListener('mouseleave',()=>{tm.x=0;tm.y=0;drag=false;});
+      const tm={x:0,y:0},mm={x:0,y:0}; let drag=false,px=0,py=0,axis=0;
+      stage.addEventListener('pointermove',e=>{ const b=stage.getBoundingClientRect(); tm.x=((e.clientX-b.left)/b.width)*2-1; tm.y=((e.clientY-b.top)/b.height)*2-1; if(!drag)return; if(axis===0){ const adx=Math.abs(e.clientX-px), ady=Math.abs(e.clientY-py); if(adx>4||ady>4){ if(adx>=ady){ axis=1; try{stage.setPointerCapture(e.pointerId);}catch(_){} } else { axis=2; drag=false; return; } } } if(axis===1){ grp.rotation.y+=(e.clientX-px)*0.01; px=e.clientX; } });
+      stage.addEventListener('pointerdown',e=>{ if(e.target.closest('.pcb-switch'))return; drag=true; px=e.clientX; py=e.clientY; axis=(e.pointerType==='touch')?0:1; if(axis===1){ try{stage.setPointerCapture(e.pointerId);}catch(_){} } });
+      addEventListener('pointerup',()=>{drag=false;axis=0;}); stage.addEventListener('pointercancel',()=>{drag=false;axis=0;});
+      stage.addEventListener('pointerleave',()=>{tm.x=0;tm.y=0;});
       new ResizeObserver(()=>{ w=stage.clientWidth;h=stage.clientHeight; if(w&&h){cam.aspect=w/h;cam.updateProjectionMatrix();r.setSize(w,h);} }).observe(stage);
       const clk=new THREE.Clock();
       (function loop(){ requestAnimationFrame(loop); if(document.hidden||!vis)return; const dt=clk.getDelta();
@@ -816,7 +836,7 @@
         o.appendChild(inner);h.appendChild(o); if(i<words.length-1)h.appendChild(document.createTextNode(' ')); }); }); }
     function playSplit(h){ h.querySelectorAll('span > span').forEach((s,i)=>setTimeout(()=>s.style.transform='translateY(0)',i*48)); }
     function ioReveals(){ const items=document.querySelectorAll('[data-reveal],[data-stagger]');
-      const io=new IntersectionObserver(es=>es.forEach(en=>{if(en.isIntersecting){en.target.classList.add('in');io.unobserve(en.target);}}),{threshold:0.12,rootMargin:'0px 0px -8% 0px'});
+      const io=new IntersectionObserver(es=>es.forEach(en=>{if(en.isIntersecting){en.target.classList.add('in');io.unobserve(en.target);}}),{threshold:0.12,rootMargin:'0px 0px -30% 0px'});
       items.forEach(i=>{if(i.closest('.hero'))return;io.observe(i);}); }
     function gsapless(){ document.querySelectorAll('[data-split] span > span').forEach(s=>s.style.transform='none'); document.querySelectorAll('.accent-underline').forEach(u=>u.classList.add('lit')); }
 
@@ -827,10 +847,10 @@
         gsap.registerPlugin(ST);
         if(lenis){ lenis.on('scroll',ST.update); gsap.ticker.add(t=>lenis.raf(t*1000)); gsap.ticker.lagSmoothing(0); }
         ST.create({start:0,end:'max',onUpdate:self=>baseScroll(self.scroll())});
-        gsap.utils.toArray('[data-reveal]').forEach(el=>{ if(el.closest('.hero'))return; gsap.fromTo(el,{y:30,autoAlpha:0},{y:0,autoAlpha:1,duration:0.9,ease:'power3.out',scrollTrigger:{trigger:el,start:'top 88%'}}); });
-        gsap.utils.toArray('[data-stagger]').forEach(el=>gsap.fromTo(el.children,{y:30,autoAlpha:0},{y:0,autoAlpha:1,duration:0.7,ease:'power3.out',stagger:0.08,scrollTrigger:{trigger:el,start:'top 86%'}}));
-        gsap.utils.toArray('[data-split]').forEach(h=>ST.create({trigger:h,start:'top 88%',once:true,onEnter:()=>playSplit(h)}));
-        gsap.utils.toArray('.accent-underline').forEach(u=>{if(u.closest('.hero'))return;ST.create({trigger:u,start:'top 90%',once:true,onEnter:()=>u.classList.add('lit')});});
+        gsap.utils.toArray('[data-reveal]').forEach(el=>{ if(el.closest('.hero'))return; gsap.fromTo(el,{y:30,autoAlpha:0},{y:0,autoAlpha:1,duration:1.2,ease:'power2.inOut',scrollTrigger:{trigger:el,start:'top 70%'}}); });
+        gsap.utils.toArray('[data-stagger]').forEach(el=>gsap.fromTo(el.children,{y:30,autoAlpha:0},{y:0,autoAlpha:1,duration:1.0,ease:'power2.inOut',stagger:0.1,scrollTrigger:{trigger:el,start:'top 70%'}}));
+        gsap.utils.toArray('[data-split]').forEach(h=>ST.create({trigger:h,start:'top 78%',once:true,onEnter:()=>playSplit(h)}));
+        gsap.utils.toArray('.accent-underline').forEach(u=>{if(u.closest('.hero'))return;ST.create({trigger:u,start:'top 80%',once:true,onEnter:()=>u.classList.add('lit')});});
         gsap.to('.footer-mark',{yPercent:-12,ease:'none',scrollTrigger:{trigger:'footer',start:'top bottom',end:'bottom bottom',scrub:true}});
         ST.refresh(); if(document.fonts)document.fonts.ready.then(()=>ST.refresh());
       } else {
