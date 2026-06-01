@@ -133,7 +133,7 @@
 
     /* ===== TOP BAR ===== */
     .bar { position: fixed; top: 0; left: 0; right: 0; z-index: 130; display: flex; align-items: center; justify-content: space-between; padding: clamp(1.1rem, 2.2vw, 1.7rem) var(--gutter); transition: transform 0.5s var(--ease); }
-    .bar::before { content: ""; position: absolute; inset: 0; bottom: auto; height: 230%; background: linear-gradient(to bottom, rgba(13,17,22,0.55), rgba(13,17,22,0)); pointer-events: none; z-index: -1; }
+    .bar::before { content: ""; position: absolute; inset: 0; bottom: auto; height: 230%; background: linear-gradient(to bottom, rgba(13,17,22,0.6), rgba(13,17,22,0)); -webkit-backdrop-filter: blur(20px) saturate(135%); backdrop-filter: blur(20px) saturate(135%); -webkit-mask-image: linear-gradient(to bottom, #000 42%, transparent 100%); mask-image: linear-gradient(to bottom, #000 42%, transparent 100%); pointer-events: none; z-index: -1; }
     html.light .bar::before { background: linear-gradient(to bottom, rgba(236,239,243,0.72), rgba(236,239,243,0)); }
     .bar.hide { transform: translateY(-130%); }
     .brand { font-family: var(--f-logo); font-weight: 500; font-size: 1.4rem; letter-spacing: 0.06em; color: var(--light); transition: opacity var(--t); }
@@ -342,6 +342,13 @@
     .chip { padding: 0.55rem 1.1rem; border-radius: var(--r-pill); border: 1px solid var(--hairline); color: var(--text-muted); font-family: var(--f-head); font-weight: 500; font-size: 0.82rem; transition: color var(--t), border-color var(--t), background var(--t), transform var(--t-fast); }
     .chip:hover { color: var(--light); border-color: var(--hairline-2); transform: translateY(-2px); }
     .chip.active { color: var(--ink); background: var(--light); border-color: var(--light); }
+    /* work: show-more collapse + blur teaser */
+    .work-grid { position: relative; transition: max-height 0.7s var(--ease); }
+    .work-grid.collapsed { overflow: hidden; -webkit-mask-image: linear-gradient(to bottom, #000 60%, transparent 98%); mask-image: linear-gradient(to bottom, #000 60%, transparent 98%); }
+    .proj-extra { order: 2; transition: filter 0.55s var(--ease), opacity 0.55s var(--ease); }
+    .work-grid.collapsed .proj-extra { filter: blur(7px); opacity: 0.5 !important; pointer-events: none; }
+    .work-more { display: flex; justify-content: center; margin-top: clamp(1.6rem, 3vw, 2.4rem); }
+    #workMore.is-open svg { transform: rotate(180deg); }
 
     /* ===== TESTIMONIALS ===== */
     .tst-grid { display: grid; gap: 1.2rem; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); }
@@ -705,15 +712,15 @@
             <div class="proj-img"><span class="proj-cat">Featured</span><img src="projects/owc_transceiver.jpg" alt="Optical wireless communication transceiver" loading="lazy"></div>
             <div class="proj-body"><span class="client">Dissertation · Royal Holloway</span><h3>Optical Wireless Comms</h3><p>650nm laser + BPW34 link streaming data &amp; audio over light. View case study →</p><div class="proj-tags"><span>ESP32</span><span>Optics</span><span>PCB</span></div></div>
           </article>
-          <article class="card proj" data-category="software" data-cursor="view" data-href="trading-bot.html" data-img="1611974789855-9c2a0a7236a3" data-more="A personal R&amp;D project: a Python trading bot that models price-action structure, detects higher- and lower-timeframe bias, and reasons about liquidity sweeps. Built with a backtesting harness for rapid iteration.">
+          <article class="card proj proj-extra" data-category="software" data-cursor="view" data-href="trading-bot.html" data-img="1611974789855-9c2a0a7236a3" data-more="A personal R&amp;D project: a Python trading bot that models price-action structure, detects higher- and lower-timeframe bias, and reasons about liquidity sweeps. Built with a backtesting harness for rapid iteration.">
             <div class="proj-img"><span class="proj-cat">Software</span><img src="https://images.unsplash.com/photo-1611974789855-9c2a0a7236a3?auto=format&fit=crop&w=700&q=80" alt="Candlestick trading chart" loading="lazy"></div>
             <div class="proj-body"><span class="client">Personal</span><h3>Algorithmic Trading Bot</h3><p>Price-action logic, HTF/LTF bias detection and liquidity sweeps.</p><div class="proj-tags"><span>Python</span><span>pandas</span></div></div>
           </article>
-          <article class="card proj" data-category="web" data-cursor="view" data-href="corporate-web.html" data-img="1497366216548-37526070297c" data-more="A bespoke marketing site for M&amp;H Associates, a clean, fast, fully responsive presence hand-coded for performance and easy maintenance, with clear calls to action throughout.">
+          <article class="card proj proj-extra" data-category="web" data-cursor="view" data-href="corporate-web.html" data-img="1497366216548-37526070297c" data-more="A bespoke marketing site for M&amp;H Associates, a clean, fast, fully responsive presence hand-coded for performance and easy maintenance, with clear calls to action throughout.">
             <div class="proj-img"><span class="proj-cat">Web</span><img src="https://images.unsplash.com/photo-1497366216548-37526070297c?auto=format&fit=crop&w=700&q=80" alt="Modern corporate office" loading="lazy"></div>
             <div class="proj-body"><span class="client">M&amp;H Associates</span><h3>Corporate Web Build</h3><p>A clean, responsive presence for a growing firm.</p><div class="proj-tags"><span>HTML</span><span>CSS</span></div></div>
           </article>
-          <article class="card proj" data-category="web" data-cursor="view" data-href="construction-website.html" data-img="1504307651254-35680f356dfd" data-more="A trade-focused website for SHC Construction highlighting capabilities, completed projects and clear contact paths, optimised for search and built to convert enquiries.">
+          <article class="card proj proj-extra" data-category="web" data-cursor="view" data-href="construction-website.html" data-img="1504307651254-35680f356dfd" data-more="A trade-focused website for SHC Construction highlighting capabilities, completed projects and clear contact paths, optimised for search and built to convert enquiries.">
             <div class="proj-img"><span class="proj-cat">Web</span><img src="https://images.unsplash.com/photo-1504307651254-35680f356dfd?auto=format&fit=crop&w=700&q=80" alt="Construction site" loading="lazy"></div>
             <div class="proj-body"><span class="client">SHC Construction</span><h3>Construction Firm Website</h3><p>Trade-focused presence highlighting capabilities &amp; projects.</p><div class="proj-tags"><span>HTML</span><span>SEO</span></div></div>
           </article>
@@ -729,22 +736,25 @@
             <div class="proj-img"><span class="proj-cat">Embedded</span><img src="projects/buggy_hero.jpg" alt="Autonomous line-following buggy on the NUCLEO-F091RC" loading="lazy"></div>
             <div class="proj-body"><span class="client">Royal Holloway · Group 10</span><h3>Autonomous Line-Following Buggy</h3><p>Self-driving NUCLEO-F091RC buggy with line sensing, ultrasonic hazard stop &amp; PWM motor control.</p><div class="proj-tags"><span>STM32</span><span>Bare-metal C</span></div></div>
           </article>
-          <article class="card proj" data-category="it" data-cursor="view" data-href="network-ring.html" data-img="1558494949-ef010cbdcc31" data-more="Designed and deployed a resilient ring network topology for OnWay LDD, improving redundancy and uptime across the organisation's day-to-day operations.">
+          <article class="card proj proj-extra" data-category="it" data-cursor="view" data-href="network-ring.html" data-img="1558494949-ef010cbdcc31" data-more="Designed and deployed a resilient ring network topology for OnWay LDD, improving redundancy and uptime across the organisation's day-to-day operations.">
             <div class="proj-img"><span class="proj-cat">IT</span><img src="https://images.unsplash.com/photo-1558494949-ef010cbdcc31?auto=format&fit=crop&w=700&q=80" alt="Network server room" loading="lazy"></div>
             <div class="proj-body"><span class="client">OnWay LDD</span><h3>Network Ring Infrastructure</h3><p>Resilient network topology for ongoing business operations.</p><div class="proj-tags"><span>Networking</span><span>Hardware</span></div></div>
           </article>
-          <article class="card proj" data-category="web" data-cursor="view" data-href="accountancy-web.html" data-img="1460925895917-afdab827c52f" data-more="A polished, trust-led brand site for Spot On Accountants, structured around service discovery and lead capture with a calm, professional aesthetic.">
+          <article class="card proj proj-extra" data-category="web" data-cursor="view" data-href="accountancy-web.html" data-img="1460925895917-afdab827c52f" data-more="A polished, trust-led brand site for Spot On Accountants, structured around service discovery and lead capture with a calm, professional aesthetic.">
             <div class="proj-img"><span class="proj-cat">Web</span><img src="https://images.unsplash.com/photo-1460925895917-afdab827c52f?auto=format&fit=crop&w=700&q=80" alt="Financial analytics" loading="lazy"></div>
             <div class="proj-body"><span class="client">Spot On Accountants</span><h3>Accountancy Web Presence</h3><p>Trust-led brand site for service discovery &amp; lead capture.</p><div class="proj-tags"><span>HTML</span><span>UX</span></div></div>
           </article>
-          <article class="card proj" data-category="it" data-cursor="view" data-href="email-hosting.html" data-img="1620712943543-bcc4688e7485" data-more="End-to-end email and web hosting for OnWay LDD, domain and DNS configuration, a managed mail server and reliable web infrastructure.">
+          <article class="card proj proj-extra" data-category="it" data-cursor="view" data-href="email-hosting.html" data-img="1620712943543-bcc4688e7485" data-more="End-to-end email and web hosting for OnWay LDD, domain and DNS configuration, a managed mail server and reliable web infrastructure.">
             <div class="proj-img"><span class="proj-cat">IT</span><img src="https://images.unsplash.com/photo-1620712943543-bcc4688e7485?auto=format&fit=crop&w=700&q=80" alt="Data infrastructure" loading="lazy"></div>
             <div class="proj-body"><span class="client">OnWay LDD</span><h3>Email &amp; Web Hosting</h3><p>Domain, DNS, mail server and web infrastructure.</p><div class="proj-tags"><span>DNS</span><span>Hosting</span></div></div>
           </article>
-          <article class="card proj" data-category="it" data-cursor="view" data-href="computer-setup.html" data-img="1517336714731-489689fd1ca8" data-more="Office-wide workstation configuration and deployment for OnWay LDD, including imaging, software setup and friendly user onboarding.">
+          <article class="card proj proj-extra" data-category="it" data-cursor="view" data-href="computer-setup.html" data-img="1517336714731-489689fd1ca8" data-more="Office-wide workstation configuration and deployment for OnWay LDD, including imaging, software setup and friendly user onboarding.">
             <div class="proj-img"><span class="proj-cat">IT</span><img src="https://images.unsplash.com/photo-1517336714731-489689fd1ca8?auto=format&fit=crop&w=700&q=80" alt="Workstation setup" loading="lazy"></div>
             <div class="proj-body"><span class="client">OnWay LDD</span><h3>Computer System Setup</h3><p>Office-wide workstation configuration &amp; onboarding.</p><div class="proj-tags"><span>Setup</span><span>Migration</span></div></div>
           </article>
+        </div>
+        <div class="work-more" data-reveal>
+          <button class="btn btn-line" id="workMore" data-cursor="hover" aria-expanded="false"><span class="lbl">Show more</span><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M6 9l6 6 6-6"/></svg></button>
         </div>
       </div>
     </section>
@@ -1064,10 +1074,27 @@
 
     /* filter */
     (function(){ const chips=document.querySelectorAll('.chip'),projs=document.querySelectorAll('.proj');
+      const grid=document.getElementById('workGrid'),moreWrap=document.querySelector('.work-more'),moreBtn=document.getElementById('workMore');
+      const extras=[...document.querySelectorAll('.proj-extra')]; const PEEK=150; let expanded=false,filter='all';
+      function extrasTop(){ let m=Infinity; extras.forEach(e=>{ if(!e.classList.contains('hidden')){ const t=e.offsetTop; if(t<m)m=t; } }); return m===Infinity?null:m; }
+      function apply(){
+        const collapse=!expanded&&filter==='all';
+        if(collapse){ grid.classList.add('collapsed'); const top=extrasTop();
+          if(top==null){ grid.style.maxHeight='none'; if(moreWrap)moreWrap.style.display='none'; }
+          else { grid.style.maxHeight=(top+PEEK)+'px'; if(moreWrap)moreWrap.style.display=''; }
+        } else { grid.classList.remove('collapsed'); grid.style.maxHeight=grid.scrollHeight+'px';
+          if(moreWrap)moreWrap.style.display=(filter==='all')?'':'none';
+          clearTimeout(grid.__mt); grid.__mt=setTimeout(()=>{ if(!grid.classList.contains('collapsed'))grid.style.maxHeight='none'; },760);
+        }
+        if(moreBtn){ moreBtn.classList.toggle('is-open',expanded); moreBtn.setAttribute('aria-expanded',String(expanded)); const l=moreBtn.querySelector('.lbl'); if(l)l.textContent=expanded?'Show less':'Show more'; }
+      }
+      if(moreBtn)moreBtn.addEventListener('click',()=>{ expanded=!expanded; apply(); if(window.ScrollTrigger)ScrollTrigger.refresh(); });
       chips.forEach(c=>c.addEventListener('click',()=>{ chips.forEach(x=>x.classList.remove('active'));c.classList.add('active');
-        const f=c.dataset.filter; projs.forEach(p=>p.classList.toggle('hidden',!(f==='all'||p.dataset.category===f)));
-        if(window.ScrollTrigger)ScrollTrigger.refresh();
+        filter=c.dataset.filter; if(filter!=='all')expanded=false;
+        projs.forEach(p=>p.classList.toggle('hidden',!(filter==='all'||p.dataset.category===filter)));
+        apply(); if(window.ScrollTrigger)ScrollTrigger.refresh();
       }));
+      addEventListener('resize',apply); if(grid&&moreBtn)apply();
     })();
 
     /* splits + reveals */
