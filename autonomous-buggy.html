@@ -3,8 +3,8 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
-  <title>Baby Soother UFO &middot; NYNA</title>
-  <meta name="description" content="A playful UFO baby soother combining programmable LEDs, audio output and tactile switches, driven by C++ on a microcontroller." />
+  <title>Autonomous Line-Following Buggy &middot; NYNA</title>
+  <meta name="description" content="An autonomous line-following robot buggy on the STM32 NUCLEO-F091RC, bare-metal C with PWM motor control, ADC line sensing, ultrasonic hazard detection and a custom PCB." />
   <meta name="theme-color" content="#181D24" />
   <script>try{if(localStorage.getItem('nyna-theme')==='light')document.documentElement.classList.add('light');}catch(e){}</script>
   <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='7' fill='%23181D24'/%3E%3Ctext x='16' y='23' font-family='Arial,sans-serif' font-size='18' font-weight='700' fill='%235ECFF9' text-anchor='middle'%3EN%3C/text%3E%3C/svg%3E" />
@@ -475,20 +475,104 @@
           <span>All work</span>
         </a>
         <div class="sec-head" data-reveal>
-          <span class="eyebrow"><span class="ln"></span><span class="caps">Embedded &middot; Academic</span></span>
-          <h2 class="h2" data-split>Baby Soother UFO</h2>
-          <p class="lead">A playful UFO baby soother combining programmable LEDs, audio output and tactile switches, driven by C++ on a microcontroller.</p>
+          <span class="eyebrow"><span class="ln"></span><span class="caps">Embedded systems &middot; Group project</span></span>
+          <h2 class="h2" data-split>An autonomous buggy that drives itself.</h2>
+          <p class="lead">A line-following robot buggy built on the STM32 NUCLEO-F091RC in bare-metal C, a Kitronik chassis driven through an L298 on PWM, steering from two LDR line sensors, stopping for obstacles on an ultrasonic sensor, and signalling with indicator, brake and headlight LEDs. A five-person Embedded Systems project at Royal Holloway, where I led testing, debugging, calibration and integration.</p>
         </div>
-        <div class="card" data-reveal style="margin-top:clamp(2.5rem,5vw,4rem);padding:clamp(2.2rem,5vw,3.6rem);text-align:center;">
-          <span class="caps" style="color:var(--accent);letter-spacing:.2em;font-size:.72rem;">Case study</span>
-          <h3 class="h3" style="margin:.7rem 0 .6rem;">Full write-up coming soon.</h3>
-          <p class="muted" style="max-width:54ch;margin:0 auto;">Detailed photos, process notes and results for this project will be added here shortly.</p>
+        <style>
+          .vstage { margin: clamp(1.4rem,3vw,2.2rem) 0 0; border-radius: var(--r-lg); overflow: hidden; border: 1px solid var(--hairline); background: #05070a; }
+          .vstage video { width: 100%; display: block; aspect-ratio: 16/9; object-fit: contain; background: #05070a; }
+          .codewrap { margin: 0; min-width: 0; }
+          .codewrap figcaption { font-family: var(--f-head); font-weight: 600; font-size: .68rem; letter-spacing: .14em; text-transform: uppercase; color: var(--accent); margin-bottom: .55rem; }
+          pre.code { margin: 0; padding: 1.05rem 1.15rem; border-radius: var(--r-md); border: 1px solid var(--hairline); background: var(--dark-3); overflow-x: auto; font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace; font-size: .76rem; line-height: 1.6; color: #c8d2e0; }
+          html.light pre.code { background: #0e131a; color: #d7dee8; }
+        </style>
+        <figure class="owc-hero card" data-reveal data-cursor="view" data-full="projects/buggy_hero.jpg">
+          <img src="projects/buggy_hero.jpg" alt="The assembled NUCLEO-F091RC line-following buggy" loading="lazy">
+          <figcaption class="owc-hero-cap"><span class="caps">The buggy</span><span class="muted">Kitronik chassis &middot; NUCLEO-F091RC &middot; L298 motor driver &middot; custom PCB &middot; LDR line sensors + HC-SR04</span></figcaption>
+        </figure>
+
+        <div class="owc-specs" data-stagger>
+          <div class="spec card"><span class="spec-n">F091RC</span><span class="spec-l">STM32F0 Cortex-M0 host</span></div>
+          <div class="spec card"><span class="spec-n">Bare-metal C</span><span class="spec-l">Direct register / CMSIS</span></div>
+          <div class="spec card"><span class="spec-n">2&times; LDR</span><span class="spec-l">ADC line sensing (PA4 / PB0)</span></div>
+          <div class="spec card"><span class="spec-n">HC-SR04</span><span class="spec-l">Ultrasonic hazard stop</span></div>
+          <div class="spec card"><span class="spec-n">TIM3</span><span class="spec-l">Dual-motor PWM control</span></div>
+          <div class="spec card"><span class="spec-n">0.57<small>m/s</small></span><span class="spec-l">Top speed (calculated)</span></div>
         </div>
-        <div class="owc-gallery" data-stagger style="margin-top:clamp(1.6rem,3vw,2.4rem);">
-          <div style="aspect-ratio:4/3;border-radius:var(--r-md);border:1px dashed var(--hairline-2);background:var(--surface);display:grid;place-items:center;color:var(--text-dim);font-family:var(--f-head);font-weight:600;font-size:.66rem;letter-spacing:.18em;text-transform:uppercase;">Coming soon</div>
-          <div style="aspect-ratio:4/3;border-radius:var(--r-md);border:1px dashed var(--hairline-2);background:var(--surface);display:grid;place-items:center;color:var(--text-dim);font-family:var(--f-head);font-weight:600;font-size:.66rem;letter-spacing:.18em;text-transform:uppercase;">Coming soon</div>
-          <div style="aspect-ratio:4/3;border-radius:var(--r-md);border:1px dashed var(--hairline-2);background:var(--surface);display:grid;place-items:center;color:var(--text-dim);font-family:var(--f-head);font-weight:600;font-size:.66rem;letter-spacing:.18em;text-transform:uppercase;">Coming soon</div>
-          <div style="aspect-ratio:4/3;border-radius:var(--r-md);border:1px dashed var(--hairline-2);background:var(--surface);display:grid;place-items:center;color:var(--text-dim);font-family:var(--f-head);font-weight:600;font-size:.66rem;letter-spacing:.18em;text-transform:uppercase;">Coming soon</div>
+
+        <div class="owc-sub" data-reveal>
+          <span class="eyebrow"><span class="ln"></span><span class="caps">Demo</span></span>
+          <h3 class="h3">Watch it follow the line.</h3>
+        </div>
+        <figure class="vstage" data-reveal>
+          <video controls preload="none" playsinline poster="projects/buggy_hero.jpg">
+            <source src="projects/buggy_demo.mp4" type="video/mp4">
+            Your browser does not support embedded video.
+          </video>
+        </figure>
+
+        <div class="owc-cols" style="margin-top:clamp(2rem,4vw,3rem);">
+          <div data-reveal>
+            <h3 class="h3">How it works</h3>
+            <p class="muted">Two downward-facing LDRs are read through the F091's ADC (PA4 and PB0) and thresholded to digital. The buggy steers by cutting PWM to whichever motor sits over the line, driving differential speed on the L298 through Timer&nbsp;3. An HC-SR04 ultrasonic sensor (trigger PA0, echo PA1) measures range as echo&nbsp;/&nbsp;58; inside a set distance the buggy halts, lights its hazard LEDs and crawls until the obstacle clears. Mode changes run off EXTI button interrupts, and a millisecond timer gives a five-second stop-and-resume. Amber corner LEDs flash as indicators, rear LEDs act as brake lights and white LEDs run as headlights.</p>
+          </div>
+          <div data-reveal>
+            <h3 class="h3">My role</h3>
+            <p class="muted">In a team of five, I owned testing, debugging and calibration, and the integration that brought the subsystems together.</p>
+            <ul class="owc-list">
+              <li>Unit-tested the sensor, motor and LED routines in isolation by checking register state</li>
+              <li>Integrated hazard detection, line-following and button handling into one main loop</li>
+              <li>Calibrated LDR thresholds, PWM base speed and ultrasonic echo timing on the 48&nbsp;MHz clock</li>
+              <li>Field-tested across lighting and track conditions, tuning until the response was smooth</li>
+              <li>Brought the front end up on a breadboard before committing to the custom PCB</li>
+            </ul>
+          </div>
+        </div>
+
+        <div class="owc-sub" data-reveal>
+          <span class="eyebrow"><span class="ln"></span><span class="caps">From the firmware</span></span>
+          <h3 class="h3">Line-following &amp; hazard logic.</h3>
+        </div>
+        <div class="owc-cols">
+          <figure class="codewrap" data-reveal>
+            <figcaption>Differential line-following (ADC + PWM)</figcaption>
+<pre class="code">// Read both LDRs on the ADC, threshold to digital
+ldr1 = adc_read(CH4);              // PA4
+ldr2 = adc_read(CH8);              // PB0
+uint8_t a = (ldr1/4095.0f &gt;= 0.5f);
+uint8_t b = (ldr2/4095.0f &gt;= 0.5f);
+
+uint32_t base = 840;               // ~0.2 m/s
+if (a &amp;&amp; !b)      { L = base;   R = 0;    }   // bear left
+else if (!a &amp;&amp; b) { L = 0;      R = base; }   // bear right
+else              { L = base/2; R = base/2; } // on the line
+TIM3-&gt;CCR1 = L;  TIM3-&gt;CCR2 = R;   // drive the L298</pre>
+          </figure>
+          <figure class="codewrap" data-reveal>
+            <figcaption>Ultrasonic hazard stop (HC-SR04)</figcaption>
+<pre class="code">TRIG_LOW;  delayuS(2);
+TRIG_HIGH; delayuS(10); TRIG_LOW;          // 10 us pulse
+float distance = read_echo(400000) / 58.0f;
+
+if (distance &lt;= 2.5f) {                     // obstacle ahead
+    LED_D2_ON; LED_D3_ON; LED_D4_ON;        // hazard lights
+    TIM3-&gt;CCR1 = 0; TIM3-&gt;CCR2 = 0;         // full stop
+    while (read_echo(400000)/58.0f &lt;= 2.5f) // crawl until clear
+        { TIM3-&gt;CCR1 = 300; TIM3-&gt;CCR2 = 300; delay_ms(50); }
+}</pre>
+          </figure>
+        </div>
+
+        <div class="owc-sub" data-reveal>
+          <span class="eyebrow"><span class="ln"></span><span class="caps">Build &amp; track</span></span>
+          <h3 class="h3">Hardware, sensors &amp; the test track.</h3>
+        </div>
+        <div class="owc-gallery" data-stagger>
+          <img src="projects/buggy_ultrasonic.jpg" data-cursor="view" data-full="projects/buggy_ultrasonic.jpg" alt="Buggy with the HC-SR04 ultrasonic sensor and breadboard mounted" loading="lazy">
+          <img src="projects/buggy_breadboard.jpg" data-cursor="view" data-full="projects/buggy_breadboard.jpg" alt="NUCLEO-F091RC breadboard bring-up" loading="lazy">
+          <img src="projects/buggy_track.jpg" data-cursor="view" data-full="projects/buggy_track.jpg" alt="The line-following test track taped out on the lab bench" loading="lazy">
+          <img src="projects/buggy_poster.jpg" data-cursor="view" data-full="projects/buggy_poster.jpg" alt="Group 10 Kitronik buggy project poster" loading="lazy">
         </div>
       </div>
     </section>

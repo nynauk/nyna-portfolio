@@ -3,8 +3,8 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
-  <title>Temperature Sensor Module &middot; NYNA</title>
-  <meta name="description" content="A real-time temperature-sensing module built on the Arm Nucleo F091RC in Keil Studio, reading, processing and displaying live sensor data with C++." />
+  <title>Peg DHCP Security Assessment &middot; NYNA</title>
+  <meta name="description" content="An information-security assessment of Peg DHCP (RFC 2322) for guest WiFi, with DREAD threat-modelling of three firewall architectures. Royal Holloway IY2840." />
   <meta name="theme-color" content="#181D24" />
   <script>try{if(localStorage.getItem('nyna-theme')==='light')document.documentElement.classList.add('light');}catch(e){}</script>
   <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='7' fill='%23181D24'/%3E%3Ctext x='16' y='23' font-family='Arial,sans-serif' font-size='18' font-weight='700' fill='%235ECFF9' text-anchor='middle'%3EN%3C/text%3E%3C/svg%3E" />
@@ -475,20 +475,80 @@
           <span>All work</span>
         </a>
         <div class="sec-head" data-reveal>
-          <span class="eyebrow"><span class="ln"></span><span class="caps">Embedded &middot; Academic</span></span>
-          <h2 class="h2" data-split>Temperature Sensor Module</h2>
-          <p class="lead">A real-time temperature-sensing module built on the Arm Nucleo F091RC in Keil Studio, reading, processing and displaying live sensor data with C++.</p>
+          <span class="eyebrow"><span class="ln"></span><span class="caps">Information security &middot; Coursework</span></span>
+          <h2 class="h2" data-split>Threat-modelling a network, peg by peg.</h2>
+          <p class="lead">A security assessment that put a CEO's "Peg DHCP" idea, handing out WiFi access on a physical pegboard (RFC 2322), through operationalisation, usability, security and business-impact analysis, then used DREAD threat-modelling to score three firewall architectures and recommend the safest. Royal Holloway, IY2840 Information Security.</p>
         </div>
-        <div class="card" data-reveal style="margin-top:clamp(2.5rem,5vw,4rem);padding:clamp(2.2rem,5vw,3.6rem);text-align:center;">
-          <span class="caps" style="color:var(--accent);letter-spacing:.2em;font-size:.72rem;">Case study</span>
-          <h3 class="h3" style="margin:.7rem 0 .6rem;">Full write-up coming soon.</h3>
-          <p class="muted" style="max-width:54ch;margin:0 auto;">Detailed photos, process notes and results for this project will be added here shortly.</p>
+        <style>
+          .sec-grid { display: grid; grid-template-columns: 1fr 1fr; gap: clamp(.9rem,2.2vw,1.3rem); }
+          @media (max-width: 720px){ .sec-grid { grid-template-columns: 1fr; } }
+          .sec-grid .card { padding: 1.2rem 1.3rem; }
+          .sec-grid h4 { font-family: var(--f-head); font-weight: 700; font-size: .95rem; color: var(--light); margin: 0 0 .45rem; display:flex; align-items:center; gap:.55rem; flex-wrap:wrap; }
+          html.light .sec-grid h4 { color: var(--ink); }
+          .sec-grid p { color: var(--text-muted); font-size: .89rem; line-height: 1.6; margin: 0; }
+          .tag-bad { font-family: var(--f-head); font-weight:700; font-size:.58rem; letter-spacing:.12em; text-transform:uppercase; padding:.16rem .5rem; border-radius:var(--r-pill); background: rgba(255,107,107,.16); color:#ff8585; }
+          .dread-wrap { overflow-x:auto; border:1px solid var(--hairline); border-radius: var(--r-md); }
+          table.dread { width:100%; border-collapse:collapse; font-family:var(--f-head); font-size:.82rem; min-width: 460px; }
+          table.dread th, table.dread td { padding:.65rem .7rem; border-bottom:1px solid var(--hairline); text-align:center; color:var(--text-muted); }
+          table.dread thead th { color:var(--text-dim); text-transform:uppercase; letter-spacing:.08em; font-size:.62rem; font-weight:700; }
+          table.dread td:first-child, table.dread th:first-child { text-align:left; color:var(--light); }
+          html.light table.dread td:first-child { color:var(--ink); }
+          table.dread tbody tr:last-child td { border-bottom:none; }
+          .risk-high{ color:#ff6b6b; font-weight:700; } .risk-med{ color:#ffc14d; font-weight:700; } .risk-low{ color:#5bd6a0; font-weight:700; }
+          ul.mit { display:grid; gap:.55rem; margin:.4rem 0 0; padding:0; list-style:none; }
+          ul.mit li { color:var(--text-muted); font-size:.92rem; padding-left:1.4rem; position:relative; line-height:1.5; }
+          ul.mit li::before{ content:""; position:absolute; left:0; top:.6em; width:11px; height:1px; background:var(--accent); }
+        </style>
+        <div class="owc-specs" data-stagger style="margin-top:clamp(2rem,5vw,3rem);">
+          <div class="spec card"><span class="spec-n">RFC 2322</span><span class="spec-l">Peg DHCP under review</span></div>
+          <div class="spec card"><span class="spec-n">DREAD</span><span class="spec-l">Quantified threat model</span></div>
+          <div class="spec card"><span class="spec-n">CIA</span><span class="spec-l">Confidentiality / integrity / availability</span></div>
+          <div class="spec card"><span class="spec-n">IY2840</span><span class="spec-l">Information Security, RHUL</span></div>
         </div>
-        <div class="owc-gallery" data-stagger style="margin-top:clamp(1.6rem,3vw,2.4rem);">
-          <div style="aspect-ratio:4/3;border-radius:var(--r-md);border:1px dashed var(--hairline-2);background:var(--surface);display:grid;place-items:center;color:var(--text-dim);font-family:var(--f-head);font-weight:600;font-size:.66rem;letter-spacing:.18em;text-transform:uppercase;">Coming soon</div>
-          <div style="aspect-ratio:4/3;border-radius:var(--r-md);border:1px dashed var(--hairline-2);background:var(--surface);display:grid;place-items:center;color:var(--text-dim);font-family:var(--f-head);font-weight:600;font-size:.66rem;letter-spacing:.18em;text-transform:uppercase;">Coming soon</div>
-          <div style="aspect-ratio:4/3;border-radius:var(--r-md);border:1px dashed var(--hairline-2);background:var(--surface);display:grid;place-items:center;color:var(--text-dim);font-family:var(--f-head);font-weight:600;font-size:.66rem;letter-spacing:.18em;text-transform:uppercase;">Coming soon</div>
-          <div style="aspect-ratio:4/3;border-radius:var(--r-md);border:1px dashed var(--hairline-2);background:var(--surface);display:grid;place-items:center;color:var(--text-dim);font-family:var(--f-head);font-weight:600;font-size:.66rem;letter-spacing:.18em;text-transform:uppercase;">Coming soon</div>
+        <div class="owc-sub" data-reveal>
+          <span class="eyebrow"><span class="ln"></span><span class="caps">The brief</span></span>
+          <h3 class="h3">A pegboard for guest WiFi?</h3>
+        </div>
+        <div data-reveal style="max-width:74ch;margin-bottom:clamp(1.4rem,3vw,2rem);">
+          <p class="muted">Peg DHCP assigns each guest a physical peg printed with a static IP, which they type in to get online, no automation, no authentication, no logging. The CEO liked it as a novelty. I assessed whether it belonged anywhere near a production guest network.</p>
+        </div>
+        <div class="sec-grid">
+          <div class="card" data-reveal><h4>Operations <span class="tag-bad">Fails</span></h4><p>A pegboard has to be built and hand-maintained; pegs get lost, stolen or damaged, causing IP conflicts. It does not scale, busy periods create bottlenecks, and every fault needs IT to step in.</p></div>
+          <div class="card" data-reveal><h4>Usability <span class="tag-bad">Fails</span></h4><p>Guests expect a password or a portal, not a walk to a physical board. It is slow at peak times and inaccessible to users with mobility or vision needs.</p></div>
+          <div class="card" data-reveal><h4>Security <span class="tag-bad">Fails</span></h4><p>A peg is a bearer token: stolen, duplicated or social-engineered, it grants access with no password or 2FA. There is no logging, so a breach leaves no trail.</p></div>
+          <div class="card" data-reveal><h4>Business impact <span class="tag-bad">Fails</span></h4><p>It loads IT and reception staff, looks unprofessional to clients, and breaks compliance regimes that require authentication and activity logging, exposing the firm to regulatory risk.</p></div>
+        </div>
+        <div data-reveal style="max-width:74ch;margin-top:clamp(1.4rem,3vw,2rem);">
+          <p class="muted"><strong style="color:var(--light)">Recommendation:</strong> drop Peg DHCP. Use a secure web-portal login, time-limited access codes issued at reception, and network segmentation that keeps guest traffic off the core network.</p>
+        </div>
+        <div class="owc-sub" data-reveal>
+          <span class="eyebrow"><span class="ln"></span><span class="caps">DREAD threat model</span></span>
+          <h3 class="h3">Scoring three firewall designs.</h3>
+        </div>
+        <div class="dread-wrap" data-reveal>
+          <table class="dread">
+            <thead><tr><th>Architecture</th><th>D</th><th>R</th><th>E</th><th>A</th><th>D</th><th>Score</th><th>Risk</th></tr></thead>
+            <tbody>
+              <tr><td>Single main firewall</td><td>9</td><td>6</td><td>8</td><td>9</td><td>7</td><td>7.8</td><td class="risk-high">High</td></tr>
+              <tr><td>Firewall per Class-4 switch</td><td>6</td><td>4</td><td>5</td><td>5</td><td>4</td><td>4.8</td><td class="risk-med">Medium</td></tr>
+              <tr><td>Firewall per ZK435 switch + specialist</td><td>3</td><td>2</td><td>3</td><td>2</td><td>3</td><td>2.6</td><td class="risk-low">Low</td></tr>
+            </tbody>
+          </table>
+        </div>
+        <div class="owc-cols" style="margin-top:clamp(1.6rem,3vw,2.2rem);">
+          <div data-reveal>
+            <h3 class="h3">The call</h3>
+            <p class="muted">A single perimeter firewall scores worst: one breach exposes everything across the CIA triad, and it is the easiest target. Distributing firewalls behind each switch and giving each business unit a dedicated specialist contains a breach to one segment and brings the score down to 2.6, so that distributed design is the recommendation.</p>
+          </div>
+          <div data-reveal>
+            <h3 class="h3">Mitigations</h3>
+            <ul class="mit">
+              <li>Strict access-control rules and least privilege at every firewall</li>
+              <li>Intrusion-detection monitoring for anomalous behaviour</li>
+              <li>Segment guest traffic away from the core network</li>
+              <li>Regular configuration audits and IT-staff threat training</li>
+            </ul>
+          </div>
         </div>
       </div>
     </section>

@@ -3,8 +3,8 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
-  <title>Train Timetable Organizer &middot; NYNA</title>
-  <meta name="description" content="An object-oriented C++ application that organises train timetables, developed with Agile practices and a full Boost-based unit-testing suite." />
+  <title>Train Schedule System &middot; NYNA</title>
+  <meta name="description" content="An object-oriented C++ train schedule system, UML-driven design with inheritance and a Boost.Test unit-testing suite. A group software-engineering project at Royal Holloway." />
   <meta name="theme-color" content="#181D24" />
   <script>try{if(localStorage.getItem('nyna-theme')==='light')document.documentElement.classList.add('light');}catch(e){}</script>
   <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='7' fill='%23181D24'/%3E%3Ctext x='16' y='23' font-family='Arial,sans-serif' font-size='18' font-weight='700' fill='%235ECFF9' text-anchor='middle'%3EN%3C/text%3E%3C/svg%3E" />
@@ -475,20 +475,69 @@
           <span>All work</span>
         </a>
         <div class="sec-head" data-reveal>
-          <span class="eyebrow"><span class="ln"></span><span class="caps">Software &middot; Academic</span></span>
-          <h2 class="h2" data-split>Train Timetable Organizer</h2>
-          <p class="lead">An object-oriented C++ application that organises train timetables, developed with Agile practices and a full Boost-based unit-testing suite.</p>
+          <span class="eyebrow"><span class="ln"></span><span class="caps">Software engineering &middot; Group project</span></span>
+          <h2 class="h2" data-split>A train schedule system in modern C++.</h2>
+          <p class="lead">An object-oriented C++ application for storing and searching train schedules, built the full software-engineering way: functional and non-functional requirements, UML class and sequence diagrams, an inheritance-based class design, and a Boost.Test unit-testing suite checked against a requirements test plan. A group project (Group 06) at Royal Holloway.</p>
         </div>
-        <div class="card" data-reveal style="margin-top:clamp(2.5rem,5vw,4rem);padding:clamp(2.2rem,5vw,3.6rem);text-align:center;">
-          <span class="caps" style="color:var(--accent);letter-spacing:.2em;font-size:.72rem;">Case study</span>
-          <h3 class="h3" style="margin:.7rem 0 .6rem;">Full write-up coming soon.</h3>
-          <p class="muted" style="max-width:54ch;margin:0 auto;">Detailed photos, process notes and results for this project will be added here shortly.</p>
+        <style>
+          .arch { display: grid; gap: .75rem; margin: 0; }
+          .arch .node { border: 1px solid var(--hairline); border-radius: var(--r-md); background: var(--surface); padding: .95rem 1.1rem; }
+          .arch .node h4 { font-family: var(--f-head); font-weight: 700; font-size: .92rem; color: var(--light); margin: 0 0 .2rem; }
+          .arch .node p { color: var(--text-muted); font-size: .85rem; line-height: 1.5; margin: 0; }
+          html.light .arch .node h4 { color: var(--ink); }
+          .codewrap { min-width: 0; }
+          .codewrap figcaption { font-family: var(--f-head); font-weight: 600; font-size: .68rem; letter-spacing: .14em; text-transform: uppercase; color: var(--accent); margin-bottom: .55rem; }
+          pre.code { margin: 0; padding: 1.05rem 1.15rem; border-radius: var(--r-md); border: 1px solid var(--hairline); background: var(--dark-3); overflow-x: auto; font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace; font-size: .76rem; line-height: 1.6; color: #c8d2e0; }
+          html.light pre.code { background: #0e131a; color: #d7dee8; }
+          .quote { border-left: 2px solid var(--accent); padding: .15rem 0 .15rem 1.05rem; color: var(--text-muted); font-style: italic; line-height: 1.6; margin: 0; }
+        </style>
+        <div class="owc-specs" data-stagger style="margin-top:clamp(2rem,5vw,3rem);">
+          <div class="spec card"><span class="spec-n">C++</span><span class="spec-l">Object-oriented design</span></div>
+          <div class="spec card"><span class="spec-n">UML</span><span class="spec-l">Class &amp; sequence diagrams</span></div>
+          <div class="spec card"><span class="spec-n">Boost.Test</span><span class="spec-l">Unit + requirement testing</span></div>
+          <div class="spec card"><span class="spec-n">Group of 5</span><span class="spec-l">Specification-driven build</span></div>
         </div>
-        <div class="owc-gallery" data-stagger style="margin-top:clamp(1.6rem,3vw,2.4rem);">
-          <div style="aspect-ratio:4/3;border-radius:var(--r-md);border:1px dashed var(--hairline-2);background:var(--surface);display:grid;place-items:center;color:var(--text-dim);font-family:var(--f-head);font-weight:600;font-size:.66rem;letter-spacing:.18em;text-transform:uppercase;">Coming soon</div>
-          <div style="aspect-ratio:4/3;border-radius:var(--r-md);border:1px dashed var(--hairline-2);background:var(--surface);display:grid;place-items:center;color:var(--text-dim);font-family:var(--f-head);font-weight:600;font-size:.66rem;letter-spacing:.18em;text-transform:uppercase;">Coming soon</div>
-          <div style="aspect-ratio:4/3;border-radius:var(--r-md);border:1px dashed var(--hairline-2);background:var(--surface);display:grid;place-items:center;color:var(--text-dim);font-family:var(--f-head);font-weight:600;font-size:.66rem;letter-spacing:.18em;text-transform:uppercase;">Coming soon</div>
-          <div style="aspect-ratio:4/3;border-radius:var(--r-md);border:1px dashed var(--hairline-2);background:var(--surface);display:grid;place-items:center;color:var(--text-dim);font-family:var(--f-head);font-weight:600;font-size:.66rem;letter-spacing:.18em;text-transform:uppercase;">Coming soon</div>
+        <div class="owc-cols">
+          <div data-reveal>
+            <h3 class="h3">What it does</h3>
+            <p class="muted">The system models a railway timetable and lets a user search it: store services and their times, query by route or time, and present results through a small UI layer. It started from a written specification, functional and non-functional requirements that justified every feature, then moved through design, implementation and a documented test pass.</p>
+          </div>
+          <div data-reveal>
+            <h3 class="h3">Architecture</h3>
+            <div class="arch">
+              <div class="node"><h4>Schedule</h4><p>Holds the timetable data and the services it contains.</p></div>
+              <div class="node"><h4>SearchEngine</h4><p>Queries the schedule by route and time, returning matches.</p></div>
+              <div class="node"><h4>UIHandler</h4><p>Drives interaction and presents results to the user.</p></div>
+            </div>
+          </div>
+        </div>
+        <div class="owc-sub" data-reveal>
+          <span class="eyebrow"><span class="ln"></span><span class="caps">Tested</span></span>
+          <h3 class="h3">Designed against a test plan.</h3>
+        </div>
+        <div class="owc-cols">
+          <figure class="codewrap" data-reveal>
+            <figcaption>Boost.Test unit test (illustrative)</figcaption>
+<pre class="code">#define BOOST_TEST_MODULE schedule_tests
+#include &lt;boost/test/included/unit_test.hpp&gt;
+#include "Schedule.h"
+
+BOOST_AUTO_TEST_CASE(search_returns_matching_service)
+{
+    Schedule s;
+    s.addService("Waterloo", "Reading", "08:32");
+    SearchEngine engine(s);
+
+    auto results = engine.findByRoute("Waterloo", "Reading");
+    BOOST_CHECK_EQUAL(results.size(), 1u);
+    BOOST_CHECK_EQUAL(results.front().departure(), "08:32");
+}</pre>
+          </figure>
+          <div data-reveal>
+            <h3 class="h3">From the assessor</h3>
+            <p class="quote">"Good level of complexity in terms of coding. Readability of code is good with relevant variable naming and comments. Implementation of inheritance. Implementation reflects design. Well done!"</p>
+            <p class="quote" style="margin-top:.85rem;">"Good test plan, evidence of testing is convincing. Good use of Boost and test code."</p>
+          </div>
         </div>
       </div>
     </section>
