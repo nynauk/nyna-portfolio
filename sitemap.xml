@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
+  <url><loc>https://nyna-portfolio.vercel.app/</loc><changefreq>monthly</changefreq><priority>1.0</priority></url>
+  <url><loc>https://nyna-portfolio.vercel.app/accountancy-web.html</loc><changefreq>monthly</changefreq><priority>0.6</priority></url>
+  <url><loc>https://nyna-portfolio.vercel.app/autonomous-buggy.html</loc><changefreq>monthly</changefreq><priority>0.8</priority></url>
+  <url><loc>https://nyna-portfolio.vercel.app/computer-setup.html</loc><changefreq>monthly</changefreq><priority>0.6</priority></url>
+  <url><loc>https://nyna-portfolio.vercel.app/construction-website.html</loc><changefreq>monthly</changefreq><priority>0.6</priority></url>
+  <url><loc>https://nyna-portfolio.vercel.app/corporate-web.html</loc><changefreq>monthly</changefreq><priority>0.6</priority></url>
+  <url><loc>https://nyna-portfolio.vercel.app/email-hosting.html</loc><changefreq>monthly</changefreq><priority>0.6</priority></url>
+  <url><loc>https://nyna-portfolio.vercel.app/network-ring.html</loc><changefreq>monthly</changefreq><priority>0.6</priority></url>
+  <url><loc>https://nyna-portfolio.vercel.app/owc.html</loc><changefreq>monthly</changefreq><priority>0.8</priority></url>
+  <url><loc>https://nyna-portfolio.vercel.app/peg-dhcp-security.html</loc><changefreq>monthly</changefreq><priority>0.8</priority></url>
+  <url><loc>https://nyna-portfolio.vercel.app/trading-bot.html</loc><changefreq>monthly</changefreq><priority>0.6</priority></url>
+  <url><loc>https://nyna-portfolio.vercel.app/train-timetable.html</loc><changefreq>monthly</changefreq><priority>0.8</priority></url>
+</urlset>
