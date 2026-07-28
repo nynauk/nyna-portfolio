@@ -494,20 +494,109 @@
           <span>All work</span>
         </a>
         <div class="sec-head" data-reveal>
-          <span class="eyebrow"><span class="ln"></span><span class="caps">Software &middot; Personal</span></span>
-          <h2 class="h2" data-split>Algorithmic Trading Bot</h2>
-          <p class="lead">A Python trading bot that models price-action structure, detects higher and lower timeframe bias, and reasons about liquidity sweeps, with a backtesting harness for rapid iteration.</p>
+          <span class="eyebrow"><span class="ln"></span><span class="caps">Software &middot; Personal &middot; Quantitative</span></span>
+          <h2 class="h2" data-split>Algorithmic Trading System</h2>
+          <p class="lead">A full research-to-live algorithmic FX system in Python: a vectorised back-testing engine, a causal validation harness and a live MetaTrader&nbsp;5 execution bot, all built around price-action market structure on EURUSD. Its defining feature isn&rsquo;t a magic edge, it&rsquo;s honesty, the framework is engineered to expose the look-ahead bugs and over-fitting that quietly wreck most retail strategies.</p>
         </div>
-        <div class="card" data-reveal style="margin-top:clamp(2.5rem,5vw,4rem);padding:clamp(2.2rem,5vw,3.6rem);text-align:center;">
-          <span class="caps" style="color:var(--accent);letter-spacing:.2em;font-size:.72rem;">Case study</span>
-          <h3 class="h3" style="margin:.7rem 0 .6rem;">Full write-up coming soon.</h3>
-          <p class="muted" style="max-width:54ch;margin:0 auto;">Detailed photos, process notes and results for this project will be added here shortly.</p>
+
+        <style>
+          .tb-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:.8rem;margin-top:clamp(2.2rem,5vw,3.4rem)}
+          @media(max-width:720px){.tb-grid{grid-template-columns:repeat(2,1fr)}}
+          .tb-cols{display:grid;grid-template-columns:1fr 1fr;gap:clamp(1.6rem,4vw,3rem);margin-top:clamp(1.4rem,3vw,2.2rem)}
+          @media(max-width:760px){.tb-cols{grid-template-columns:1fr}}
+          .tb-list{margin:.9rem 0 0;padding:0;list-style:none;display:grid;gap:.62rem}
+          .tb-list li{position:relative;padding-left:1.4rem;color:var(--text-muted);line-height:1.5}
+          .tb-list li::before{content:"";position:absolute;left:0;top:.55em;width:7px;height:7px;border-radius:50%;background:var(--accent)}
+          .tb-flow{display:flex;flex-wrap:wrap;align-items:center;gap:.55rem;margin-top:clamp(1.6rem,3vw,2.2rem)}
+          .tb-node{padding:.68rem 1.05rem;border:1px solid var(--hairline-2);border-radius:var(--r-pill);font-family:var(--f-head);font-weight:600;font-size:.8rem;color:var(--light);background:var(--surface);white-space:nowrap}
+          .tb-node.acc{border-color:var(--accent-line);color:var(--accent)}
+          .tb-arrow{color:var(--text-dim)}
+          .tb-quote{margin:clamp(2.6rem,5vw,3.6rem) 0;padding-left:1.5rem;border-left:2px solid var(--accent);font-family:var(--f-head);font-weight:600;font-size:clamp(1.2rem,2.6vw,1.7rem);line-height:1.32;color:var(--light);max-width:26ch}
+          .tb-chips{display:flex;flex-wrap:wrap;gap:.5rem;margin-top:clamp(1.4rem,3vw,2rem)}
+          .tb-chips span{font-family:var(--f-head);font-weight:500;font-size:.78rem;color:var(--text-muted);border:1px solid var(--hairline);border-radius:var(--r-sm);padding:.3rem .7rem}
+        </style>
+
+        <div class="tb-grid" data-stagger>
+          <div class="spec card"><span class="spec-n">25<small>yr</small></span><span class="spec-l">EURUSD history modelled, D1 &rarr; M1</span></div>
+          <div class="spec card"><span class="spec-n">M1&ndash;D1</span><span class="spec-l">Multi-timeframe back-test engine</span></div>
+          <div class="spec card"><span class="spec-n">+1<small>pip</small></span><span class="spec-l">Spread &amp; slippage on every fill</span></div>
+          <div class="spec card"><span class="spec-n">MT5</span><span class="spec-l">Live Python execution API</span></div>
+          <div class="spec card"><span class="spec-n">CISD</span><span class="spec-l">Asia-sweep &rarr; London entry model</span></div>
+          <div class="spec card"><span class="spec-n">Causal</span><span class="spec-l">Bar-by-bar parity validation</span></div>
         </div>
-        <div class="owc-gallery" data-stagger style="margin-top:clamp(1.6rem,3vw,2.4rem);">
-          <div style="aspect-ratio:4/3;border-radius:var(--r-md);border:1px dashed var(--hairline-2);background:var(--surface);display:grid;place-items:center;color:var(--text-dim);font-family:var(--f-head);font-weight:600;font-size:.66rem;letter-spacing:.18em;text-transform:uppercase;">Coming soon</div>
-          <div style="aspect-ratio:4/3;border-radius:var(--r-md);border:1px dashed var(--hairline-2);background:var(--surface);display:grid;place-items:center;color:var(--text-dim);font-family:var(--f-head);font-weight:600;font-size:.66rem;letter-spacing:.18em;text-transform:uppercase;">Coming soon</div>
-          <div style="aspect-ratio:4/3;border-radius:var(--r-md);border:1px dashed var(--hairline-2);background:var(--surface);display:grid;place-items:center;color:var(--text-dim);font-family:var(--f-head);font-weight:600;font-size:.66rem;letter-spacing:.18em;text-transform:uppercase;">Coming soon</div>
-          <div style="aspect-ratio:4/3;border-radius:var(--r-md);border:1px dashed var(--hairline-2);background:var(--surface);display:grid;place-items:center;color:var(--text-dim);font-family:var(--f-head);font-weight:600;font-size:.66rem;letter-spacing:.18em;text-transform:uppercase;">Coming soon</div>
+
+        <div class="tb-flow" data-reveal aria-label="Pipeline">
+          <span class="tb-node">EURUSD data &middot; 25&nbsp;yr</span><span class="tb-arrow">&rarr;</span>
+          <span class="tb-node">Vectorised back-test</span><span class="tb-arrow">&rarr;</span>
+          <span class="tb-node acc">Causal parity gate</span><span class="tb-arrow">&rarr;</span>
+          <span class="tb-node">Strategy library</span><span class="tb-arrow">&rarr;</span>
+          <span class="tb-node">Live MT5 bot</span>
+        </div>
+
+        <p class="tb-quote" data-reveal>Most retail &ldquo;edges&rdquo; are look-ahead bugs in disguise. This system is built to catch them, even its own.</p>
+
+        <div class="tb-cols">
+          <div data-reveal>
+            <h3 class="h3">How it works</h3>
+            <p class="muted">The engine ingests decades of EURUSD data across timeframes from daily down to one-minute and simulates strategies bar by bar. Every fill is charged a realistic cost, stops are widened by the spread plus a pip and slippage is modelled, so a back-test can&rsquo;t win on fills it would never get live. Strategies are expressed as pure functions of <em>past</em> price structure: liquidity sweeps (a prior high or low taken and reclaimed), change-in-state-of-delivery (CISD) confirmations, and draw-on-liquidity (DOL) targets, the mechanics behind ICT-style price action.</p>
+          </div>
+          <div data-reveal>
+            <h3 class="h3">What I built</h3>
+            <ul class="tb-list">
+              <li>A vectorised NumPy / pandas back-testing engine over ~25 years of EURUSD, D1 to M1</li>
+              <li>A causal parity harness that re-runs every strategy with past-only data to prove a back-test is reproducible</li>
+              <li>A strategy library: EMA / DOL trend models, quality-filtered Donchian breakouts, RSI-2 mean reversion, opening-range &amp; session-liquidity models</li>
+              <li>A live MetaTrader&nbsp;5 bot (Python API) with automated entries, structure-based stops and R-multiple targets</li>
+              <li>Fixed-fractional risk sizing and multi-era, out-of-sample testing to reject regime-fit</li>
+              <li>Built AI-assisted with Claude Code for fast iteration on the research loop</li>
+            </ul>
+          </div>
+        </div>
+
+        <div class="owc-sub" data-reveal>
+          <span class="eyebrow"><span class="ln"></span><span class="caps">The bug that mattered &middot; Look-ahead audit</span></span>
+          <h3 class="h3">How a 15-year &ldquo;edge&rdquo; turned out to be a mirage.</h3>
+        </div>
+        <div data-reveal style="max-width:70ch;margin-bottom:clamp(2rem,4vw,3rem)">
+          <p class="muted">An early trend model, EMA bias with a DOL filter, looked spectacular: a clean, rising equity curve and a healthy profit factor across fifteen years. It was too good. An audit of the swing-detection logic found the culprit, it was confirming swing highs and lows using bars that hadn&rsquo;t happened yet. The &ldquo;edge&rdquo; was the strategy quietly reading the future. Rebuilt to use only information available at the moment of each decision, the same system&rsquo;s profit factor collapsed from comfortably profitable to <strong style="color:var(--light)">0.63</strong>, a loser. That failure became the most valuable result in the project: every strategy since has to pass a causal parity test before it goes anywhere near a live account.</p>
+        </div>
+
+        <div class="owc-sub" data-reveal>
+          <span class="eyebrow"><span class="ln"></span><span class="caps">The edge hunt &middot; Causal &amp; multi-era</span></span>
+          <h3 class="h3">Testing honestly, and accepting the answer.</h3>
+        </div>
+        <div data-reveal style="max-width:70ch;margin-bottom:clamp(2rem,4vw,3rem)">
+          <p class="muted">With the validation harness in place, I ran a systematic search across strategy families and distinct market eras. The honest conclusion: no strategy held a durable profit factor above ~1.25 in <em>every</em> era. The strongest, most stubborn lead was a quality-filtered Donchian daily breakout, hovering around 1.15&ndash;1.27 depending on the period; classic setups like RSI-2 mean reversion &ldquo;died honest,&rdquo; with no survivorship illusion left to hide behind. Documenting negative results like these <em>is</em> the process, not a failure of it, it&rsquo;s the line between real research and a curve-fit fantasy.</p>
+        </div>
+
+        <div class="owc-sub" data-reveal>
+          <span class="eyebrow"><span class="ln"></span><span class="caps">Live deployment &middot; MetaTrader 5</span></span>
+          <h3 class="h3">From back-test to a live, risk-controlled bot.</h3>
+        </div>
+        <div data-reveal style="max-width:70ch;margin-bottom:clamp(2rem,4vw,3rem)">
+          <p class="muted">The live component runs the strongest structural idea end-to-end on EURUSD: wait for the Asian session&rsquo;s range to sweep liquidity into the London open, then enter on a one-minute change-in-state-of-delivery, place the stop just beyond the swept swing, and target roughly 2.2R. It executes fully automatically through the MetaTrader&nbsp;5 Python API, handling live ticks, order placement and position management under a fixed per-trade risk cap. It ran as a genuine live experiment, real spread, real slippage, real fills, to pressure-test the model where a back-test simply can&rsquo;t.</p>
+        </div>
+
+        <div class="tb-cols" style="margin-bottom:clamp(1rem,3vw,2rem)">
+          <div data-reveal>
+            <h3 class="h3">What it demonstrates</h3>
+            <ul class="tb-list">
+              <li>Quantitative research &amp; back-testing</li>
+              <li>Causal inference &amp; look-ahead detection</li>
+              <li>Python (NumPy / pandas) at scale</li>
+              <li>MetaTrader&nbsp;5 automation &amp; live execution</li>
+              <li>Market microstructure (ICT price action)</li>
+              <li>Disciplined, fixed-fractional risk management</li>
+            </ul>
+          </div>
+          <div data-reveal>
+            <h3 class="h3">Honest takeaways</h3>
+            <p class="muted">The deliverable here isn&rsquo;t a money-printer, it&rsquo;s a framework that tells the truth. It caught a look-ahead bug that would have blown up a live account, and it rejected every over-fit edge that couldn&rsquo;t survive out-of-sample. That instinct, trust the process, distrust the result until it&rsquo;s reproducible, is exactly what I bring to any engineering problem.</p>
+          </div>
+        </div>
+
+        <div class="tb-chips" data-reveal>
+          <span>Python</span><span>NumPy</span><span>pandas</span><span>MetaTrader&nbsp;5 API</span><span>Back-testing</span><span>ICT price action</span><span>Risk management</span><span>Claude Code</span>
         </div>
       </div>
     </section>
