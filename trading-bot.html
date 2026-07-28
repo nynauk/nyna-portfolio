@@ -547,6 +547,15 @@
           #tvCanvas{width:100%;height:clamp(320px,44vw,470px);display:block;cursor:crosshair}
           .tv-tip{position:absolute;pointer-events:none;background:rgba(8,11,15,.92);-webkit-backdrop-filter:blur(6px);backdrop-filter:blur(6px);border:1px solid var(--hairline-2);border-radius:var(--r-sm);padding:.5rem .65rem;font-size:.72rem;color:var(--light);line-height:1.55;white-space:nowrap;transform:translateX(-50%);z-index:4}
           .tv-tip b{color:var(--text-dim);font-weight:500}
+          .tv-foot{display:flex;flex-wrap:wrap;gap:1rem 1.6rem;align-items:center;justify-content:space-between;border-top:1px solid var(--hairline);margin:0 clamp(1.2rem,2.6vw,1.7rem);padding:clamp(1rem,2.4vw,1.4rem) 0 clamp(1.2rem,2.6vw,1.6rem)}
+          .tv-stats{display:flex;flex-wrap:wrap;gap:1rem 1.7rem}
+          .tv-stat{display:flex;flex-direction:column;gap:.22rem}
+          .tv-stat span{font-size:.6rem;letter-spacing:.11em;text-transform:uppercase;color:var(--text-dim)}
+          .tv-stat b{font-family:var(--f-head);font-weight:700;font-size:1.22rem;color:var(--light);line-height:1}
+          .tv-stat b.pos{color:#2bbe8c}.tv-stat b.neg{color:#e0566a}
+          .tv-eq{display:flex;flex-direction:column;gap:.4rem}
+          .tv-eq span{font-size:.6rem;letter-spacing:.11em;text-transform:uppercase;color:var(--text-dim)}
+          #tvEq{width:190px;height:56px;display:block}
           .tb-shots{display:grid;grid-template-columns:1fr 1fr;gap:.9rem;margin-top:clamp(1.2rem,3vw,1.8rem)}
           @media(max-width:720px){.tb-shots{grid-template-columns:1fr}}
           .tb-shots img{width:100%;height:auto;display:block;border:1px solid var(--hairline);border-radius:var(--r-md);background:var(--surface);transition:border-color var(--t)}
@@ -559,19 +568,26 @@
           </div>
           <div class="tv-switch" id="tvSwitch"></div>
           <div class="tv-stage"><canvas id="tvCanvas"></canvas><div class="tv-tip" id="tvTip" hidden></div></div>
+          <div class="tv-foot">
+            <div class="tv-stats" id="tvStats"></div>
+            <div class="tv-eq"><span>Equity curve · R (illustrative)</span><canvas id="tvEq"></canvas></div>
+          </div>
         </div>
         <script src="projects/strategies.js"></script>
         <script>
         (function(){
           var S=window.NYNA_STRATS; var cv=document.getElementById('tvCanvas'); if(!S||!S.length||!cv) return;
           var ctx=cv.getContext('2d'), nameEl=document.getElementById('tvName'), descEl=document.getElementById('tvDesc'),
-              tip=document.getElementById('tvTip'), sw=document.getElementById('tvSwitch');
+              tip=document.getElementById('tvTip'), sw=document.getElementById('tvSwitch'),
+              stEl=document.getElementById('tvStats'), eqcv=document.getElementById('tvEq'), eqx=eqcv.getContext('2d');
           var cur=0, geo=null, hover=-1, dpr=Math.max(1,Math.min(2,window.devicePixelRatio||1));
           var UP='#2bbe8c', DN='#e0566a', ACC='#5ecff9', GRID='rgba(150,170,190,.10)', AXIS='#8994a2';
           S.forEach(function(s,i){ var b=document.createElement('button'); b.className='tv-chip'+(i?'':' active'); b.type='button'; b.textContent=s.name; b.addEventListener('click',function(){select(i);}); sw.appendChild(b); });
           function roundRect(x,y,w,h,r){ ctx.beginPath(); ctx.moveTo(x+r,y); ctx.arcTo(x+w,y,x+w,y+h,r); ctx.arcTo(x+w,y+h,x,y+h,r); ctx.arcTo(x,y+h,x,y,r); ctx.arcTo(x,y,x+w,y,r); ctx.closePath(); }
-          function select(i){ cur=i; [].forEach.call(sw.children,function(b,j){b.classList.toggle('active',j===i);}); nameEl.textContent=S[i].name; descEl.textContent=S[i].desc; hover=-1; tip.hidden=true; draw(); }
-          function resize(){ var w=cv.clientWidth,h=cv.clientHeight; if(!w||!h)return; cv.width=w*dpr; cv.height=h*dpr; ctx.setTransform(dpr,0,0,dpr,0,0); draw(); }
+          function renderStats(s){ var st=s.stats; if(!st){stEl.innerHTML='';return;} var it=[['Win rate',st.wr+'%',''],['Profit factor',st.pf.toFixed(2),st.pf>=1?'pos':'neg'],['Avg win',st.avgR+'R',''],['Trades',String(st.trades),''],['Max DD',st.maxdd+'R','neg']]; stEl.innerHTML=it.map(function(x){return '<div class="tv-stat"><span>'+x[0]+'</span><b class="'+x[2]+'">'+x[1]+'</b></div>';}).join(''); }
+          function drawEq(s){ var eq=s.equity; if(!eq||!eq.length)return; var w=eqcv.clientWidth,h=eqcv.clientHeight; if(!w||!h)return; eqcv.width=w*dpr; eqcv.height=h*dpr; eqx.setTransform(dpr,0,0,dpr,0,0); eqx.clearRect(0,0,w,h); var lo=Math.min.apply(null,eq),hi=Math.max.apply(null,eq); if(hi-lo<1){hi+=1;lo-=1;} var pd=(hi-lo)*0.15; lo-=pd; hi+=pd; var n=eq.length; function X(i){return 2+i*(w-4)/(n-1);} function Y(v){return h-2-(v-lo)/(hi-lo)*(h-4);} if(lo<0&&hi>0){ eqx.strokeStyle='rgba(150,170,190,.25)'; eqx.setLineDash([3,3]); eqx.beginPath(); eqx.moveTo(0,Y(0)); eqx.lineTo(w,Y(0)); eqx.stroke(); eqx.setLineDash([]); } var up=eq[n-1]>=0, col=up?'#2bbe8c':'#e0566a'; eqx.beginPath(); eqx.moveTo(X(0),Y(eq[0])); eq.forEach(function(v,i){eqx.lineTo(X(i),Y(v));}); eqx.lineTo(X(n-1),Y(lo)); eqx.lineTo(X(0),Y(lo)); eqx.closePath(); var gr=eqx.createLinearGradient(0,0,0,h); gr.addColorStop(0,up?'rgba(43,190,140,.28)':'rgba(224,86,106,.24)'); gr.addColorStop(1,'rgba(0,0,0,0)'); eqx.fillStyle=gr; eqx.fill(); eqx.strokeStyle=col; eqx.lineWidth=1.8; eqx.beginPath(); eq.forEach(function(v,i){var xx=X(i),yy=Y(v);i?eqx.lineTo(xx,yy):eqx.moveTo(xx,yy);}); eqx.stroke(); }
+          function select(i){ cur=i; [].forEach.call(sw.children,function(b,j){b.classList.toggle('active',j===i);}); nameEl.textContent=S[i].name; descEl.textContent=S[i].desc; renderStats(S[i]); drawEq(S[i]); hover=-1; tip.hidden=true; draw(); }
+          function resize(){ var w=cv.clientWidth,h=cv.clientHeight; if(!w||!h)return; cv.width=w*dpr; cv.height=h*dpr; ctx.setTransform(dpr,0,0,dpr,0,0); draw(); drawEq(S[cur]); }
           function draw(){
             var s=S[cur], c=s.candles, ann=s.ann||{}, w=cv.clientWidth, h=cv.clientHeight; if(!w||!h)return;
             ctx.clearRect(0,0,w,h);

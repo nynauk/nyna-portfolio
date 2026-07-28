@@ -356,7 +356,7 @@
     .work-fade span:nth-child(2) { -webkit-backdrop-filter: blur(3px); backdrop-filter: blur(3px); -webkit-mask-image: linear-gradient(to bottom, transparent 24%, #000 50%, transparent 82%); mask-image: linear-gradient(to bottom, transparent 24%, #000 50%, transparent 82%); }
     .work-fade span:nth-child(3) { -webkit-backdrop-filter: blur(6px); backdrop-filter: blur(6px); -webkit-mask-image: linear-gradient(to bottom, transparent 44%, #000 68%, transparent 92%); mask-image: linear-gradient(to bottom, transparent 44%, #000 68%, transparent 92%); }
     .work-fade span:nth-child(4) { -webkit-backdrop-filter: blur(11px); backdrop-filter: blur(11px); -webkit-mask-image: linear-gradient(to bottom, transparent 62%, #000 88%); mask-image: linear-gradient(to bottom, transparent 62%, #000 88%); }
-    /* no color scrim — the grid's own content alpha-fades, so the peek dissolves into the real background with nothing to mismatch the blur */
+    /* no color scrim: the grid's own content alpha-fades, so the peek dissolves into the real background with nothing to mismatch the blur */
     .proj-extra { order: 2; transition: opacity 0.45s var(--ease); }
     .work-grid.collapsed .proj-extra { pointer-events: none; }
     .work-more { display: flex; justify-content: center; margin-top: clamp(1.6rem, 3vw, 2.4rem); }
