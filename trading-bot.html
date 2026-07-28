@@ -533,6 +533,78 @@
           <span class="tb-node">Live MT5 bot</span>
         </div>
 
+        <style>
+          .tv{margin-top:clamp(2.4rem,5vw,3.6rem);border:1px solid var(--hairline);border-radius:var(--r-lg);background:var(--surface);overflow:hidden}
+          .tv-head{display:flex;justify-content:space-between;align-items:flex-start;gap:1rem;padding:clamp(1.2rem,2.6vw,1.7rem) clamp(1.2rem,2.6vw,1.7rem) 0}
+          .tv-name{font-family:var(--f-head);font-weight:700;font-size:clamp(1.05rem,2.2vw,1.4rem);color:var(--light)}
+          .tv-desc{margin-top:.4rem;color:var(--text-muted);font-size:.9rem;max-width:62ch;line-height:1.45}
+          .tv-badge{flex-shrink:0;font-family:var(--f-head);font-weight:600;font-size:.6rem;letter-spacing:.14em;text-transform:uppercase;color:var(--accent);border:1px solid var(--accent-line);border-radius:var(--r-pill);padding:.34rem .7rem;white-space:nowrap}
+          .tv-switch{display:flex;flex-wrap:wrap;gap:.4rem;padding:clamp(1rem,2vw,1.3rem) clamp(1.2rem,2.6vw,1.7rem)}
+          .tv-chip{font-family:var(--f-head);font-weight:600;font-size:.78rem;color:var(--text-muted);border:1px solid var(--hairline);border-radius:var(--r-pill);padding:.45rem .95rem;cursor:pointer;transition:color var(--t),border-color var(--t),background var(--t);white-space:nowrap}
+          .tv-chip:hover{color:var(--light);border-color:var(--hairline-2)}
+          .tv-chip.active{color:var(--accent);border-color:var(--accent-line);background:var(--accent-soft)}
+          .tv-stage{position:relative;padding:0 clamp(.5rem,1.4vw,1rem) clamp(.8rem,2vw,1.2rem)}
+          #tvCanvas{width:100%;height:clamp(320px,44vw,470px);display:block;cursor:crosshair}
+          .tv-tip{position:absolute;pointer-events:none;background:rgba(8,11,15,.92);-webkit-backdrop-filter:blur(6px);backdrop-filter:blur(6px);border:1px solid var(--hairline-2);border-radius:var(--r-sm);padding:.5rem .65rem;font-size:.72rem;color:var(--light);line-height:1.55;white-space:nowrap;transform:translateX(-50%);z-index:4}
+          .tv-tip b{color:var(--text-dim);font-weight:500}
+          .tb-shots{display:grid;grid-template-columns:1fr 1fr;gap:.9rem;margin-top:clamp(1.2rem,3vw,1.8rem)}
+          @media(max-width:720px){.tb-shots{grid-template-columns:1fr}}
+          .tb-shots img{width:100%;height:auto;display:block;border:1px solid var(--hairline);border-radius:var(--r-md);background:var(--surface);transition:border-color var(--t)}
+          .tb-shots img:hover{border-color:var(--hairline-2)}
+        </style>
+        <div class="tv" data-reveal>
+          <div class="tv-head">
+            <div><div class="tv-name" id="tvName"></div><div class="tv-desc" id="tvDesc"></div></div>
+            <span class="tv-badge">Illustrative &middot; interactive</span>
+          </div>
+          <div class="tv-switch" id="tvSwitch"></div>
+          <div class="tv-stage"><canvas id="tvCanvas"></canvas><div class="tv-tip" id="tvTip" hidden></div></div>
+        </div>
+        <script src="projects/strategies.js"></script>
+        <script>
+        (function(){
+          var S=window.NYNA_STRATS; var cv=document.getElementById('tvCanvas'); if(!S||!S.length||!cv) return;
+          var ctx=cv.getContext('2d'), nameEl=document.getElementById('tvName'), descEl=document.getElementById('tvDesc'),
+              tip=document.getElementById('tvTip'), sw=document.getElementById('tvSwitch');
+          var cur=0, geo=null, hover=-1, dpr=Math.max(1,Math.min(2,window.devicePixelRatio||1));
+          var UP='#2bbe8c', DN='#e0566a', ACC='#5ecff9', GRID='rgba(150,170,190,.10)', AXIS='#8994a2';
+          S.forEach(function(s,i){ var b=document.createElement('button'); b.className='tv-chip'+(i?'':' active'); b.type='button'; b.textContent=s.name; b.addEventListener('click',function(){select(i);}); sw.appendChild(b); });
+          function roundRect(x,y,w,h,r){ ctx.beginPath(); ctx.moveTo(x+r,y); ctx.arcTo(x+w,y,x+w,y+h,r); ctx.arcTo(x+w,y+h,x,y+h,r); ctx.arcTo(x,y+h,x,y,r); ctx.arcTo(x,y,x+w,y,r); ctx.closePath(); }
+          function select(i){ cur=i; [].forEach.call(sw.children,function(b,j){b.classList.toggle('active',j===i);}); nameEl.textContent=S[i].name; descEl.textContent=S[i].desc; hover=-1; tip.hidden=true; draw(); }
+          function resize(){ var w=cv.clientWidth,h=cv.clientHeight; if(!w||!h)return; cv.width=w*dpr; cv.height=h*dpr; ctx.setTransform(dpr,0,0,dpr,0,0); draw(); }
+          function draw(){
+            var s=S[cur], c=s.candles, ann=s.ann||{}, w=cv.clientWidth, h=cv.clientHeight; if(!w||!h)return;
+            ctx.clearRect(0,0,w,h);
+            var padL=6,padR=64,padT=12,padB=20, x0=padL,x1=w-padR,y0=padT,y1=h-padB;
+            var lo=1e9,hi=-1e9; c.forEach(function(k){lo=Math.min(lo,k[2]);hi=Math.max(hi,k[1]);});
+            (ann.hlines||[]).forEach(function(l){lo=Math.min(lo,l.y);hi=Math.max(hi,l.y);});
+            (ann.zones||[]).forEach(function(z){lo=Math.min(lo,z.y0);hi=Math.max(hi,z.y1);});
+            var pad=(hi-lo)*0.10; lo-=pad; hi+=pad; var n=c.length;
+            function X(i){return x0+(i+0.5)*(x1-x0)/n;} function Y(p){return y1-(p-lo)/(hi-lo)*(y1-y0);}
+            geo={X:X,x0:x0,x1:x1,n:n};
+            ctx.lineWidth=1; ctx.font='11px "DM Sans",system-ui'; ctx.textBaseline='middle';
+            for(var g=0;g<=5;g++){ var p=lo+(hi-lo)*g/5, yy=Y(p); ctx.strokeStyle=GRID; ctx.beginPath(); ctx.moveTo(x0,yy); ctx.lineTo(x1,yy); ctx.stroke(); ctx.fillStyle=AXIS; ctx.textAlign='left'; ctx.fillText(p.toFixed(4), x1+8, yy); }
+            (ann.zones||[]).forEach(function(z){ var zx0=X(z.x0)-4,zx1=X(z.x1)+4,zy0=Y(z.y1),zy1=Y(z.y0); ctx.fillStyle='rgba(94,207,249,.08)'; ctx.fillRect(zx0,zy0,zx1-zx0,zy1-zy0); ctx.strokeStyle='rgba(94,207,249,.35)'; ctx.strokeRect(zx0,zy0,zx1-zx0,zy1-zy0); ctx.fillStyle='rgba(94,207,249,.85)'; ctx.textBaseline='bottom'; ctx.fillText(z.label,zx0+2,zy0-3); ctx.textBaseline='middle'; });
+            function poly(arr,color){ ctx.strokeStyle=color; ctx.lineWidth=1.5; ctx.beginPath(); arr.forEach(function(v,i){ var xx=X(i),yy=Y(v); i?ctx.lineTo(xx,yy):ctx.moveTo(xx,yy); }); ctx.stroke(); }
+            if(ann.upline) poly(ann.upline,'rgba(94,207,249,.5)');
+            if(ann.loline) poly(ann.loline,'rgba(150,162,175,.55)');
+            if(ann.maline) poly(ann.maline,'rgba(94,207,249,.5)');
+            var cw=Math.max(2,(x1-x0)/n*0.6);
+            c.forEach(function(k,i){ var o=k[0],hg=k[1],l=k[2],cl=k[3],col=cl>=o?UP:DN,xc=X(i); ctx.strokeStyle=col; ctx.lineWidth=Math.max(1,cw*0.14); ctx.beginPath(); ctx.moveTo(xc,Y(hg)); ctx.lineTo(xc,Y(l)); ctx.stroke(); var a=Y(o),b=Y(cl); if(Math.abs(a-b)<1.2)b=a-1.2; ctx.fillStyle=col; ctx.fillRect(xc-cw/2,Math.min(a,b),cw,Math.abs(a-b)); });
+            ctx.setLineDash([5,4]);
+            (ann.hlines||[]).forEach(function(hl){ var up=(hl.kind==='entry'||hl.kind==='target'); var col=hl.kind==='stop'?DN:hl.kind==='target'?UP:hl.kind==='entry'?ACC:'#8994a2', yy=Y(hl.y); ctx.strokeStyle=col; ctx.lineWidth=1; ctx.beginPath(); ctx.moveTo(x0,yy); ctx.lineTo(x1,yy); ctx.stroke(); ctx.fillStyle=col; ctx.textBaseline=up?'bottom':'top'; ctx.fillText(hl.label,x0+4,yy+(up?-3:3)); ctx.textBaseline='middle'; });
+            ctx.setLineDash([]);
+            (ann.markers||[]).forEach(function(m){ var xc=X(m.x),yy=Y(m.y),up=m.dir==='up'; ctx.fillStyle=ACC; ctx.beginPath(); ctx.moveTo(xc,yy+(up?12:-12)); ctx.lineTo(xc-6,yy+(up?24:-24)); ctx.lineTo(xc+6,yy+(up?24:-24)); ctx.closePath(); ctx.fill(); var tw=ctx.measureText(m.label).width, lx=Math.min(Math.max(xc-tw/2,x0+2),x1-tw-2), ly=yy+(up?30:-42); ctx.fillStyle='rgba(94,207,249,.14)'; ctx.strokeStyle='rgba(94,207,249,.5)'; roundRect(lx-7,ly-3,tw+14,20,6); ctx.fill(); ctx.stroke(); ctx.fillStyle='#e9f6fb'; ctx.textBaseline='top'; ctx.fillText(m.label,lx,ly); ctx.textBaseline='middle'; });
+            if(hover>=0&&hover<n){ var xc=X(hover); ctx.strokeStyle='rgba(150,170,190,.3)'; ctx.setLineDash([3,3]); ctx.beginPath(); ctx.moveTo(xc,y0); ctx.lineTo(xc,y1); ctx.stroke(); ctx.setLineDash([]); var k=c[hover]; tip.hidden=false; tip.innerHTML='<b>O</b> '+k[0].toFixed(4)+'&nbsp;&nbsp;<b>H</b> '+k[1].toFixed(4)+'<br><b>L</b> '+k[2].toFixed(4)+'&nbsp;&nbsp;<b>C</b> '+k[3].toFixed(4); tip.style.left=Math.min(Math.max(xc,64),w-64)+'px'; tip.style.top=(y0+6)+'px'; } else tip.hidden=true;
+          }
+          cv.addEventListener('mousemove',function(e){ if(!geo)return; var r=cv.getBoundingClientRect(), mx=e.clientX-r.left, i=Math.round((mx-geo.x0)/((geo.x1-geo.x0)/geo.n)-0.5); i=Math.max(0,Math.min(geo.n-1,i)); if(i!==hover){hover=i;draw();} });
+          cv.addEventListener('mouseleave',function(){ hover=-1; tip.hidden=true; draw(); });
+          var rt; window.addEventListener('resize',function(){ clearTimeout(rt); rt=setTimeout(resize,120); });
+          if(document.fonts&&document.fonts.ready) document.fonts.ready.then(draw);
+          select(0); resize();
+        })();
+        </script>
+
         <p class="tb-quote" data-reveal>Most retail &ldquo;edges&rdquo; are look-ahead bugs in disguise. This system is built to catch them, even its own.</p>
 
         <div class="tb-cols">
@@ -567,6 +639,17 @@
         </div>
         <div data-reveal style="max-width:70ch;margin-bottom:clamp(2rem,4vw,3rem)">
           <p class="muted">With the validation harness in place, I ran a systematic search across strategy families and distinct market eras. The honest conclusion: no strategy held a durable profit factor above ~1.25 in <em>every</em> era. The strongest, most stubborn lead was a quality-filtered Donchian daily breakout, hovering around 1.15&ndash;1.27 depending on the period; classic setups like RSI-2 mean reversion &ldquo;died honest,&rdquo; with no survivorship illusion left to hide behind. Documenting negative results like these <em>is</em> the process, not a failure of it, it&rsquo;s the line between real research and a curve-fit fantasy.</p>
+        </div>
+
+        <div class="owc-sub" data-reveal>
+          <span class="eyebrow"><span class="ln"></span><span class="caps">Strategy snapshots &middot; illustrative</span></span>
+          <h3 class="h3">The setups, at a glance.</h3>
+        </div>
+        <div class="tb-shots" data-stagger>
+          <img src="projects/strat_asia.png" data-cursor="view" data-full="projects/strat_asia.png" alt="Asia sweep to London CISD strategy chart" loading="lazy">
+          <img src="projects/strat_donchian.png" data-cursor="view" data-full="projects/strat_donchian.png" alt="Donchian channel breakout strategy chart" loading="lazy">
+          <img src="projects/strat_sweep.png" data-cursor="view" data-full="projects/strat_sweep.png" alt="Liquidity sweep and reclaim reversal strategy chart" loading="lazy">
+          <img src="projects/strat_rsi2.png" data-cursor="view" data-full="projects/strat_rsi2.png" alt="RSI-2 mean reversion strategy chart" loading="lazy">
         </div>
 
         <div class="owc-sub" data-reveal>
