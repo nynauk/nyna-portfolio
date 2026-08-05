@@ -451,6 +451,71 @@
       .hero h1 .line > span, .menu-links a { transform: none !important; }
       #wave { opacity: 0.5; }
     }
+
+    /* ==========================================================================
+       APPLE DESIGN PASS
+       Designing Fluid Interfaces (WWDC18) + The Details of UI Typography (WWDC20)
+       ========================================================================== */
+
+    /* 1 · Response: kill input latency. Removes the ~300ms tap delay and the
+       browser's uncontrolled tap flash, so our own press feedback is the only
+       feedback the user sees. */
+    a, button, .btn, .chip, .proj, .card, .service, .menu-btn, .brand,
+    .pcb-chip, .owc-gallery img, [data-cursor] {
+      -webkit-tap-highlight-color: transparent;
+      touch-action: manipulation;
+    }
+
+    /* 1 + 10 · Feedback on pointer-DOWN, never on release. The press settles the
+       element toward the surface; ~100ms ease-out so it reads as instantaneous.
+       (Declared after the :hover rules so it wins at equal specificity.) */
+    .btn:active { transform: translateY(-1px) scale(0.972); transition: transform 100ms ease-out; }
+    .chip:active, .pcb-chip:active { transform: scale(0.955); transition: transform 100ms ease-out; }
+    .proj:active { transform: translateY(-3px) scale(0.993); transition: transform 120ms ease-out; }
+    .service:active { transform: translateY(-2px) scale(0.995); transition: transform 120ms ease-out; }
+    .owc-gallery img:active { transform: scale(0.985); transition: transform 120ms ease-out; }
+    .menu-btn:active, .brand:active, .menu-links a:active,
+    .menu-foot a:active, .footer-row a:active { opacity: 0.62; transition: opacity 80ms ease-out; }
+
+    /* 15 · Typography: tracking is size-specific and leading tracks size
+       inversely. A single value across h1-h4 is wrong at both ends of the scale,
+       so large display text tightens and small headings relax. */
+    h1, h2, h3, h4, .display, .h1, .h2, .h3 { font-optical-sizing: auto; }
+    .display, .h1 { line-height: 1.06; letter-spacing: -0.033em; }
+    .h2 { line-height: 1.14; letter-spacing: -0.024em; }
+    .h3 { line-height: 1.26; letter-spacing: -0.012em; }
+    .lead { letter-spacing: -0.003em; }
+
+    /* 14 · prefers-reduced-transparency: translucent surfaces become frosted
+       solids rather than blurred glass, so legibility never depends on blur. */
+    @media (prefers-reduced-transparency: reduce) {
+      .card, .map-badge, .modal-close, .modal-scrim, .pcb-lightbox-close,
+      .pcb-lightbox-scrim, .pcb-switch, .proj-cat, .work-fade span {
+        -webkit-backdrop-filter: none !important; backdrop-filter: none !important;
+      }
+      .card, .pcb-switch, .map-badge { background: var(--dark-2); }
+      .modal-scrim, .pcb-lightbox-scrim { background: rgba(8,11,15,0.97); }
+      html.light .modal-scrim, html.light .pcb-lightbox-scrim { background: rgba(226,230,236,0.97); }
+    }
+
+    /* 14 · prefers-contrast: near-solid surfaces with defined, contrasting
+       borders. Driven through the tokens so every component inherits it. */
+    @media (prefers-contrast: more) {
+      :root { --hairline: rgba(242,242,242,0.30); --hairline-2: rgba(242,242,242,0.50);
+              --text-muted: rgba(242,242,242,0.86); --text-dim: rgba(242,242,242,0.70); }
+      html.light { --hairline: rgba(20,28,40,0.36); --hairline-2: rgba(20,28,40,0.56);
+                   --text-muted: rgba(26,33,43,0.88); --text-dim: rgba(26,33,43,0.72); }
+      .btn-line, .chip { border-width: 1.5px; }
+    }
+
+    /* 14 · Reduced motion is a gentler equivalent, not the absence of feedback.
+       Transforms drop out, but a short opacity cross-fade keeps the press
+       readable so the interface still answers the user. */
+    @media (prefers-reduced-motion: reduce) {
+      a, button, .btn, .chip, .card, .proj, .service { transition: opacity 140ms ease !important; }
+      .btn:active, .chip:active, .pcb-chip:active, .proj:active,
+      .service:active, .owc-gallery img:active { transform: none; opacity: 0.72; }
+    }
   </style>
   <link rel="canonical" href="https://nyna.co.uk/" />
   <meta name="robots" content="index, follow" />
