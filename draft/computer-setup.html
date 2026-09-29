@@ -1,0 +1,170 @@
+<!doctype html>
+<html lang="en-GB" data-theme="light">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Computer System Setup | NYNA</title>
+  <meta name="description" content="Office-wide workstation configuration and deployment for OnWay LDD, including imaging, software setup and friendly user onboarding.">
+  <meta name="robots" content="noindex">
+  <meta name="theme-color" content="#1A222C">
+  <script>
+    /* theme before first paint: saved choice, else the system setting */
+    (function () {
+      var d = document.documentElement, t = null;
+      try { t = localStorage.getItem('nyna-draft-theme'); } catch (e) {}
+      if (t !== 'light' && t !== 'dark') t = matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
+      d.setAttribute('data-theme', t);
+      d.className += ' js';
+      // main.js reveals the headline; never leave it hidden if that script fails
+      setTimeout(function () { d.classList.add('is-ready'); }, 3000);
+    })();
+  </script>
+  <link rel="icon" href="../icons/favicon-32.png" sizes="32x32">
+  <link rel="preload" href="assets/fonts/archivo-wide.woff" as="font" type="font/woff" crossorigin>
+  <link rel="preload" href="assets/fonts/archivo.woff" as="font" type="font/woff" crossorigin>
+  <link rel="preload" href="assets/fonts/unbounded-500.woff" as="font" type="font/woff" crossorigin>
+  <link rel="stylesheet" href="style.css?v=24">
+</head>
+<body class="case-page">
+  <canvas class="bench" id="bench" aria-hidden="true"></canvas>
+  <a class="skip" href="#main">Skip to content</a>
+
+  <div class="board" id="board">
+    <div class="tiles" id="tiles" aria-hidden="true"></div>
+
+    <span class="mhole mhole--tl" aria-hidden="true" data-keepout></span>
+    <span class="mhole mhole--tr" aria-hidden="true" data-keepout></span>
+
+    <header class="nav" id="nav" data-keepout>
+      <a class="logo" href="index.html" aria-label="NYNA, home">NYNA</a>
+      <button class="pwr" type="button" aria-pressed="true" aria-label="Backlight" title="Backlight on / off" data-backlight><span class="led" aria-hidden="true"></span><span class="pwr-label" aria-hidden="true">PWR</span></button>
+      <nav class="nav-links" aria-label="Main">
+        <a href="index.html#services">Services</a>
+        <a href="index.html#hardware">Hardware</a>
+        <a href="index.html#work">Work</a>
+        <a href="index.html#clients">Clients</a>
+        <a href="index.html#contact">Contact</a>
+      </nav>
+      <div class="nav-tools">
+        <button class="mode" type="button" role="switch" aria-checked="false" aria-label="Dark mode" title="Dark mode" data-theme-toggle>
+          <svg viewBox="0 0 24 24" aria-hidden="true"><circle class="mode-ring" cx="12" cy="12" r="8.25"/><path class="mode-half" d="M12 3.75a8.25 8.25 0 0 1 0 16.5z"/></svg>
+        </button>
+        <button class="menu-open" type="button" aria-expanded="false" aria-controls="menu" data-menu-open>Menu</button>
+      </div>
+    </header>
+
+    <main id="main">
+      <article class="case" id="top" data-keepout="text">
+        <a class="back" href="index.html#work"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M19 12H5M12 19l-7-7 7-7"/></svg>All work</a>
+        <header class="case-head">
+          <p class="case-kicker"><span class="led" aria-hidden="true"></span>IT support, OnWay LDD</p>
+          <h1 class="case-h"><span class="w" style="--i:0">Computer</span> <span class="w" style="--i:1">System</span> <span class="w" style="--i:2">Setup</span></h1>
+          <p class="case-lead">Office-wide workstation configuration and deployment for OnWay LDD, including imaging, software setup and friendly user onboarding.</p>
+        </header>
+        <div class="perf perf--side" aria-hidden="true" data-keepout></div>
+        <div class="stub">
+          <div class="stub-art" aria-hidden="true"><svg viewBox="0 0 240 170" aria-hidden="true"><g class="ink">
+                        <rect x="30" y="26" width="120" height="82" rx="6"/><path d="M90 108v20M64 128h52"/>
+                        <rect x="168" y="38" width="44" height="100" rx="5"/><path d="M178 54h24M178 64h24"/><circle cx="190" cy="118" r="5"/>
+                      </g></svg></div>
+          <div>
+            <dl class="stub-meta">
+              <div><dt>Client</dt><dd>OnWay LDD</dd></div>
+              <div><dt>Service</dt><dd>Computer setup and migration</dd></div>
+              <div><dt>Scope</dt><dd><ul class="tags"><li>Setup</li><li>Migration</li></ul></dd></div>
+            </dl>
+            <figure class="stub-quote">
+              <blockquote><p>From our network to our hosting and workstations, NYNA keeps everything running without a hitch.</p></blockquote>
+              <figcaption>OnWay LDD</figcaption>
+            </figure>
+          </div>
+        </div>
+        <p class="stub-note"><span class="led" aria-hidden="true"></span>The full write-up, with photos, process notes and results, is on its way.</p>
+        <p class="stub-cta"><a class="btn btn--solid" href="index.html#contact">Start a similar project</a></p>
+      </article>
+
+      <nav class="case-next" aria-label="More projects" data-keepout>
+        <a class="next-link" href="email-hosting.html"><span class="next-dir">Previous project</span><span class="next-title">Email &amp; Web Hosting</span></a>
+        <a class="next-link next-link--next" href="owc.html"><span class="next-dir">Next project</span><span class="next-title">Optical Wireless Comms</span></a>
+      </nav>
+    </main>
+
+    <footer class="foot" data-keepout>
+      <div class="perf perf--foot" aria-hidden="true"></div>
+      <div class="foot-main">
+        <a class="logo" href="#top" aria-label="NYNA, back to top">NYNA</a>
+        <p class="foot-tag">Your partner in professional IT, web &amp; hardware solutions.</p>
+        <nav class="foot-links" aria-label="Footer">
+          <a href="index.html#services">Services</a>
+          <a href="index.html#hardware">Hardware</a>
+          <a href="index.html#work">Work</a>
+          <a href="index.html#clients">Clients</a>
+          <a href="index.html#contact">Contact</a>
+        </nav>
+        <address class="foot-contact">
+          <a href="tel:+442080874237">020 8087 4237</a>
+          <a href="mailto:info@nyna.co.uk">info@nyna.co.uk</a>
+          <a href="https://www.google.com/maps/search/?api=1&amp;query=Croxley+Business+Park+Building+2+WD18+8YA" target="_blank" rel="noopener">Office 1.42, Building 2, Croxley Business Park, WD18 8YA</a>
+        </address>
+      </div>
+      <div class="foot-row">
+        <p>© <span id="year">2026</span> NYNA</p>
+        <a class="top-link" href="#top">Back to top</a>
+      </div>
+      <p class="fab fab--foot" aria-hidden="true">NYNA-MAIN REV B 2026-09</p>
+    </footer>
+
+    <span class="mhole mhole--bl" aria-hidden="true" data-keepout></span>
+    <span class="mhole mhole--br" aria-hidden="true" data-keepout></span>
+  </div>
+
+  <!-- vertical section marker in the left margin (wide screens) -->
+  <div class="rail-v" id="railv" aria-hidden="true">
+    <span class="rail-v-brand">NYNA</span>
+    <span class="rail-v-track" id="rail-track"><span class="rail-v-fill" id="rail-fill"></span><span class="rail-v-dot" id="rail-dot"></span></span>
+    <span class="rail-v-labels" id="rail-labels"></span>
+  </div>
+
+  <!-- floating control, appears once the header scrolls away -->
+  <div class="float" id="float" aria-hidden="true">
+    <a class="float-logo" href="#top" tabindex="-1">NYNA</a>
+    <button class="float-btn" type="button" data-menu-open aria-expanded="false" aria-controls="menu" tabindex="-1">Menu</button>
+    <a class="float-btn float-btn--solid" href="index.html#contact" tabindex="-1">Contact</a>
+  </div>
+
+  <!-- menu: a small popover that grows out of whichever Menu button opened it -->
+  <div class="pop" id="menu" role="dialog" aria-label="Menu" hidden>
+    <div class="pop-in">
+      <nav class="pop-nav" aria-label="Sections">
+        <a href="index.html#services" data-sec="services" style="--i:0"><span>Services</span><i class="pop-trace" aria-hidden="true"></i></a>
+        <a href="index.html#hardware" data-sec="hardware" style="--i:1"><span>Hardware</span><i class="pop-trace" aria-hidden="true"></i></a>
+        <a href="index.html#work" data-sec="work" style="--i:2"><span>Work</span><i class="pop-trace" aria-hidden="true"></i></a>
+        <a href="index.html#why" data-sec="why" style="--i:3"><span>Why NYNA</span><i class="pop-trace" aria-hidden="true"></i></a>
+        <a href="index.html#capabilities" data-sec="capabilities" style="--i:4"><span>Capabilities</span><i class="pop-trace" aria-hidden="true"></i></a>
+        <a href="index.html#clients" data-sec="clients" style="--i:5"><span>Clients</span><i class="pop-trace" aria-hidden="true"></i></a>
+        <a href="index.html#contact" data-sec="contact" style="--i:6"><span>Contact</span><i class="pop-trace" aria-hidden="true"></i></a>
+      </nav>
+      <div class="pop-set">
+        <button class="set" type="button" role="switch" aria-checked="true" data-backlight>
+          <span class="set-label">Backlight</span>
+          <span class="set-state" aria-hidden="true"><span class="set-on">On</span><span class="set-off">Off</span><span class="led"></span></span>
+        </button>
+        <button class="set" type="button" role="switch" aria-checked="false" data-theme-toggle>
+          <span class="set-label">Dark mode</span>
+          <span class="set-state" aria-hidden="true"><span class="set-on">On</span><span class="set-off">Off</span><span class="led"></span></span>
+        </button>
+      </div>
+      <div class="pop-foot">
+        <a href="mailto:info@nyna.co.uk">info@nyna.co.uk</a>
+        <a href="tel:+442080874237">020 8087 4237</a>
+        <p class="pop-status"><span class="led" aria-hidden="true"></span>London <time id="ldn-time"></time></p>
+      </div>
+    </div>
+  </div>
+
+  <div class="cursor" id="cursor" aria-hidden="true"><span class="cursor-ring"><span class="cursor-label"></span></span><span class="cursor-dot"></span></div>
+
+  <script src="main.js?v=24" defer></script>
+  <script src="work.js?v=24" defer></script>
+</body>
+</html>

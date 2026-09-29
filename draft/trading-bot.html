@@ -1,0 +1,204 @@
+<!doctype html>
+<html lang="en-GB" data-theme="light">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Algorithmic Trading Bot | NYNA</title>
+  <meta name="description" content="A research-to-live algorithmic FX system in Python: back-testing engine, causal validation harness and a live MetaTrader 5 bot.">
+  <meta name="robots" content="noindex">
+  <meta name="theme-color" content="#1A222C">
+  <script>
+    /* theme before first paint: saved choice, else the system setting */
+    (function () {
+      var d = document.documentElement, t = null;
+      try { t = localStorage.getItem('nyna-draft-theme'); } catch (e) {}
+      if (t !== 'light' && t !== 'dark') t = matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
+      d.setAttribute('data-theme', t);
+      d.className += ' js';
+      // main.js reveals the headline; never leave it hidden if that script fails
+      setTimeout(function () { d.classList.add('is-ready'); }, 3000);
+    })();
+  </script>
+  <link rel="icon" href="../icons/favicon-32.png" sizes="32x32">
+  <link rel="preload" href="assets/fonts/archivo-wide.woff" as="font" type="font/woff" crossorigin>
+  <link rel="preload" href="assets/fonts/archivo.woff" as="font" type="font/woff" crossorigin>
+  <link rel="preload" href="assets/fonts/unbounded-500.woff" as="font" type="font/woff" crossorigin>
+  <link rel="stylesheet" href="style.css?v=24">
+</head>
+<body class="case-page">
+  <canvas class="bench" id="bench" aria-hidden="true"></canvas>
+  <a class="skip" href="#main">Skip to content</a>
+
+  <div class="board" id="board">
+    <div class="tiles" id="tiles" aria-hidden="true"></div>
+
+    <span class="mhole mhole--tl" aria-hidden="true" data-keepout></span>
+    <span class="mhole mhole--tr" aria-hidden="true" data-keepout></span>
+
+    <header class="nav" id="nav" data-keepout>
+      <a class="logo" href="index.html" aria-label="NYNA, home">NYNA</a>
+      <button class="pwr" type="button" aria-pressed="true" aria-label="Backlight" title="Backlight on / off" data-backlight><span class="led" aria-hidden="true"></span><span class="pwr-label" aria-hidden="true">PWR</span></button>
+      <nav class="nav-links" aria-label="Main">
+        <a href="index.html#services">Services</a>
+        <a href="index.html#hardware">Hardware</a>
+        <a href="index.html#work">Work</a>
+        <a href="index.html#clients">Clients</a>
+        <a href="index.html#contact">Contact</a>
+      </nav>
+      <div class="nav-tools">
+        <button class="mode" type="button" role="switch" aria-checked="false" aria-label="Dark mode" title="Dark mode" data-theme-toggle>
+          <svg viewBox="0 0 24 24" aria-hidden="true"><circle class="mode-ring" cx="12" cy="12" r="8.25"/><path class="mode-half" d="M12 3.75a8.25 8.25 0 0 1 0 16.5z"/></svg>
+        </button>
+        <button class="menu-open" type="button" aria-expanded="false" aria-controls="menu" data-menu-open>Menu</button>
+      </div>
+    </header>
+
+    <main id="main">
+      <article class="case" id="top" data-keepout="text">
+        <a class="back" href="index.html#work"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M19 12H5M12 19l-7-7 7-7"/></svg>All work</a>
+        <header class="case-head">
+          <p class="case-kicker"><span class="led" aria-hidden="true"></span>In-house software</p>
+          <h1 class="case-h"><span class="w" style="--i:0">Algorithmic</span> <span class="w" style="--i:1">Trading</span> <span class="w" style="--i:2">System</span></h1>
+          <p class="case-lead">A full research-to-live algorithmic FX system in Python: a vectorised back-testing engine, a causal validation harness and a live MetaTrader&nbsp;5 execution bot, all built around price-action market structure on EURUSD. Its defining feature isn&rsquo;t a magic edge, it&rsquo;s honesty: the framework is engineered to expose the look-ahead bugs and over-fitting that quietly wreck most retail strategies.</p>
+        </header>
+        <div class="perf perf--side" aria-hidden="true" data-keepout></div>
+        <dl class="specs"><div class="spec"><dt>25<small>yr</small></dt><dd>EURUSD history modelled, D1 to M1</dd></div><div class="spec"><dt>M1&ndash;D1</dt><dd>Multi-timeframe back-test engine</dd></div><div class="spec"><dt>+1<small>pip</small></dt><dd>Spread and slippage on every fill</dd></div><div class="spec"><dt>MT5</dt><dd>Live Python execution API</dd></div><div class="spec"><dt>CISD</dt><dd>Asia-sweep to London entry model</dd></div><div class="spec"><dt>Causal</dt><dd>Bar-by-bar parity validation</dd></div></dl>
+        <ol class="pipeline" aria-label="Research pipeline" style="margin-top:clamp(40px,5vw,64px)">
+          <li><span class="node">EURUSD data, 25&nbsp;yr</span></li>
+          <li><span class="node">Vectorised back-test</span></li>
+          <li><span class="node node--key">Causal parity gate</span></li>
+          <li><span class="node">Strategy library</span></li>
+          <li><span class="node">Live MT5 bot</span></li>
+        </ol>
+        <section class="case-sec" id="chart" data-label="Strategies">
+          <div class="sec-head"><h2 class="h2">Every strategy, on the chart.</h2><p class="sec-lead">Pick a model to see its setup marked on illustrative EURUSD candles, with its headline numbers and equity curve. Hover the chart for prices.</p></div>
+          <figure class="tv" data-keepout>
+            <div class="tv-head">
+              <div><p class="tv-name" id="tvName"></p><p class="tv-desc" id="tvDesc"></p></div>
+              <span class="tv-badge"><span class="led" aria-hidden="true"></span>Illustrative, interactive</span>
+            </div>
+            <div class="tv-switch" id="tvSwitch" role="group" aria-label="Choose a strategy"></div>
+            <div class="tv-stage"><canvas id="tvCanvas" role="img" aria-label="Candlestick chart of the selected strategy"></canvas><div class="tv-tip" id="tvTip" hidden></div></div>
+            <div class="tv-foot">
+              <div class="tv-stats" id="tvStats"></div>
+              <div class="tv-eq"><span>Equity curve, R (illustrative)</span><canvas id="tvEq" aria-hidden="true"></canvas></div>
+            </div>
+          </figure>
+        </section>
+        <p class="pull">Most retail &ldquo;edges&rdquo; are look-ahead bugs in disguise. This system is built to catch them, even its own.</p>
+        <section class="case-sec" id="how" data-label="How it works">
+          
+          <div class="case-cols">
+            <div class="prose"><h2 class="case-h3">How it works</h2><p>The engine ingests decades of EURUSD data across timeframes from daily down to one-minute and simulates strategies bar by bar. Every fill is charged a realistic cost: stops are widened by the spread plus a pip and slippage is modelled, so a back-test can&rsquo;t win on fills it would never get live. Strategies are expressed as pure functions of <em>past</em> price structure: liquidity sweeps (a prior high or low taken and reclaimed), change-in-state-of-delivery (CISD) confirmations, and draw-on-liquidity (DOL) targets, the mechanics behind ICT-style price action.</p></div>
+            <div><h2 class="case-h3">What we built</h2><ul class="leds"><li>A vectorised NumPy and pandas back-testing engine over roughly 25 years of EURUSD, D1 to M1</li><li>A causal parity harness that re-runs every strategy with past-only data to prove a back-test is reproducible</li><li>A strategy library: EMA and DOL trend models, quality-filtered Donchian breakouts, RSI-2 mean reversion, opening-range and session-liquidity models</li><li>A live MetaTrader&nbsp;5 bot (Python API) with automated entries, structure-based stops and R-multiple targets</li><li>Fixed-fractional risk sizing and multi-era, out-of-sample testing to reject regime-fit</li><li>Built AI-assisted with Claude Code for fast iteration on the research loop</li></ul></div>
+          </div>
+        </section>
+        <section class="case-sec" id="audit" data-label="Look-ahead audit">
+          <div class="sec-head"><h2 class="h2">How a 15-year &ldquo;edge&rdquo; turned out to be a mirage.</h2></div>
+          <div class="prose"><p>An early trend model, EMA bias with a DOL filter, looked spectacular: a clean, rising equity curve and a healthy profit factor across fifteen years. It was too good. An audit of the swing-detection logic found the culprit: it was confirming swing highs and lows using bars that hadn&rsquo;t happened yet. The &ldquo;edge&rdquo; was the strategy quietly reading the future. Rebuilt to use only information available at the moment of each decision, the same system&rsquo;s profit factor collapsed from comfortably profitable to <strong>0.63</strong>, a loser. That failure became the most valuable result in the project: every strategy since has to pass a causal parity test before it goes anywhere near a live account.</p></div>
+        </section>
+        <section class="case-sec" id="hunt" data-label="The edge hunt">
+          <div class="sec-head"><h2 class="h2">Testing honestly, and accepting the answer.</h2></div>
+          <div class="prose"><p>With the validation harness in place, we ran a systematic search across strategy families and distinct market eras. The honest conclusion: no strategy held a durable profit factor above about 1.25 in <em>every</em> era. The strongest, most stubborn lead was a quality-filtered Donchian daily breakout, hovering around 1.15 to 1.27 depending on the period; classic setups like RSI-2 mean reversion &ldquo;died honest&rdquo;, with no survivorship illusion left to hide behind. Documenting negative results like these <em>is</em> the process, not a failure of it: it&rsquo;s the line between real research and a curve-fit fantasy.</p></div>
+        </section>
+        <section class="case-sec" id="setups" data-label="Strategy snapshots">
+          <div class="sec-head"><h2 class="h2">The setups, at a glance.</h2></div>
+          <ul class="gallery gallery--wide"><li><button class="shot" type="button" data-zoom="../projects/strat_asia.png" data-cursor="Zoom"><img src="assets/thumbs/strat_asia.webp" alt="Chart of the Asia sweep into London CISD strategy" width="960" height="617" loading="lazy" decoding="async" draggable="false"></button></li><li><button class="shot" type="button" data-zoom="../projects/strat_donchian.png" data-cursor="Zoom"><img src="assets/thumbs/strat_donchian.webp" alt="Chart of the Donchian channel breakout strategy" width="960" height="617" loading="lazy" decoding="async" draggable="false"></button></li><li><button class="shot" type="button" data-zoom="../projects/strat_sweep.png" data-cursor="Zoom"><img src="assets/thumbs/strat_sweep.webp" alt="Chart of the liquidity sweep and reclaim reversal strategy" width="960" height="617" loading="lazy" decoding="async" draggable="false"></button></li><li><button class="shot" type="button" data-zoom="../projects/strat_rsi2.png" data-cursor="Zoom"><img src="assets/thumbs/strat_rsi2.webp" alt="Chart of the RSI-2 mean reversion strategy" width="960" height="617" loading="lazy" decoding="async" draggable="false"></button></li></ul>
+        </section>
+        <section class="case-sec" id="live" data-label="Live deployment">
+          <div class="sec-head"><h2 class="h2">From back-test to a live, risk-controlled bot.</h2></div>
+          <div class="prose"><p>The live component runs the strongest structural idea end to end on EURUSD: wait for the Asian session&rsquo;s range to sweep liquidity into the London open, then enter on a one-minute change-in-state-of-delivery, place the stop just beyond the swept swing, and target roughly 2.2R. It executes fully automatically through the MetaTrader&nbsp;5 Python API, handling live ticks, order placement and position management under a fixed per-trade risk cap. It ran as a genuine live experiment, with real spread, real slippage and real fills, to pressure-test the model where a back-test simply can&rsquo;t.</p></div>
+          <div class="case-cols" style="margin-top:clamp(40px,5vw,70px)">
+            <div><h3 class="case-h3">What it demonstrates</h3><ul class="leds"><li>Quantitative research and back-testing</li><li>Causal inference and look-ahead detection</li><li>Python (NumPy, pandas) at scale</li><li>MetaTrader&nbsp;5 automation and live execution</li><li>Market microstructure (ICT price action)</li><li>Disciplined, fixed-fractional risk management</li></ul></div>
+            <div class="prose"><h3 class="case-h3">Honest takeaways</h3><p>The deliverable here isn&rsquo;t a money-printer, it&rsquo;s a framework that tells the truth. It caught a look-ahead bug that would have blown up a live account, and it rejected every over-fit edge that couldn&rsquo;t survive out-of-sample. That instinct (trust the process, distrust the result until it&rsquo;s reproducible) is exactly what we bring to every engineering problem.</p></div>
+          </div>
+          <ul class="tags" style="margin-top:clamp(30px,3.4vw,44px)"><li>Python</li><li>NumPy</li><li>pandas</li><li>MetaTrader&nbsp;5 API</li><li>Back-testing</li><li>ICT price action</li><li>Risk management</li><li>Claude Code</li></ul>
+        </section>
+      </article>
+
+      <nav class="case-next" aria-label="More projects" data-keepout>
+        <a class="next-link" href="owc.html"><span class="next-dir">Previous project</span><span class="next-title">Optical Wireless Comms</span></a>
+        <a class="next-link next-link--next" href="corporate-web.html"><span class="next-dir">Next project</span><span class="next-title">Corporate Web Build</span></a>
+      </nav>
+    </main>
+
+    <footer class="foot" data-keepout>
+      <div class="perf perf--foot" aria-hidden="true"></div>
+      <div class="foot-main">
+        <a class="logo" href="#top" aria-label="NYNA, back to top">NYNA</a>
+        <p class="foot-tag">Your partner in professional IT, web &amp; hardware solutions.</p>
+        <nav class="foot-links" aria-label="Footer">
+          <a href="index.html#services">Services</a>
+          <a href="index.html#hardware">Hardware</a>
+          <a href="index.html#work">Work</a>
+          <a href="index.html#clients">Clients</a>
+          <a href="index.html#contact">Contact</a>
+        </nav>
+        <address class="foot-contact">
+          <a href="tel:+442080874237">020 8087 4237</a>
+          <a href="mailto:info@nyna.co.uk">info@nyna.co.uk</a>
+          <a href="https://www.google.com/maps/search/?api=1&amp;query=Croxley+Business+Park+Building+2+WD18+8YA" target="_blank" rel="noopener">Office 1.42, Building 2, Croxley Business Park, WD18 8YA</a>
+        </address>
+      </div>
+      <div class="foot-row">
+        <p>© <span id="year">2026</span> NYNA</p>
+        <a class="top-link" href="#top">Back to top</a>
+      </div>
+      <p class="fab fab--foot" aria-hidden="true">NYNA-MAIN REV B 2026-09</p>
+    </footer>
+
+    <span class="mhole mhole--bl" aria-hidden="true" data-keepout></span>
+    <span class="mhole mhole--br" aria-hidden="true" data-keepout></span>
+  </div>
+
+  <!-- vertical section marker in the left margin (wide screens) -->
+  <div class="rail-v" id="railv" aria-hidden="true">
+    <span class="rail-v-brand">NYNA</span>
+    <span class="rail-v-track" id="rail-track"><span class="rail-v-fill" id="rail-fill"></span><span class="rail-v-dot" id="rail-dot"></span></span>
+    <span class="rail-v-labels" id="rail-labels"></span>
+  </div>
+
+  <!-- floating control, appears once the header scrolls away -->
+  <div class="float" id="float" aria-hidden="true">
+    <a class="float-logo" href="#top" tabindex="-1">NYNA</a>
+    <button class="float-btn" type="button" data-menu-open aria-expanded="false" aria-controls="menu" tabindex="-1">Menu</button>
+    <a class="float-btn float-btn--solid" href="index.html#contact" tabindex="-1">Contact</a>
+  </div>
+
+  <!-- menu: a small popover that grows out of whichever Menu button opened it -->
+  <div class="pop" id="menu" role="dialog" aria-label="Menu" hidden>
+    <div class="pop-in">
+      <nav class="pop-nav" aria-label="Sections">
+        <a href="index.html#services" data-sec="services" style="--i:0"><span>Services</span><i class="pop-trace" aria-hidden="true"></i></a>
+        <a href="index.html#hardware" data-sec="hardware" style="--i:1"><span>Hardware</span><i class="pop-trace" aria-hidden="true"></i></a>
+        <a href="index.html#work" data-sec="work" style="--i:2"><span>Work</span><i class="pop-trace" aria-hidden="true"></i></a>
+        <a href="index.html#why" data-sec="why" style="--i:3"><span>Why NYNA</span><i class="pop-trace" aria-hidden="true"></i></a>
+        <a href="index.html#capabilities" data-sec="capabilities" style="--i:4"><span>Capabilities</span><i class="pop-trace" aria-hidden="true"></i></a>
+        <a href="index.html#clients" data-sec="clients" style="--i:5"><span>Clients</span><i class="pop-trace" aria-hidden="true"></i></a>
+        <a href="index.html#contact" data-sec="contact" style="--i:6"><span>Contact</span><i class="pop-trace" aria-hidden="true"></i></a>
+      </nav>
+      <div class="pop-set">
+        <button class="set" type="button" role="switch" aria-checked="true" data-backlight>
+          <span class="set-label">Backlight</span>
+          <span class="set-state" aria-hidden="true"><span class="set-on">On</span><span class="set-off">Off</span><span class="led"></span></span>
+        </button>
+        <button class="set" type="button" role="switch" aria-checked="false" data-theme-toggle>
+          <span class="set-label">Dark mode</span>
+          <span class="set-state" aria-hidden="true"><span class="set-on">On</span><span class="set-off">Off</span><span class="led"></span></span>
+        </button>
+      </div>
+      <div class="pop-foot">
+        <a href="mailto:info@nyna.co.uk">info@nyna.co.uk</a>
+        <a href="tel:+442080874237">020 8087 4237</a>
+        <p class="pop-status"><span class="led" aria-hidden="true"></span>London <time id="ldn-time"></time></p>
+      </div>
+    </div>
+  </div>
+
+  <div class="cursor" id="cursor" aria-hidden="true"><span class="cursor-ring"><span class="cursor-label"></span></span><span class="cursor-dot"></span></div>
+
+  <script src="main.js?v=24" defer></script>
+  <script src="../projects/strategies.js" defer></script>
+  <script src="work.js?v=24" defer></script>
+</body>
+</html>
