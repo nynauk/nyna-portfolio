@@ -90,7 +90,7 @@
     const RENDERS = { final: 'render_final_adapter', bpw34: 'render_bpw34_adapter', coupler: 'render_laser_adapter', toslink_led: 'render_laser_module', toslink: 'render_laser_adapter' };
     const pick = key => {
       tabs.forEach(t => t.setAttribute('aria-pressed', String(t.dataset.adapter === key)));
-      if (fallback) fallback.src = `../projects/${RENDERS[key] || 'render_final_adapter'}.png`;
+      if (fallback) fallback.src = `/projects/${RENDERS[key] || 'render_final_adapter'}.png`;
     };
     tabs.forEach(t => t.addEventListener('click', () => { pick(t.dataset.adapter); if (viewer) viewer.load(t.dataset.adapter); }));
     let viewer = null;
@@ -129,7 +129,7 @@
       let token = 0, current = null;
       const load = key => {
         const my = ++token;
-        loader.load(`../models/adapter_${key}.glb`, gltf => {
+        loader.load(`/models/adapter_${key}.glb`, gltf => {
           if (my !== token) return;
           const mdl = gltf.scene;
           mdl.traverse(o => {

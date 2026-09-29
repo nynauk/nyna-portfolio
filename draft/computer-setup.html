@@ -19,11 +19,11 @@
       setTimeout(function () { d.classList.add('is-ready'); }, 3000);
     })();
   </script>
-  <link rel="icon" href="../icons/favicon-32.png" sizes="32x32">
-  <link rel="preload" href="assets/fonts/archivo-wide.woff" as="font" type="font/woff" crossorigin>
-  <link rel="preload" href="assets/fonts/archivo.woff" as="font" type="font/woff" crossorigin>
-  <link rel="preload" href="assets/fonts/unbounded-500.woff" as="font" type="font/woff" crossorigin>
-  <link rel="stylesheet" href="style.css?v=24">
+  <link rel="icon" href="/icons/favicon-32.png" sizes="32x32">
+  <link rel="preload" href="/draft/assets/fonts/archivo-wide.woff" as="font" type="font/woff" crossorigin>
+  <link rel="preload" href="/draft/assets/fonts/archivo.woff" as="font" type="font/woff" crossorigin>
+  <link rel="preload" href="/draft/assets/fonts/unbounded-500.woff" as="font" type="font/woff" crossorigin>
+  <link rel="stylesheet" href="/draft/style.css?v=25">
 </head>
 <body class="case-page">
   <canvas class="bench" id="bench" aria-hidden="true"></canvas>
@@ -36,14 +36,14 @@
     <span class="mhole mhole--tr" aria-hidden="true" data-keepout></span>
 
     <header class="nav" id="nav" data-keepout>
-      <a class="logo" href="index.html" aria-label="NYNA, home">NYNA</a>
+      <a class="logo" href="/draft" aria-label="NYNA, home">NYNA</a>
       <button class="pwr" type="button" aria-pressed="true" aria-label="Backlight" title="Backlight on / off" data-backlight><span class="led" aria-hidden="true"></span><span class="pwr-label" aria-hidden="true">PWR</span></button>
       <nav class="nav-links" aria-label="Main">
-        <a href="index.html#services">Services</a>
-        <a href="index.html#hardware">Hardware</a>
-        <a href="index.html#work">Work</a>
-        <a href="index.html#clients">Clients</a>
-        <a href="index.html#contact">Contact</a>
+        <a href="/draft#services">Services</a>
+        <a href="/draft#hardware">Hardware</a>
+        <a href="/draft#work">Work</a>
+        <a href="/draft#clients">Clients</a>
+        <a href="/draft#contact">Contact</a>
       </nav>
       <div class="nav-tools">
         <button class="mode" type="button" role="switch" aria-checked="false" aria-label="Dark mode" title="Dark mode" data-theme-toggle>
@@ -55,7 +55,7 @@
 
     <main id="main">
       <article class="case" id="top" data-keepout="text">
-        <a class="back" href="index.html#work"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M19 12H5M12 19l-7-7 7-7"/></svg>All work</a>
+        <a class="back" href="/draft#work"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M19 12H5M12 19l-7-7 7-7"/></svg>All work</a>
         <header class="case-head">
           <p class="case-kicker"><span class="led" aria-hidden="true"></span>IT support, OnWay LDD</p>
           <h1 class="case-h"><span class="w" style="--i:0">Computer</span> <span class="w" style="--i:1">System</span> <span class="w" style="--i:2">Setup</span></h1>
@@ -80,12 +80,12 @@
           </div>
         </div>
         <p class="stub-note"><span class="led" aria-hidden="true"></span>The full write-up, with photos, process notes and results, is on its way.</p>
-        <p class="stub-cta"><a class="btn btn--solid" href="index.html#contact">Start a similar project</a></p>
+        <p class="stub-cta"><a class="btn btn--solid" href="/draft#contact">Start a similar project</a></p>
       </article>
 
       <nav class="case-next" aria-label="More projects" data-keepout>
-        <a class="next-link" href="email-hosting.html"><span class="next-dir">Previous project</span><span class="next-title">Email &amp; Web Hosting</span></a>
-        <a class="next-link next-link--next" href="owc.html"><span class="next-dir">Next project</span><span class="next-title">Optical Wireless Comms</span></a>
+        <a class="next-link" href="/draft/email-hosting.html"><span class="next-dir">Previous project</span><span class="next-title">Email &amp; Web Hosting</span></a>
+        <a class="next-link next-link--next" href="/draft/owc.html"><span class="next-dir">Next project</span><span class="next-title">Optical Wireless Comms</span></a>
       </nav>
     </main>
 
@@ -95,11 +95,11 @@
         <a class="logo" href="#top" aria-label="NYNA, back to top">NYNA</a>
         <p class="foot-tag">Your partner in professional IT, web &amp; hardware solutions.</p>
         <nav class="foot-links" aria-label="Footer">
-          <a href="index.html#services">Services</a>
-          <a href="index.html#hardware">Hardware</a>
-          <a href="index.html#work">Work</a>
-          <a href="index.html#clients">Clients</a>
-          <a href="index.html#contact">Contact</a>
+          <a href="/draft#services">Services</a>
+          <a href="/draft#hardware">Hardware</a>
+          <a href="/draft#work">Work</a>
+          <a href="/draft#clients">Clients</a>
+          <a href="/draft#contact">Contact</a>
         </nav>
         <address class="foot-contact">
           <a href="tel:+442080874237">020 8087 4237</a>
@@ -129,20 +129,20 @@
   <div class="float" id="float" aria-hidden="true">
     <a class="float-logo" href="#top" tabindex="-1">NYNA</a>
     <button class="float-btn" type="button" data-menu-open aria-expanded="false" aria-controls="menu" tabindex="-1">Menu</button>
-    <a class="float-btn float-btn--solid" href="index.html#contact" tabindex="-1">Contact</a>
+    <a class="float-btn float-btn--solid" href="/draft#contact" tabindex="-1">Contact</a>
   </div>
 
   <!-- menu: a small popover that grows out of whichever Menu button opened it -->
   <div class="pop" id="menu" role="dialog" aria-label="Menu" hidden>
     <div class="pop-in">
       <nav class="pop-nav" aria-label="Sections">
-        <a href="index.html#services" data-sec="services" style="--i:0"><span>Services</span><i class="pop-trace" aria-hidden="true"></i></a>
-        <a href="index.html#hardware" data-sec="hardware" style="--i:1"><span>Hardware</span><i class="pop-trace" aria-hidden="true"></i></a>
-        <a href="index.html#work" data-sec="work" style="--i:2"><span>Work</span><i class="pop-trace" aria-hidden="true"></i></a>
-        <a href="index.html#why" data-sec="why" style="--i:3"><span>Why NYNA</span><i class="pop-trace" aria-hidden="true"></i></a>
-        <a href="index.html#capabilities" data-sec="capabilities" style="--i:4"><span>Capabilities</span><i class="pop-trace" aria-hidden="true"></i></a>
-        <a href="index.html#clients" data-sec="clients" style="--i:5"><span>Clients</span><i class="pop-trace" aria-hidden="true"></i></a>
-        <a href="index.html#contact" data-sec="contact" style="--i:6"><span>Contact</span><i class="pop-trace" aria-hidden="true"></i></a>
+        <a href="/draft#services" data-sec="services" style="--i:0"><span>Services</span><i class="pop-trace" aria-hidden="true"></i></a>
+        <a href="/draft#hardware" data-sec="hardware" style="--i:1"><span>Hardware</span><i class="pop-trace" aria-hidden="true"></i></a>
+        <a href="/draft#work" data-sec="work" style="--i:2"><span>Work</span><i class="pop-trace" aria-hidden="true"></i></a>
+        <a href="/draft#why" data-sec="why" style="--i:3"><span>Why NYNA</span><i class="pop-trace" aria-hidden="true"></i></a>
+        <a href="/draft#capabilities" data-sec="capabilities" style="--i:4"><span>Capabilities</span><i class="pop-trace" aria-hidden="true"></i></a>
+        <a href="/draft#clients" data-sec="clients" style="--i:5"><span>Clients</span><i class="pop-trace" aria-hidden="true"></i></a>
+        <a href="/draft#contact" data-sec="contact" style="--i:6"><span>Contact</span><i class="pop-trace" aria-hidden="true"></i></a>
       </nav>
       <div class="pop-set">
         <button class="set" type="button" role="switch" aria-checked="true" data-backlight>
@@ -164,7 +164,7 @@
 
   <div class="cursor" id="cursor" aria-hidden="true"><span class="cursor-ring"><span class="cursor-label"></span></span><span class="cursor-dot"></span></div>
 
-  <script src="main.js?v=24" defer></script>
-  <script src="work.js?v=24" defer></script>
+  <script src="/draft/main.js?v=25" defer></script>
+  <script src="/draft/work.js?v=25" defer></script>
 </body>
 </html>

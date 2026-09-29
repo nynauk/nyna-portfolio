@@ -19,11 +19,11 @@
       setTimeout(function () { d.classList.add('is-ready'); }, 3000);
     })();
   </script>
-  <link rel="icon" href="../icons/favicon-32.png" sizes="32x32">
-  <link rel="preload" href="assets/fonts/archivo-wide.woff" as="font" type="font/woff" crossorigin>
-  <link rel="preload" href="assets/fonts/archivo.woff" as="font" type="font/woff" crossorigin>
-  <link rel="preload" href="assets/fonts/unbounded-500.woff" as="font" type="font/woff" crossorigin>
-  <link rel="stylesheet" href="style.css?v=24">
+  <link rel="icon" href="/icons/favicon-32.png" sizes="32x32">
+  <link rel="preload" href="/draft/assets/fonts/archivo-wide.woff" as="font" type="font/woff" crossorigin>
+  <link rel="preload" href="/draft/assets/fonts/archivo.woff" as="font" type="font/woff" crossorigin>
+  <link rel="preload" href="/draft/assets/fonts/unbounded-500.woff" as="font" type="font/woff" crossorigin>
+  <link rel="stylesheet" href="/draft/style.css?v=25">
 </head>
 <body class="case-page">
   <canvas class="bench" id="bench" aria-hidden="true"></canvas>
@@ -36,14 +36,14 @@
     <span class="mhole mhole--tr" aria-hidden="true" data-keepout></span>
 
     <header class="nav" id="nav" data-keepout>
-      <a class="logo" href="index.html" aria-label="NYNA, home">NYNA</a>
+      <a class="logo" href="/draft" aria-label="NYNA, home">NYNA</a>
       <button class="pwr" type="button" aria-pressed="true" aria-label="Backlight" title="Backlight on / off" data-backlight><span class="led" aria-hidden="true"></span><span class="pwr-label" aria-hidden="true">PWR</span></button>
       <nav class="nav-links" aria-label="Main">
-        <a href="index.html#services">Services</a>
-        <a href="index.html#hardware">Hardware</a>
-        <a href="index.html#work">Work</a>
-        <a href="index.html#clients">Clients</a>
-        <a href="index.html#contact">Contact</a>
+        <a href="/draft#services">Services</a>
+        <a href="/draft#hardware">Hardware</a>
+        <a href="/draft#work">Work</a>
+        <a href="/draft#clients">Clients</a>
+        <a href="/draft#contact">Contact</a>
       </nav>
       <div class="nav-tools">
         <button class="mode" type="button" role="switch" aria-checked="false" aria-label="Dark mode" title="Dark mode" data-theme-toggle>
@@ -55,7 +55,7 @@
 
     <main id="main">
       <article class="case" id="top" data-keepout="text">
-        <a class="back" href="index.html#work"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M19 12H5M12 19l-7-7 7-7"/></svg>All work</a>
+        <a class="back" href="/draft#work"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M19 12H5M12 19l-7-7 7-7"/></svg>All work</a>
         <header class="case-head">
           <p class="case-kicker"><span class="led" aria-hidden="true"></span>Embedded systems</p>
           <h1 class="case-h"><span class="w" style="--i:0">An</span> <span class="w" style="--i:1">autonomous</span> <span class="w" style="--i:2">buggy</span> <span class="w" style="--i:3">that</span> <span class="w" style="--i:4">drives</span> <span class="w" style="--i:5">itself.</span></h1>
@@ -63,15 +63,15 @@
         </header>
         <div class="perf perf--side" aria-hidden="true" data-keepout></div>
         <figure class="case-hero">
-          <button class="shot" type="button" data-zoom="../projects/buggy_hero.jpg" data-cursor="Zoom"><img src="../projects/buggy_hero.jpg" alt="The assembled NUCLEO-F091RC line-following buggy" width="522" height="695" draggable="false"></button>
+          <button class="shot" type="button" data-zoom="/projects/buggy_hero.jpg" data-cursor="Zoom"><img src="/projects/buggy_hero.jpg" alt="The assembled NUCLEO-F091RC line-following buggy" width="522" height="695" draggable="false"></button>
           <figcaption><strong>The buggy</strong><span>Kitronik chassis, NUCLEO-F091RC, L298 motor driver, a custom PCB, LDR line sensors and an HC-SR04.</span></figcaption>
         </figure>
         <dl class="specs"><div class="spec"><dt>F091RC</dt><dd>STM32F0 Cortex-M0 host</dd></div><div class="spec"><dt>Bare-metal C</dt><dd>Direct register access and CMSIS</dd></div><div class="spec"><dt>2&times; LDR</dt><dd>ADC line sensing (PA4, PB0)</dd></div><div class="spec"><dt>HC-SR04</dt><dd>Ultrasonic hazard stop</dd></div><div class="spec"><dt>TIM3</dt><dd>Dual-motor PWM control</dd></div><div class="spec"><dt>0.57<small>m/s</small></dt><dd>Top speed (calculated)</dd></div></dl>
         <section class="case-sec" id="demo" data-label="Demo">
           <div class="sec-head"><h2 class="h2">Watch it follow the line.</h2></div>
           <figure class="video" data-keepout>
-            <video controls preload="none" playsinline poster="../projects/buggy_hero.jpg">
-              <source src="../projects/buggy_demo.mp4" type="video/mp4">
+            <video controls preload="none" playsinline poster="/projects/buggy_hero.jpg">
+              <source src="/projects/buggy_demo.mp4" type="video/mp4">
               Your browser can&rsquo;t play this video.
             </video>
           </figure>
@@ -111,13 +111,13 @@ if (distance &lt;= 2.5f) {                     <span class="cm">// obstacle ahea
         </section>
         <section class="case-sec" id="build" data-label="Build and track">
           <div class="sec-head"><h2 class="h2">Hardware, sensors &amp; the test track.</h2></div>
-          <ul class="gallery"><li><button class="shot" type="button" data-zoom="../projects/buggy_ultrasonic.jpg" data-cursor="Zoom"><img src="assets/thumbs/buggy_ultrasonic.webp" alt="The buggy with its HC-SR04 ultrasonic sensor and breadboard mounted" width="517" height="689" loading="lazy" decoding="async" draggable="false"></button></li><li><button class="shot" type="button" data-zoom="../projects/buggy_breadboard.jpg" data-cursor="Zoom"><img src="assets/thumbs/buggy_breadboard.webp" alt="Breadboard bring-up of the NUCLEO-F091RC" width="540" height="960" loading="lazy" decoding="async" draggable="false"></button></li><li><button class="shot" type="button" data-zoom="../projects/buggy_track.jpg" data-cursor="Zoom"><img src="assets/thumbs/buggy_track.webp" alt="The line-following test track taped out on the bench" width="672" height="896" loading="lazy" decoding="async" draggable="false"></button></li><li><button class="shot" type="button" data-zoom="../projects/buggy_poster.jpg" data-cursor="Zoom"><img src="assets/thumbs/buggy_poster.webp" alt="The project poster for the Kitronik buggy" width="679" height="960" loading="lazy" decoding="async" draggable="false"></button></li></ul>
+          <ul class="gallery"><li><button class="shot" type="button" data-zoom="/projects/buggy_ultrasonic.jpg" data-cursor="Zoom"><img src="/draft/assets/thumbs/buggy_ultrasonic.webp" alt="The buggy with its HC-SR04 ultrasonic sensor and breadboard mounted" width="517" height="689" loading="lazy" decoding="async" draggable="false"></button></li><li><button class="shot" type="button" data-zoom="/projects/buggy_breadboard.jpg" data-cursor="Zoom"><img src="/draft/assets/thumbs/buggy_breadboard.webp" alt="Breadboard bring-up of the NUCLEO-F091RC" width="540" height="960" loading="lazy" decoding="async" draggable="false"></button></li><li><button class="shot" type="button" data-zoom="/projects/buggy_track.jpg" data-cursor="Zoom"><img src="/draft/assets/thumbs/buggy_track.webp" alt="The line-following test track taped out on the bench" width="672" height="896" loading="lazy" decoding="async" draggable="false"></button></li><li><button class="shot" type="button" data-zoom="/projects/buggy_poster.jpg" data-cursor="Zoom"><img src="/draft/assets/thumbs/buggy_poster.webp" alt="The project poster for the Kitronik buggy" width="679" height="960" loading="lazy" decoding="async" draggable="false"></button></li></ul>
         </section>
       </article>
 
       <nav class="case-next" aria-label="More projects" data-keepout>
-        <a class="next-link" href="train-timetable.html"><span class="next-dir">Previous project</span><span class="next-title">Train Schedule System</span></a>
-        <a class="next-link next-link--next" href="network-ring.html"><span class="next-dir">Next project</span><span class="next-title">Network Ring Infrastructure</span></a>
+        <a class="next-link" href="/draft/train-timetable.html"><span class="next-dir">Previous project</span><span class="next-title">Train Schedule System</span></a>
+        <a class="next-link next-link--next" href="/draft/network-ring.html"><span class="next-dir">Next project</span><span class="next-title">Network Ring Infrastructure</span></a>
       </nav>
     </main>
 
@@ -127,11 +127,11 @@ if (distance &lt;= 2.5f) {                     <span class="cm">// obstacle ahea
         <a class="logo" href="#top" aria-label="NYNA, back to top">NYNA</a>
         <p class="foot-tag">Your partner in professional IT, web &amp; hardware solutions.</p>
         <nav class="foot-links" aria-label="Footer">
-          <a href="index.html#services">Services</a>
-          <a href="index.html#hardware">Hardware</a>
-          <a href="index.html#work">Work</a>
-          <a href="index.html#clients">Clients</a>
-          <a href="index.html#contact">Contact</a>
+          <a href="/draft#services">Services</a>
+          <a href="/draft#hardware">Hardware</a>
+          <a href="/draft#work">Work</a>
+          <a href="/draft#clients">Clients</a>
+          <a href="/draft#contact">Contact</a>
         </nav>
         <address class="foot-contact">
           <a href="tel:+442080874237">020 8087 4237</a>
@@ -161,20 +161,20 @@ if (distance &lt;= 2.5f) {                     <span class="cm">// obstacle ahea
   <div class="float" id="float" aria-hidden="true">
     <a class="float-logo" href="#top" tabindex="-1">NYNA</a>
     <button class="float-btn" type="button" data-menu-open aria-expanded="false" aria-controls="menu" tabindex="-1">Menu</button>
-    <a class="float-btn float-btn--solid" href="index.html#contact" tabindex="-1">Contact</a>
+    <a class="float-btn float-btn--solid" href="/draft#contact" tabindex="-1">Contact</a>
   </div>
 
   <!-- menu: a small popover that grows out of whichever Menu button opened it -->
   <div class="pop" id="menu" role="dialog" aria-label="Menu" hidden>
     <div class="pop-in">
       <nav class="pop-nav" aria-label="Sections">
-        <a href="index.html#services" data-sec="services" style="--i:0"><span>Services</span><i class="pop-trace" aria-hidden="true"></i></a>
-        <a href="index.html#hardware" data-sec="hardware" style="--i:1"><span>Hardware</span><i class="pop-trace" aria-hidden="true"></i></a>
-        <a href="index.html#work" data-sec="work" style="--i:2"><span>Work</span><i class="pop-trace" aria-hidden="true"></i></a>
-        <a href="index.html#why" data-sec="why" style="--i:3"><span>Why NYNA</span><i class="pop-trace" aria-hidden="true"></i></a>
-        <a href="index.html#capabilities" data-sec="capabilities" style="--i:4"><span>Capabilities</span><i class="pop-trace" aria-hidden="true"></i></a>
-        <a href="index.html#clients" data-sec="clients" style="--i:5"><span>Clients</span><i class="pop-trace" aria-hidden="true"></i></a>
-        <a href="index.html#contact" data-sec="contact" style="--i:6"><span>Contact</span><i class="pop-trace" aria-hidden="true"></i></a>
+        <a href="/draft#services" data-sec="services" style="--i:0"><span>Services</span><i class="pop-trace" aria-hidden="true"></i></a>
+        <a href="/draft#hardware" data-sec="hardware" style="--i:1"><span>Hardware</span><i class="pop-trace" aria-hidden="true"></i></a>
+        <a href="/draft#work" data-sec="work" style="--i:2"><span>Work</span><i class="pop-trace" aria-hidden="true"></i></a>
+        <a href="/draft#why" data-sec="why" style="--i:3"><span>Why NYNA</span><i class="pop-trace" aria-hidden="true"></i></a>
+        <a href="/draft#capabilities" data-sec="capabilities" style="--i:4"><span>Capabilities</span><i class="pop-trace" aria-hidden="true"></i></a>
+        <a href="/draft#clients" data-sec="clients" style="--i:5"><span>Clients</span><i class="pop-trace" aria-hidden="true"></i></a>
+        <a href="/draft#contact" data-sec="contact" style="--i:6"><span>Contact</span><i class="pop-trace" aria-hidden="true"></i></a>
       </nav>
       <div class="pop-set">
         <button class="set" type="button" role="switch" aria-checked="true" data-backlight>
@@ -196,7 +196,7 @@ if (distance &lt;= 2.5f) {                     <span class="cm">// obstacle ahea
 
   <div class="cursor" id="cursor" aria-hidden="true"><span class="cursor-ring"><span class="cursor-label"></span></span><span class="cursor-dot"></span></div>
 
-  <script src="main.js?v=24" defer></script>
-  <script src="work.js?v=24" defer></script>
+  <script src="/draft/main.js?v=25" defer></script>
+  <script src="/draft/work.js?v=25" defer></script>
 </body>
 </html>

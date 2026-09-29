@@ -1167,7 +1167,7 @@ void main(){
   if (vImg && vTabs.length) {
     let cur = 'systems';
     const cache = {};
-    const src = key => `assets/boards/${key}.webp?v=2`;
+    const src = key => `/draft/assets/boards/${key}.webp?v=2`;
     const load = key => cache[key] || (cache[key] = new Promise(res => {
       const im = new Image();
       im.onload = im.onerror = () => res();
