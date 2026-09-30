@@ -1,1138 +1,224 @@
-<!DOCTYPE html>
-<html lang="en">
+<!doctype html>
+<html lang="en-GB" data-theme="light">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
-  <title>Optical Wireless Communication, NYNA · Fibre-optic dissertation project</title>
-  <meta name="description" content="Optical Wireless Communication, a final-year dissertation by NYNA: transmitting data and live audio over a 650 nm laser to a BPW34 photodiode, with custom PCBs, 3D-printed optics and dual-ESP32 firmware." />
-  <meta name="keywords" content="optical wireless communication, OWC, laser data transmission, Li-Fi, BPW34 photodiode, 650nm laser, ESP32, fibre optic, plastic optical fibre, dissertation project, electronic engineering, Royal Holloway, NYNA" />
-  <meta name="theme-color" content="#181D24" />
-  <script>try{if(localStorage.getItem('nyna-theme-v2')==='light')document.documentElement.classList.add('light');}catch(e){}</script>
-  <link rel="icon" href="/icons/favicon.ico" sizes="any" />
-  <link rel="icon" type="image/png" sizes="32x32" href="/icons/favicon-32.png" />
-  <link rel="icon" type="image/png" sizes="16x16" href="/icons/favicon-16.png" />
-  <link rel="apple-touch-icon" href="/icons/apple-touch-icon.png" />
-  <link rel="manifest" href="/site.webmanifest" />
-
-  <link rel="preconnect" href="https://fonts.googleapis.com" />
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-  <link rel="preconnect" href="https://api.fontshare.com" crossorigin />
-  <link rel="preconnect" href="https://images.unsplash.com" crossorigin />
-  <link href="https://fonts.googleapis.com/css2?family=Unbounded:wght@400;500;600&family=DM+Sans:opsz,wght@9..40,400;9..40,500;9..40,700&display=swap" rel="stylesheet" />
-  <link href="https://api.fontshare.com/v2/css?f[]=satoshi@400,500,700&display=swap" rel="stylesheet" />
-
-  <script type="importmap">
-  {
-    "imports": {
-      "three": "https://cdn.jsdelivr.net/npm/three@0.160.0/build/three.module.js",
-      "three/addons/": "https://cdn.jsdelivr.net/npm/three@0.160.0/examples/jsm/",
-      "lenis": "https://cdn.jsdelivr.net/npm/lenis@1.0.42/dist/lenis.mjs"
-    }
-  }
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Optical Wireless Comms | NYNA</title>
+  <meta name="description" content="A low-cost, bidirectional fibre-optic link carrying data and digital audio between two ESP32 nodes, designed and built by NYNA.">
+  <meta name="robots" content="index, follow">
+  <link rel="canonical" href="https://nyna.co.uk/owc.html">
+  <meta property="og:type" content="website">
+  <meta property="og:site_name" content="NYNA">
+  <meta property="og:title" content="Optical Wireless Comms | NYNA">
+  <meta property="og:description" content="A low-cost, bidirectional fibre-optic link carrying data and digital audio between two ESP32 nodes, designed and built by NYNA.">
+  <meta property="og:url" content="https://nyna.co.uk/owc.html">
+  <meta property="og:image" content="https://nyna.co.uk/icons/og.png">
+  <meta property="og:image:width" content="1200">
+  <meta property="og:image:height" content="630">
+  <meta name="twitter:card" content="summary_large_image">
+  <meta name="twitter:title" content="Optical Wireless Comms | NYNA">
+  <meta name="twitter:description" content="A low-cost, bidirectional fibre-optic link carrying data and digital audio between two ESP32 nodes, designed and built by NYNA.">
+  <meta name="twitter:image" content="https://nyna.co.uk/icons/og.png">
+  <meta name="theme-color" content="#1A222C">
+  <script>
+    /* theme before first paint: saved choice, else the system setting */
+    (function () {
+      var d = document.documentElement, t = null;
+      try { t = localStorage.getItem('nyna-theme'); } catch (e) {}
+      if (t !== 'light' && t !== 'dark') t = matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
+      d.setAttribute('data-theme', t);
+      d.className += ' js';
+      // main.js reveals the headline; never leave it hidden if that script fails
+      setTimeout(function () { d.classList.add('is-ready'); }, 3000);
+    })();
   </script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js" defer></script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/ScrollTrigger.min.js" defer></script>
-
-  <style>
-    /* ===== TOKENS ===== */
-    :root {
-      --dark: #181D24; --dark-2: #12161c; --dark-3: #0d1116;
-      --light: #F2F2F2; --ink: #141414;
-      --accent: #5ECFF9; --accent-soft: rgba(94,207,249,0.16); --accent-line: rgba(94,207,249,0.55);
-      --surface: rgba(242,242,242,0.035); --surface-2: rgba(242,242,242,0.06);
-      --hairline: rgba(242,242,242,0.1); --hairline-2: rgba(242,242,242,0.2);
-      --text: #F2F2F2; --text-muted: rgba(242,242,242,0.58); --text-dim: rgba(242,242,242,0.38);
-      --f-logo: "Unbounded", system-ui, sans-serif; --f-head: "Satoshi", system-ui, sans-serif; --f-body: "DM Sans", system-ui, sans-serif;
-      --r-sm: 10px; --r-md: 16px; --r-lg: 22px; --r-pill: 999px;
-      --ease: cubic-bezier(0.16,1,0.3,1); --ease-io: cubic-bezier(0.66,0,0.34,1); --t-fast: 0.25s; --t: 0.45s; --t-slow: 0.8s;
-      --container: 1280px; --gutter: clamp(1.25rem, 5vw, 3.5rem); --logo-shadow: 0 2px 4px rgba(0,0,0,0.62), 0 6px 20px rgba(0,0,0,0.45); --icon-shadow: drop-shadow(0 2px 4px rgba(0,0,0,0.62));
-    }
-    html.light {
-      --dark: #ECEFF3; --dark-2: #E2E6EC; --dark-3: #DADFE6;
-      --light: #161B22; --ink: #F4F6F8;
-      --accent: #0C8FCB; --accent-soft: rgba(12,143,203,0.14); --accent-line: rgba(12,143,203,0.5);
-      --surface: rgba(20,28,40,0.045); --surface-2: rgba(20,28,40,0.08);
-      --hairline: rgba(20,28,40,0.13); --hairline-2: rgba(20,28,40,0.24);
-      --text: #1A212B; --text-muted: rgba(26,33,43,0.64); --text-dim: rgba(26,33,43,0.44); --logo-shadow: 0 2px 4px rgba(20,26,34,0.32), 0 6px 18px rgba(20,26,34,0.18); --icon-shadow: drop-shadow(0 2px 4px rgba(20,26,34,0.34));
-    }
-    body { transition: background 0.5s var(--ease), color 0.5s var(--ease); }
-    .footer-row .variant button { color: var(--text-muted); transition: color var(--t); cursor: pointer; font: inherit; }
-    .footer-row .variant button:hover { color: var(--accent); }
-    .footer-row .variant button[aria-current] { color: var(--light); }
-    html.light .proj-cat { color: #F4F6F8; background: rgba(13,17,22,0.55); border-color: rgba(244,246,248,0.28); }
-    html.light .vignette { background: radial-gradient(135% 100% at 50% 42%, transparent 65%, rgba(150,165,190,0.2) 100%); }
-    html.light .hero::before { background: radial-gradient(72% 62% at 32% 48%, rgba(240,243,247,0.5), transparent 72%); }
-    html.light .bg-grad { background: radial-gradient(125% 95% at 50% -10%, #fafbfd 0%, var(--dark) 46%, var(--dark-2) 100%); }
-    html.light .owc-hero-cap { background: linear-gradient(to top, rgba(13,17,22,0.86), transparent); }
-    html.light .owc-hero-cap .caps { color: #F4F6F8; }
-    html.light .owc-hero-cap .muted { color: rgba(244,246,248,0.72); }
-    html.light .modal-close, html.light .pcb-lightbox-close { color: #F4F6F8; }
-    html.light .service:hover, html.light .proj:hover { box-shadow: 0 22px 48px -30px rgba(20,30,45,0.42); }
-    html.light .btn-solid:hover { box-shadow: 0 16px 40px rgba(20,30,45,0.22); }
-    html.light .adapters-stage { background: radial-gradient(circle at 50% 40%, rgba(56,86,120,0.13), rgba(30,45,65,0.05) 70%); border-color: var(--hairline-2); }
-    html.light .pcb-stage { background: radial-gradient(circle at 50% 44%, rgba(var(--pcb-glow,94,207,249),0.18), rgba(30,45,65,0.05) 70%); border-color: var(--hairline-2); }
-    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
-    html.js { scroll-behavior: auto; } html:not(.js) { scroll-behavior: smooth; }
-    img, svg, canvas { display: block; max-width: 100%; }
-    a { color: inherit; text-decoration: none; } ul { list-style: none; }
-    button { font: inherit; color: inherit; background: none; border: none; }
-    ::selection { background: var(--accent); color: var(--dark); }
-    body { font-family: var(--f-body); font-size: 16px; line-height: 1.8; color: var(--text); background: var(--dark); min-height: 100vh; overflow-x: hidden; -webkit-font-smoothing: antialiased; text-rendering: optimizeLegibility; }
-    @media (hover: hover) and (pointer: fine) { html.js, html.js * { cursor: none !important; } }
-    html.lenis, html.lenis body { height: auto; } .lenis.lenis-smooth { scroll-behavior: auto !important; } .lenis.lenis-stopped { overflow: hidden; }
-
-    /* ===== TYPE ===== */
-    h1,h2,h3,h4 { font-family: var(--f-head); font-weight: 700; line-height: 1.28; letter-spacing: -0.02em; }
-    .logo-type { font-family: var(--f-logo); font-weight: 500; letter-spacing: 0.04em; }
-    .display { font-family: var(--f-head); font-weight: 700; line-height: 1.12; letter-spacing: -0.03em; }
-    .h1 { font-size: clamp(2.4rem, 6vw, 4.4rem); } .h2 { font-size: clamp(1.9rem, 4.2vw, 3rem); line-height: 1.18; } .h3 { font-size: clamp(1.3rem, 2.3vw, 1.7rem); }
-    .lead { font-size: clamp(1.05rem, 1.5vw, 1.2rem); line-height: 1.65; color: var(--text-muted); }
-    .caps { font-family: var(--f-body); font-weight: 700; font-size: 0.7rem; letter-spacing: 0.26em; text-transform: uppercase; }
-    .muted { color: var(--text-muted); }
-    .accent-underline { position: relative; white-space: nowrap; color: var(--accent); }
-    .accent-underline::after { content: ""; position: absolute; left: 0; right: 0; bottom: -0.06em; height: 2px; background: var(--accent); border-radius: 2px; transform: scaleX(0); transform-origin: left; transition: transform var(--t-slow) var(--ease) 0.15s; }
-    .in .accent-underline::after, .accent-underline.lit::after { transform: scaleX(1); }
-
-    /* ===== LAYOUT ===== */
-    .shell { position: relative; z-index: 2; }
-    .container { width: min(100% - var(--gutter)*2, var(--container)); margin-inline: auto; }
-    section { padding: clamp(5rem, 12vw, 9rem) 0; position: relative; }
-    .eyebrow { display: inline-flex; align-items: center; gap: 0.7rem; color: var(--text-muted); margin-bottom: 1.5rem; }
-    .eyebrow .ln { width: 40px; height: 1px; background: var(--accent-line); }
-
-    /* ===== ATMOSPHERE ===== */
-    #wave { position: fixed; inset: 0; width: 100%; height: 100%; z-index: 0; pointer-events: none; opacity: 0; transition: opacity 1.6s var(--ease); }
-    #wave.ready { opacity: 1; }
-    .bg-grad { position: fixed; inset: 0; z-index: 0; pointer-events: none; background: radial-gradient(125% 95% at 50% -10%, #1e2630 0%, var(--dark) 46%, var(--dark-2) 100%); }
-    .wave-fallback { position: fixed; inset: 0; z-index: 0; pointer-events: none; opacity: 0; background: repeating-linear-gradient(0deg, transparent 0 40px, rgba(242,242,242,0.03) 40px 41px); }
-    html.no-webgl .wave-fallback { opacity: 1; }
-    .grain { position: fixed; inset: 0; z-index: 1; pointer-events: none; opacity: 0.035; mix-blend-mode: overlay; background-image: url("data:image/svg+xml;utf8,<svg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'><filter id='n'><feTurbulence type='fractalNoise' baseFrequency='0.8' numOctaves='2'/></filter><rect width='100%25' height='100%25' filter='url(%23n)'/></svg>"); }
-    .vignette { position: fixed; inset: 0; z-index: 1; pointer-events: none; background: radial-gradient(135% 100% at 50% 42%, transparent 58%, rgba(8,11,15,0.62) 100%); }
-
-    /* ===== PRELOADER ===== */
-    #loader { position: fixed; inset: 0; z-index: 1000; background: var(--dark-2); display: grid; place-items: center; transition: opacity 0.7s var(--ease); }
-    #loader.done { opacity: 0; pointer-events: none; }
-    .loader-in { width: min(78vw, 320px); text-align: center; }
-    .loader-logo { font-family: var(--f-logo); font-weight: 500; font-size: clamp(2rem, 7vw, 3rem); color: var(--light); letter-spacing: 0.08em; }
-    .loader-track { margin-top: 1.4rem; height: 1px; background: var(--hairline); position: relative; overflow: hidden; }
-    .loader-track i { position: absolute; inset: 0 100% 0 0; background: var(--accent); }
-    .loader-pct { margin-top: 0.9rem; font-family: var(--f-head); font-size: 0.78rem; letter-spacing: 0.3em; color: var(--text-dim); }
-
-    /* ===== CURSOR ===== */
-    .cur-dot, .cur-ring { position: fixed; top: 0; left: 0; z-index: 900; pointer-events: none; transform: translate(-50%,-50%); will-change: transform; mix-blend-mode: difference; }
-    .cur-dot { width: 5px; height: 5px; border-radius: 50%; background: #fff; transition: opacity var(--t-fast); }
-    .cur-ring { width: 38px; height: 38px; border: 1px solid rgba(255,255,255,0.7); border-radius: 50%; display: grid; place-items: center; transition: width var(--t) var(--ease), height var(--t) var(--ease), border-color var(--t), opacity var(--t-fast); }
-    .cur-ring .lbl { font-family: var(--f-head); font-weight: 700; font-size: 10px; letter-spacing: 0.14em; text-transform: uppercase; color: #fff; opacity: 0; transition: opacity var(--t-fast); mix-blend-mode: normal; }
-    body.c-hover .cur-ring { width: 60px; height: 60px; border-color: #fff; } body.c-hover .cur-dot { opacity: 0; }
-    body.c-view .cur-ring, body.c-drag .cur-ring { width: 84px; height: 84px; mix-blend-mode: normal; border-color: var(--accent-line); background: var(--accent-soft); -webkit-backdrop-filter: blur(2px); backdrop-filter: blur(2px); }
-    body.c-view .cur-ring .lbl, body.c-drag .cur-ring .lbl { opacity: 1; } body.c-view .cur-dot, body.c-drag .cur-dot { opacity: 0; }
-    @media (hover: none), (pointer: coarse) { .cur-dot, .cur-ring { display: none !important; } }
-    .progress { position: fixed; top: 0; left: 0; height: 2px; width: 100%; transform-origin: 0 50%; transform: scaleX(0); z-index: 120; background: var(--accent); }
-
-    /* ===== TOP BAR ===== */
-    .bar { position: fixed; top: 0; left: 0; right: 0; z-index: 130; display: flex; align-items: center; justify-content: space-between; padding: clamp(1.1rem, 2.2vw, 1.7rem) var(--gutter); transition: transform 0.5s var(--ease); }
-    .bar::before { content: ""; position: absolute; inset: 0; bottom: auto; height: 230%; background: linear-gradient(to bottom, rgba(13,17,22,0.66) 0%, rgba(13,17,22,0.4) 34%, rgba(13,17,22,0.14) 64%, rgba(13,17,22,0) 100%); pointer-events: none; z-index: -1; }
-    html.light .bar::before { background: linear-gradient(to bottom, rgba(236,239,243,0.78) 0%, rgba(236,239,243,0.5) 34%, rgba(236,239,243,0.18) 64%, rgba(236,239,243,0) 100%); }
-    .bar.hide { transform: translateY(-130%); }
-    .brand { font-family: var(--f-logo); font-weight: 500; font-size: 1.4rem; letter-spacing: 0.06em; color: var(--light); text-shadow: var(--logo-shadow); transition: opacity var(--t); }
-    .brand:hover { opacity: 0.7; }
-    .menu-btn { display: inline-flex; align-items: center; gap: 0.7rem; font-family: var(--f-head); font-weight: 700; font-size: 0.8rem; letter-spacing: 0.18em; text-transform: uppercase; color: var(--light); text-shadow: var(--logo-shadow); padding: 0.6rem 0.2rem; transition: opacity var(--t); }
-    .menu-btn:hover { opacity: 0.7; }
-    .menu-btn .bars { display: inline-grid; gap: 4px; width: 24px; filter: var(--icon-shadow); }
-    .menu-btn .bars span { height: 1.6px; background: var(--light); width: 100%; transition: transform var(--t) var(--ease), width var(--t) var(--ease); }
-    .menu-btn .bars span:nth-child(2) { width: 62%; justify-self: end; }
-    .menu-btn:hover .bars span:nth-child(2) { width: 100%; }
-
-    /* ===== MENU ===== */
-    .menu { position: fixed; inset: 0; z-index: 200; visibility: hidden; }
-    .menu.open { visibility: visible; }
-    .menu-bg { position: absolute; inset: 0; background: var(--dark-2); clip-path: inset(0 0 100% 0); transition: clip-path 0.85s var(--ease); }
-    .menu.open .menu-bg { clip-path: inset(0 0 0% 0); }
-    .menu-wave { position: absolute; left: 0; right: 0; bottom: 0; width: 100%; height: 24vh; opacity: 0; transition: opacity 0.6s ease 0.35s; }
-    .menu.open .menu-wave { opacity: 1; }
-    .menu-inner { position: relative; height: 100%; display: grid; grid-template-rows: auto 1fr auto; padding: clamp(1.1rem,2.2vw,1.7rem) var(--gutter) clamp(0.9rem,2.4vw,1.8rem); }
-    .menu-top { display: flex; align-items: center; justify-content: space-between; }
-    .menu-close { font-family: var(--f-head); font-weight: 700; font-size: 0.8rem; letter-spacing: 0.18em; text-transform: uppercase; color: var(--light); display: inline-flex; align-items: center; gap: 0.6rem; transition: opacity var(--t); }
-    .menu-close:hover { opacity: 0.7; }
-    .menu-close .x { position: relative; width: 20px; height: 20px; }
-    .menu-close .x::before, .menu-close .x::after { content: ""; position: absolute; top: 50%; left: 0; width: 20px; height: 1.6px; background: var(--light); }
-    .menu-close .x::before { transform: rotate(45deg); } .menu-close .x::after { transform: rotate(-45deg); }
-    .menu-links { align-self: center; display: grid; gap: clamp(0.4rem,1.4vw,0.7rem); }
-    .menu-links li { overflow: hidden; padding-bottom: 0.14em; margin-bottom: -0.14em; }
-    .menu-links a { font-family: var(--f-head); font-weight: 700; font-size: clamp(2rem, 7vw, 4.6rem); line-height: 1.16; letter-spacing: -0.03em; color: var(--light); display: inline-flex; align-items: baseline; gap: 1rem; transform: translateY(112%); transition: transform 0.75s var(--ease), color var(--t); }
-    .menu.open .menu-links a { transform: translateY(0); }
-    .menu.open .menu-links li:nth-child(1) a { transition-delay: 0.34s; } .menu.open .menu-links li:nth-child(2) a { transition-delay: 0.41s; }
-    .menu.open .menu-links li:nth-child(3) a { transition-delay: 0.48s; } .menu.open .menu-links li:nth-child(4) a { transition-delay: 0.55s; } .menu.open .menu-links li:nth-child(5) a { transition-delay: 0.62s; }
-    .menu-links a .idx { font-family: var(--f-body); font-weight: 700; font-size: 0.78rem; letter-spacing: 0.1em; color: var(--text-dim); transition: color var(--t); }
-    .menu-links a:hover, .menu-links a:hover .idx { color: var(--accent); }
-    .menu-foot { display: flex; flex-wrap: wrap; gap: 1rem 2.2rem; align-items: center; justify-content: space-between; opacity: 0; transition: opacity 0.6s ease 0.62s; padding-top: 1.2rem; }
-    .menu.open .menu-foot { opacity: 1; }
-    .menu-foot a { color: var(--text-muted); transition: color var(--t); position: relative; }
-    .menu-foot a::after { content: ""; position: absolute; left: 0; bottom: -3px; width: 100%; height: 1px; background: var(--accent); transform: scaleX(0); transform-origin: left; transition: transform var(--t) var(--ease); }
-    .menu-foot a:hover { color: var(--light); } .menu-foot a:hover::after { transform: scaleX(1); }
-
-    /* ===== BUTTONS ===== */
-    .btn { display: inline-flex; align-items: center; gap: 0.7rem; padding: 1rem 1.7rem; border-radius: var(--r-pill); font-family: var(--f-head); font-weight: 700; font-size: 0.94rem; transition: transform var(--t) var(--ease), background var(--t), color var(--t), border-color var(--t), box-shadow var(--t); will-change: transform; }
-    .btn svg { width: 16px; height: 16px; transition: transform var(--t) var(--ease); }
-    .btn-solid { background: var(--light); color: var(--ink); }
-    .btn-solid:hover { transform: translateY(-3px); box-shadow: 0 16px 40px rgba(0,0,0,0.4); } .btn-solid:hover svg { transform: translateX(5px); }
-    .btn-line { border: 1px solid var(--hairline-2); color: var(--light); } .btn-line:hover { border-color: var(--light); transform: translateY(-3px); }
-    .btn-text { color: var(--light); padding: 0.6rem 0; gap: 0.6rem; } .btn-text:hover .arr { transform: translateX(6px); } .btn-text .arr { transition: transform var(--t) var(--ease); }
-
-    /* ===== HERO ===== */
-    .hero { min-height: 100vh; min-height: 100svh; display: flex; align-items: center; padding-top: 9rem; padding-bottom: 7rem; }
-    .hero-grid { display: grid; gap: 1.6rem; max-width: 1000px; }
-    .hero h1 { margin-bottom: 0.6rem; }
-    .hero h1 .line { display: block; overflow: hidden; padding-bottom: 0.12em; margin-bottom: -0.06em; }
-    .hero h1 .line > span { display: inline-block; transform: translateY(116%); }
-    html:not(.js) .hero h1 .line > span { transform: none; }
-    .hero .lead { max-width: 560px; margin-bottom: 1.4rem; }
-    .hero-ctas { display: flex; gap: 0.9rem; flex-wrap: wrap; align-items: center; }
-    .scroll-cue { position: absolute; bottom: 2rem; left: var(--gutter); display: inline-flex; align-items: center; gap: 0.8rem; color: var(--text-dim); }
-    .scroll-cue .ln { width: 46px; height: 1px; background: var(--hairline-2); position: relative; overflow: hidden; }
-    .scroll-cue .ln::after { content: ""; position: absolute; inset: 0; background: var(--accent); transform: translateX(-100%); animation: cue 2.6s var(--ease) infinite; }
-    @keyframes cue { 0% { transform: translateX(-100%); } 55%,100% { transform: translateX(100%); } }
-
-    /* ===== SECTION HEAD + CARD ===== */
-    .sec-head { max-width: 720px; margin-bottom: clamp(2.5rem, 5vw, 4rem); } .sec-head .lead { margin-top: 1.1rem; }
-    .card { position: relative; background: var(--surface); border: 1px solid var(--hairline); border-radius: var(--r-lg); -webkit-backdrop-filter: blur(14px); backdrop-filter: blur(14px); overflow: hidden; transition: border-color 0.5s var(--ease), background 0.5s var(--ease), transform 0.5s var(--ease), box-shadow 0.5s var(--ease); }
-
-    /* ===== SERVICES ===== */
-    .services { display: grid; gap: 1.2rem; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); }
-    .service { padding: 2rem; display: flex; flex-direction: column; min-height: 320px; }
-    .service:hover { transform: translateY(-6px); border-color: var(--hairline-2); background: var(--surface-2); box-shadow: 0 24px 50px -30px rgba(0,0,0,0.7); }
-    .service .num { font-family: var(--f-head); font-weight: 700; font-size: 0.78rem; color: var(--text-dim); letter-spacing: 0.1em; }
-    .service .ic { width: 46px; height: 46px; margin: 1.4rem 0; transition: transform var(--t) var(--ease); }
-    .service:hover .ic { transform: translateY(-2px) scale(1.05); }
-    .service .ic svg { width: 100%; height: 100%; stroke: var(--accent); fill: none; stroke-width: 1.4; }
-    .service h3 { margin-bottom: 0.6rem; }
-    .service p { color: var(--text-muted); font-size: 0.95rem; line-height: 1.65; flex-grow: 1; }
-    .service ul { margin-top: 1.3rem; padding-top: 1.3rem; border-top: 1px solid var(--hairline); display: grid; gap: 0.5rem; }
-    .service ul li { font-size: 0.85rem; color: var(--text-muted); display: flex; gap: 0.7rem; align-items: center; }
-    .service ul li::before { content: ""; width: 14px; height: 1px; background: var(--hairline-2); flex-shrink: 0; transition: background var(--t); }
-    .service:hover ul li::before { background: var(--accent-line); }
-
-    /* ===== MARQUEE ===== */
-    .marquee { overflow: hidden; padding: 1.2rem 0; border-block: 1px solid var(--hairline); -webkit-mask-image: linear-gradient(90deg, transparent, #000 8%, #000 92%, transparent); mask-image: linear-gradient(90deg, transparent, #000 8%, #000 92%, transparent); }
-    .marquee-track { display: flex; gap: 2.6rem; width: max-content; animation: marquee 46s linear infinite; }
-    .marquee-track span { font-family: var(--f-head); font-weight: 500; font-size: 1rem; color: var(--text-muted); white-space: nowrap; display: inline-flex; align-items: center; gap: 2.6rem; }
-    .marquee-track span::after { content: ""; width: 16px; height: 1px; background: var(--hairline-2); }
-    @keyframes marquee { to { transform: translateX(-50%); } }
-
-    /* ===== PCB SHOWCASE ===== */
-    .pcb-wrap { display: grid; grid-template-columns: 1.1fr 0.9fr; gap: clamp(2rem,5vw,4rem); align-items: center; }
-    .pcb-stage { position: relative; aspect-ratio: 1/1; border-radius: var(--r-lg); overflow: hidden; border: 1px solid var(--hairline); background: radial-gradient(circle at 50% 44%, rgba(var(--pcb-glow,94,207,249),0.16), transparent 66%); perspective: 1400px; }
-    .pcb-viewer { position: absolute; inset: 0; padding: 9% 8% 15%; transform-style: preserve-3d; }
-    .pcb-board { width: 100%; height: 100%; object-fit: contain; object-position: center; transform: rotateX(8deg); transition: transform 0.4s var(--ease), opacity 0.45s var(--ease); will-change: transform; animation: pcbFloat 7s ease-in-out infinite; filter: drop-shadow(0 22px 40px rgba(0,0,0,0.5)) drop-shadow(0 0 30px rgba(var(--pcb-glow,94,207,249),0.42)); }
-    .pcb-board.swapping { opacity: 0; }
-    @keyframes pcbFloat { 0%,100% { translate: 0 -6px; } 50% { translate: 0 10px; } }
-    @media (prefers-reduced-motion: reduce) { .pcb-board { animation: none; } }
-    .pcb-board { cursor: pointer; }
-    /* PCB fullscreen lightbox */
-    .pcb-lightbox { position: fixed; inset: 0; z-index: 500; visibility: hidden; display: grid; place-items: center; }
-    .pcb-lightbox.open { visibility: visible; }
-    .pcb-lightbox-scrim { position: absolute; inset: 0; background: rgba(8,11,15,0.88); -webkit-backdrop-filter: blur(12px); backdrop-filter: blur(12px); opacity: 0; transition: opacity 0.45s var(--ease); }
-    .pcb-lightbox.open .pcb-lightbox-scrim { opacity: 1; }
-    .pcb-lightbox img { position: relative; max-width: 92vw; max-height: 84vh; object-fit: contain; opacity: 0; transform: scale(0.95); transition: opacity 0.5s var(--ease), transform 0.6s var(--ease); filter: drop-shadow(0 30px 70px rgba(0,0,0,0.7)); }
-    .pcb-lightbox.open img { opacity: 1; transform: scale(1); }
-    .pcb-lightbox-close { position: absolute; top: 1.4rem; right: 1.4rem; z-index: 2; width: 48px; height: 48px; border-radius: 50%; border: 1px solid var(--hairline-2); background: rgba(8,11,15,0.5); -webkit-backdrop-filter: blur(8px); backdrop-filter: blur(8px); display: grid; place-items: center; transition: transform 0.4s var(--ease), border-color 0.3s; }
-    .pcb-lightbox-close:hover { transform: rotate(90deg); border-color: var(--light); }
-    .pcb-lightbox-close .x { position: relative; width: 16px; height: 16px; }
-    .pcb-lightbox-close .x::before, .pcb-lightbox-close .x::after { content: ""; position: absolute; top: 50%; left: 0; width: 16px; height: 1.5px; background: var(--light); }
-    .pcb-lightbox-close .x::before { transform: rotate(45deg); } .pcb-lightbox-close .x::after { transform: rotate(-45deg); }
-    /* hero readability scrim */
-    .hero { position: relative; }
-    .hero::before { content: ""; position: absolute; inset: 0; z-index: -1; background: radial-gradient(72% 62% at 32% 48%, rgba(13,17,22,0.62), transparent 72%); pointer-events: none; }
-    /* ===== OWC FEATURED PROJECT ===== */
-    .owc-hero { display: block; margin: 0 0 1.2rem; border-radius: var(--r-lg); overflow: hidden; position: relative; cursor: pointer; }
-    .owc-hero img { width: 100%; max-height: 60vh; object-fit: cover; display: block; transition: transform 0.8s var(--ease); }
-    .owc-hero:hover img { transform: scale(1.03); }
-    .owc-hero-cap { position: absolute; left: 0; right: 0; bottom: 0; display: flex; flex-wrap: wrap; gap: 0.3rem 1rem; align-items: baseline; padding: 1.4rem; background: linear-gradient(to top, rgba(13,17,22,0.88), transparent); }
-    .owc-hero-cap .caps { color: var(--accent); }
-    .owc-specs { display: grid; grid-template-columns: repeat(auto-fit, minmax(150px,1fr)); gap: 0.8rem; margin-bottom: clamp(2rem,5vw,3rem); }
-    .spec { padding: 1.3rem; }
-    .spec-n { display: block; font-family: var(--f-head); font-weight: 700; font-size: 1.7rem; color: var(--light); line-height: 1; }
-    .spec-n small { font-size: 0.85rem; color: var(--text-muted); font-weight: 500; }
-    .spec-l { display: block; margin-top: 0.5rem; font-size: 0.8rem; color: var(--text-muted); line-height: 1.4; }
-    .owc-cols { display: grid; grid-template-columns: 1fr 1fr; gap: clamp(2rem,5vw,4rem); margin-bottom: clamp(2rem,5vw,3.5rem); }
-    .owc-cols h3 { margin-bottom: 0.8rem; } .owc-cols p { line-height: 1.7; }
-    .owc-list { display: grid; gap: 0.6rem; }
-    .owc-list li { color: var(--text-muted); font-size: 0.94rem; padding-left: 1.4rem; position: relative; line-height: 1.5; }
-    .owc-list li::before { content: ""; position: absolute; left: 0; top: 0.62em; width: 11px; height: 1px; background: var(--accent); }
-    @media (max-width: 760px) { .owc-cols { grid-template-columns: 1fr; } }
-    .owc-sub { margin: clamp(2rem,5vw,3.5rem) 0 1.6rem; }
-    .owc-sub .h3 { margin-top: 0.4rem; }
-    .adapters-wrap { display: grid; grid-template-columns: 1.05fr 0.95fr; gap: clamp(1.5rem,4vw,3rem); align-items: center; }
-    @media (max-width: 900px) { .adapters-wrap { grid-template-columns: 1fr; } }
-    .adapters-stage { position: relative; aspect-ratio: 1/1; border-radius: var(--r-lg); overflow: hidden; touch-action: pan-y; border: 1px solid var(--hairline); background: radial-gradient(circle at 50% 42%, rgba(94,207,249,0.1), transparent 68%); }
-    .adapters-stage canvas { width: 100% !important; height: 100% !important; display: block; touch-action: pan-y; }
-    .adapters-loading { position: absolute; inset: 0; display: grid; place-items: center; font-family: var(--f-head); font-weight: 700; font-size: 0.72rem; letter-spacing: 0.22em; text-transform: uppercase; color: var(--text-dim); opacity: 0; transition: opacity var(--t); pointer-events: none; z-index: 2; }
-    .adapters-fallback { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: contain; padding: 13%; opacity: 1; transition: opacity 0.5s; pointer-events: none; }
-    .adapters-stage.has3d .adapters-fallback { opacity: 0; }
-    .owc-render-grid { display: flex; flex-wrap: wrap; justify-content: center; gap: 0.7rem; margin-top: 1.4rem; }
-    .owc-render-grid img { flex: 1 1 150px; max-width: 215px; aspect-ratio: 1/1; object-fit: cover; border-radius: var(--r-md); border: 1px solid var(--hairline); background: var(--surface); cursor: pointer; transition: transform 0.4s var(--ease), border-color var(--t); }
-    .owc-render-grid img:hover { transform: translateY(-4px); border-color: var(--hairline-2); }
-    .owc-gallery { display: grid; grid-template-columns: repeat(4,1fr); gap: 0.8rem; }
-    @media (max-width: 760px) { .owc-gallery { grid-template-columns: repeat(2,1fr); } }
-    .owc-gallery img { width: 100%; aspect-ratio: 4/3; object-fit: cover; border-radius: var(--r-md); border: 1px solid var(--hairline); cursor: pointer; transition: transform 0.5s var(--ease), border-color var(--t); background: var(--surface); }
-    .owc-gallery img:hover { transform: translateY(-5px); border-color: var(--hairline-2); }
-    /* ===== SKILLS ===== */
-    .skills-grid { display: grid; grid-template-columns: repeat(3,1fr); gap: 1.2rem; }
-    @media (max-width: 760px) { .skills-grid { grid-template-columns: 1fr; } }
-    .skill-col { padding: 2rem; }
-    .skill-col:hover { border-color: var(--hairline-2); background: var(--surface-2); transform: translateY(-5px); }
-    .skill-h { font-family: var(--f-head); font-weight: 700; font-size: 1.05rem; margin-bottom: 1.2rem; display: flex; align-items: center; gap: 0.6rem; }
-    .skill-h .d { width: 8px; height: 8px; border-radius: 2px; background: var(--accent); }
-    .skill-col ul { display: grid; gap: 0.55rem; }
-    .skill-col li { color: var(--text-muted); font-size: 0.92rem; padding-left: 1.2rem; position: relative; }
-    .skill-col li::before { content: ""; position: absolute; left: 0; top: 0.62em; width: 8px; height: 1px; background: var(--hairline-2); transition: background var(--t); }
-    .skill-col:hover li::before { background: var(--accent-line); }
-    .pcb-badge { position: absolute; top: 1rem; left: 1rem; z-index: 2; }
-    .pcb-switch { position: absolute; bottom: 1rem; left: 50%; transform: translateX(-50%); z-index: 3; display: flex; gap: 0.32rem; padding: 0.38rem; border-radius: var(--r-pill); background: rgba(13,17,22,0.55); -webkit-backdrop-filter: blur(12px); backdrop-filter: blur(12px); border: 1px solid rgba(242,242,242,0.14); }
-    .pcb-chip { padding: 0.4rem 0.85rem; border-radius: var(--r-pill); font-family: var(--f-head); font-weight: 500; font-size: 0.72rem; color: rgba(242,242,242,0.62); transition: color var(--t), background var(--t); white-space: nowrap; cursor: pointer; }
-    .pcb-chip:hover { color: #fff; }
-    .pcb-chip.active { color: #0c1117; background: var(--accent); }
-    .pcb-loading { position: absolute; inset: 0; display: grid; place-items: center; z-index: 2; font-family: var(--f-head); font-weight: 700; font-size: 0.72rem; letter-spacing: 0.22em; text-transform: uppercase; color: var(--text-dim); opacity: 0; transition: opacity var(--t); pointer-events: none; }
-    @media (max-width: 560px) {
-      .pcb-switch { flex-wrap: nowrap; justify-content: flex-start; width: calc(100% - 1.4rem); overflow-x: auto; overflow-y: hidden; scroll-snap-type: x proximity; -webkit-overflow-scrolling: touch; scrollbar-width: none; -ms-overflow-style: none; }
-      .pcb-switch::-webkit-scrollbar { display: none; }
-      .pcb-switch .pcb-chip { flex: 0 0 auto; scroll-snap-align: center; }
-    }
-    .tst-logo { height: 38px; width: auto; max-width: 130px; object-fit: contain; object-position: left center; opacity: 0.92; }
-    .pcb-feats { display: grid; gap: 1rem; margin-top: 1.8rem; }
-    .pcb-feat { display: flex; gap: 1rem; align-items: flex-start; }
-    .pcb-feat .d { width: 8px; height: 8px; border-radius: 2px; background: var(--accent); margin-top: 0.5rem; flex-shrink: 0; }
-    .pcb-feat .ft { font-family: var(--f-head); font-weight: 700; color: var(--light); }
-    .pcb-feat p { color: var(--text-muted); font-size: 0.92rem; line-height: 1.55; }
-    @media (max-width: 900px) { .pcb-wrap { grid-template-columns: 1fr; } }
-
-    /* ===== WHY (equal 2x2) ===== */
-    .why-wrap { display: grid; grid-template-columns: 0.85fr 1.15fr; gap: clamp(2rem,5vw,5rem); align-items: start; }
-    .why-sticky { position: sticky; top: 22vh; }
-    .pillars { display: grid; grid-template-columns: repeat(2, 1fr); grid-auto-rows: 1fr; gap: 1.2rem; }
-    .pillar { padding: clamp(1.6rem,3vw,2.2rem); display: flex; flex-direction: column; gap: 0.9rem; }
-    .pillar:hover { transform: translateY(-6px); border-color: var(--hairline-2); background: var(--surface-2); }
-    .pillar .pn { font-family: var(--f-head); font-weight: 700; font-size: 1.6rem; color: var(--accent); }
-    .pillar h3 { font-size: 1.12rem; }
-    .pillar p { color: var(--text-muted); font-size: 0.92rem; line-height: 1.55; }
-    @media (max-width: 900px) { .why-wrap { grid-template-columns: 1fr; } .why-sticky { position: static; } }
-    @media (max-width: 520px) { .pillars { grid-template-columns: 1fr; } }
-
-    /* ===== WORK (clean grid) ===== */
-    .work-head { display: flex; justify-content: space-between; align-items: flex-end; gap: 2rem; flex-wrap: wrap; margin-bottom: 2.6rem; }
-    .work-grid { display: grid; gap: 1.2rem; grid-template-columns: repeat(auto-fill, minmax(290px, 1fr)); }
-    .proj { padding: 0; display: flex; flex-direction: column; }
-    .proj.hidden { display: none; }
-    .proj-img { position: relative; aspect-ratio: 16/10; overflow: hidden; }
-    .proj-img img { width: 100%; height: 100%; object-fit: cover; transition: transform 0.7s var(--ease); }
-    .proj:hover .proj-img img { transform: scale(1.06); }
-    .proj-img::after { content: ""; position: absolute; inset: 0; background: linear-gradient(to top, rgba(13,17,22,0.78), rgba(13,17,22,0.15) 55%, transparent); }
-    .proj-cat { position: absolute; top: 0.9rem; left: 0.9rem; z-index: 2; font-family: var(--f-head); font-weight: 700; font-size: 0.6rem; letter-spacing: 0.16em; text-transform: uppercase; color: var(--light); border: 1px solid rgba(242,242,242,0.35); padding: 0.25rem 0.6rem; border-radius: var(--r-pill); -webkit-backdrop-filter: blur(6px); backdrop-filter: blur(6px); transition: color var(--t), border-color var(--t); }
-    .proj:hover .proj-cat { color: var(--accent); border-color: var(--accent-line); }
-    .proj-body { padding: 1.4rem 1.5rem 1.6rem; display: flex; flex-direction: column; gap: 0.55rem; flex-grow: 1; }
-    .proj .client { font-family: var(--f-head); font-weight: 500; font-size: 0.76rem; color: var(--text-dim); }
-    .proj h3 { font-size: 1.15rem; }
-    .proj p { color: var(--text-muted); font-size: 0.86rem; line-height: 1.5; flex-grow: 1; }
-    .proj-tags { display: flex; flex-wrap: wrap; gap: 0.4rem; margin-top: 0.4rem; }
-    .proj-tags span { font-family: var(--f-head); font-weight: 500; font-size: 0.66rem; color: var(--text-muted); border: 1px solid var(--hairline); border-radius: var(--r-sm); padding: 0.18rem 0.5rem; }
-    .proj:hover { transform: translateY(-6px); border-color: var(--hairline-2); box-shadow: 0 26px 54px -30px rgba(0,0,0,0.75); }
-    .work-filters { display: flex; gap: 0.5rem; flex-wrap: wrap; }
-    .chip { padding: 0.55rem 1.1rem; border-radius: var(--r-pill); border: 1px solid var(--hairline); color: var(--text-muted); font-family: var(--f-head); font-weight: 500; font-size: 0.82rem; transition: color var(--t), border-color var(--t), background var(--t), transform var(--t-fast); }
-    .chip:hover { color: var(--light); border-color: var(--hairline-2); transform: translateY(-2px); }
-    .chip.active { color: var(--ink); background: var(--light); border-color: var(--light); }
-
-    /* ===== TESTIMONIALS ===== */
-    .tst-grid { display: grid; gap: 1.2rem; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); }
-    .tst { padding: 2rem; display: flex; flex-direction: column; gap: 1.4rem; }
-    .tst:hover { border-color: var(--hairline-2); background: var(--surface-2); transform: translateY(-4px); }
-    .tst .quote { font-family: var(--f-head); font-weight: 500; font-size: 1.05rem; line-height: 1.55; color: var(--light); }
-    .tst .quote::before { content: "“"; color: var(--accent); font-size: 2rem; line-height: 0; vertical-align: -0.35em; margin-right: 0.15em; }
-    .tst-by { display: flex; align-items: center; gap: 0.9rem; margin-top: auto; }
-    .tst-mono { width: 42px; height: 42px; border-radius: var(--r-sm); display: grid; place-items: center; font-family: var(--f-logo); font-weight: 500; font-size: 0.9rem; color: var(--accent); border: 1px solid var(--accent-line); background: var(--accent-soft); flex-shrink: 0; }
-    .tst-by .nm { font-family: var(--f-head); font-weight: 700; font-size: 0.92rem; color: var(--light); }
-    .tst-by .rl { font-size: 0.78rem; color: var(--text-dim); }
-
-    /* ===== CONTACT ===== */
-    .contact-wrap { display: grid; grid-template-columns: 1.1fr 0.9fr; gap: 1.2rem; }
-    .contact-main { padding: clamp(2rem,4vw,3.2rem); display: flex; flex-direction: column; gap: 1.4rem; justify-content: center; }
-    .contact-main h2 { font-size: clamp(1.8rem,4vw,2.8rem); }
-    .contact-list { display: grid; gap: 0.9rem; }
-    .contact-item { display: flex; align-items: center; gap: 1.1rem; padding: 1.2rem 1.3rem; }
-    .contact-item:hover { transform: translateX(6px); border-color: var(--hairline-2); background: var(--surface-2); }
-    .contact-item .ic { width: 22px; height: 22px; flex-shrink: 0; transition: transform var(--t) var(--ease); }
-    .contact-item:hover .ic { transform: scale(1.12); }
-    .contact-item .ic svg { width: 100%; height: 100%; stroke: var(--accent); fill: none; stroke-width: 1.5; }
-    .contact-item .k { font-family: var(--f-head); font-weight: 700; font-size: 0.62rem; letter-spacing: 0.2em; text-transform: uppercase; color: var(--text-dim); }
-    .contact-item .v { color: var(--light); font-size: 0.98rem; line-height: 1.4; }
-    @media (max-width: 860px) { .contact-wrap { grid-template-columns: 1fr; } }
-
-    /* ===== FOOTER ===== */
-    footer { padding: clamp(3rem,6vw,5rem) 0 2.5rem; position: relative; }
-    .footer-top { display: grid; grid-template-columns: 1.4fr 1fr 1fr; gap: 2rem; padding-bottom: 2.5rem; border-bottom: 1px solid var(--hairline); }
-    .footer-col h4 { font-family: var(--f-head); font-weight: 700; font-size: 0.7rem; letter-spacing: 0.2em; text-transform: uppercase; color: var(--text-dim); margin-bottom: 1.1rem; }
-    .footer-col a, .footer-col p { display: block; color: var(--text-muted); font-size: 0.92rem; margin-bottom: 0.5rem; transition: color var(--t); position: relative; width: fit-content; }
-    .footer-col a:hover { color: var(--light); }
-    .footer-lead { font-family: var(--f-head); font-weight: 500; color: var(--light); font-size: 1.05rem; max-width: 22ch; line-height: 1.5; }
-    .footer-brand { display: block; text-align: center; margin-top: 2.5rem; }
-    .footer-mark { font-family: var(--f-logo); font-weight: 500; font-size: clamp(3rem, 11vw, 7.5rem); line-height: 1; letter-spacing: 0.04em; color: var(--light); user-select: none; transition: opacity var(--t), letter-spacing var(--t-slow) var(--ease); display: inline-block; }
-    .footer-brand:hover .footer-mark { opacity: 0.85; letter-spacing: 0.09em; }
-    .footer-row { display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 1.2rem; margin-top: 2rem; color: var(--text-dim); font-size: 0.82rem; }
-    .footer-row .variant { display: inline-flex; gap: 0.5rem; align-items: center; }
-    .footer-row .variant a { color: var(--text-muted); transition: color var(--t); }
-    .footer-row .variant a:hover { color: var(--accent); }
-    @media (max-width: 760px) { .footer-top { grid-template-columns: 1fr; gap: 1.6rem; } .footer-row { justify-content: center; text-align: center; } }
-
-    /* ===== MODAL ===== */
-    .modal { position: fixed; inset: 0; z-index: 400; visibility: hidden; }
-    .modal.open { visibility: visible; }
-    .modal-scrim { position: absolute; inset: 0; background: rgba(8,11,15,0.65); -webkit-backdrop-filter: blur(8px); backdrop-filter: blur(8px); opacity: 0; transition: opacity var(--t); }
-    .modal.open .modal-scrim { opacity: 1; }
-    .modal-card { position: absolute; left: 50%; top: 50%; transform: translate(-50%,-46%); width: min(94vw, 600px); background: var(--dark); border: 1px solid var(--hairline-2); border-radius: var(--r-lg); overflow: hidden; opacity: 0; transition: opacity 0.5s var(--ease), transform 0.6s var(--ease); }
-    .modal.open .modal-card { opacity: 1; transform: translate(-50%,-50%); }
-    .modal-img { position: relative; aspect-ratio: 16/8; overflow: hidden; }
-    .modal-img img { width: 100%; height: 100%; object-fit: cover; }
-    .modal-img::after { content: ""; position: absolute; inset: 0; background: linear-gradient(to top, var(--dark), transparent 70%); }
-    .modal-pad { padding: 0 clamp(1.6rem,4vw,2.4rem) clamp(1.8rem,4vw,2.4rem); margin-top: -2rem; position: relative; }
-    .modal-close { position: absolute; top: 1.1rem; right: 1.1rem; z-index: 3; width: 40px; height: 40px; border-radius: 50%; border: 1px solid var(--hairline-2); background: rgba(8,11,15,0.5); -webkit-backdrop-filter: blur(6px); backdrop-filter: blur(6px); display: grid; place-items: center; transition: border-color var(--t), transform var(--t) var(--ease); }
-    .modal-close:hover { border-color: var(--light); transform: rotate(90deg); }
-    .modal-close .x { position: relative; width: 14px; height: 14px; }
-    .modal-close .x::before, .modal-close .x::after { content: ""; position: absolute; top: 50%; left: 0; width: 14px; height: 1.4px; background: var(--light); }
-    .modal-close .x::before { transform: rotate(45deg); } .modal-close .x::after { transform: rotate(-45deg); }
-    .modal-cat { color: var(--accent); display: block; margin-bottom: 0.7rem; }
-    .modal-title { margin-bottom: 0.3rem; } .modal-client { display: block; margin-bottom: 1.2rem; }
-    .modal-desc { color: var(--text-muted); margin-bottom: 1.4rem; }
-    .modal-tags { display: flex; flex-wrap: wrap; gap: 0.4rem; }
-    .modal-tags span { font-family: var(--f-head); font-weight: 500; font-size: 0.72rem; color: var(--text-muted); border: 1px solid var(--hairline); border-radius: var(--r-sm); padding: 0.25rem 0.6rem; }
-
-    /* ===== REVEAL ===== */
-    .js [data-reveal] { opacity: 0; transform: translateY(24px); transition: opacity 0.55s var(--ease-io), transform 0.55s var(--ease-io); }
-    .js [data-reveal].in { opacity: 1; transform: none; }
-    .js [data-stagger] > * { opacity: 0; transform: translateY(24px); transition: opacity 0.5s var(--ease-io), transform 0.5s var(--ease-io); }
-    .js [data-stagger].in > * { opacity: 1; transform: none; }
-    .js [data-stagger].in > *:nth-child(2){transition-delay:.07s;} .js [data-stagger].in > *:nth-child(3){transition-delay:.14s;}
-    .js [data-stagger].in > *:nth-child(4){transition-delay:.21s;} .js [data-stagger].in > *:nth-child(5){transition-delay:.28s;}
-    .js [data-stagger].in > *:nth-child(6){transition-delay:.35s;} .js [data-stagger].in > *:nth-child(7){transition-delay:.42s;}
-    a:focus-visible, button:focus-visible { outline: 2px solid var(--accent); outline-offset: 4px; border-radius: var(--r-sm); }
-
-    @media (max-width: 760px) {
-      section { padding: clamp(3.5rem,14vw,6rem) 0; }
-      .hero { padding-top: 7rem; min-height: 92vh; }
-      .hero-ctas { width: 100%; } .hero-ctas .btn-solid { flex: 1; justify-content: center; }
-      .scroll-cue { display: none; }
-    }
-    @media (max-width: 600px) { .service { min-height: auto; } }
-    @media (prefers-reduced-motion: reduce) {
-      *, *::before, *::after { animation-duration: .001ms !important; animation-iteration-count: 1 !important; transition-duration: .001ms !important; }
-      .js [data-reveal], .js [data-stagger] > * { opacity: 1 !important; transform: none !important; }
-      .hero h1 .line > span, .menu-links a { transform: none !important; }
-      #wave { opacity: 0.5; }
-    }
-
-    /* ==========================================================================
-       APPLE DESIGN PASS
-       Designing Fluid Interfaces (WWDC18) + The Details of UI Typography (WWDC20)
-       ========================================================================== */
-
-    /* 1 · Response: kill input latency. Removes the ~300ms tap delay and the
-       browser's uncontrolled tap flash, so our own press feedback is the only
-       feedback the user sees. */
-    a, button, .btn, .chip, .proj, .card, .service, .menu-btn, .brand,
-    .pcb-chip, .owc-gallery img, [data-cursor] {
-      -webkit-tap-highlight-color: transparent;
-      touch-action: manipulation;
-    }
-
-    /* 1 + 10 · Feedback on pointer-DOWN, never on release. The press settles the
-       element toward the surface; ~100ms ease-out so it reads as instantaneous.
-       (Declared after the :hover rules so it wins at equal specificity.) */
-    .btn:active { transform: translateY(-1px) scale(0.972); transition: transform 100ms ease-out; }
-    .chip:active, .pcb-chip:active { transform: scale(0.955); transition: transform 100ms ease-out; }
-    .proj:active { transform: translateY(-3px) scale(0.993); transition: transform 120ms ease-out; }
-    .service:active { transform: translateY(-2px) scale(0.995); transition: transform 120ms ease-out; }
-    .owc-gallery img:active { transform: scale(0.985); transition: transform 120ms ease-out; }
-    .menu-btn:active, .brand:active, .menu-links a:active,
-    .menu-foot a:active, .footer-row a:active { opacity: 0.62; transition: opacity 80ms ease-out; }
-
-    /* 15 · Typography: tracking is size-specific and leading tracks size
-       inversely. A single value across h1-h4 is wrong at both ends of the scale,
-       so large display text tightens and small headings relax. */
-    h1, h2, h3, h4, .display, .h1, .h2, .h3 { font-optical-sizing: auto; }
-    .display, .h1 { line-height: 1.06; letter-spacing: -0.033em; }
-    .h2 { line-height: 1.14; letter-spacing: -0.024em; }
-    .h3 { line-height: 1.26; letter-spacing: -0.012em; }
-    .lead { letter-spacing: -0.003em; }
-
-    /* 14 · prefers-reduced-transparency: translucent surfaces become frosted
-       solids rather than blurred glass, so legibility never depends on blur. */
-    @media (prefers-reduced-transparency: reduce) {
-      .card, .map-badge, .modal-close, .modal-scrim, .pcb-lightbox-close,
-      .pcb-lightbox-scrim, .pcb-switch, .proj-cat, .work-fade span {
-        -webkit-backdrop-filter: none !important; backdrop-filter: none !important;
-      }
-      .card, .pcb-switch, .map-badge { background: var(--dark-2); }
-      .modal-scrim, .pcb-lightbox-scrim { background: rgba(8,11,15,0.97); }
-      html.light .modal-scrim, html.light .pcb-lightbox-scrim { background: rgba(226,230,236,0.97); }
-    }
-
-    /* 14 · prefers-contrast: near-solid surfaces with defined, contrasting
-       borders. Driven through the tokens so every component inherits it. */
-    @media (prefers-contrast: more) {
-      :root { --hairline: rgba(242,242,242,0.30); --hairline-2: rgba(242,242,242,0.50);
-              --text-muted: rgba(242,242,242,0.86); --text-dim: rgba(242,242,242,0.70); }
-      html.light { --hairline: rgba(20,28,40,0.36); --hairline-2: rgba(20,28,40,0.56);
-                   --text-muted: rgba(26,33,43,0.88); --text-dim: rgba(26,33,43,0.72); }
-      .btn-line, .chip { border-width: 1.5px; }
-    }
-
-    /* 14 · Reduced motion is a gentler equivalent, not the absence of feedback.
-       Transforms drop out, but a short opacity cross-fade keeps the press
-       readable so the interface still answers the user. */
-    @media (prefers-reduced-motion: reduce) {
-      a, button, .btn, .chip, .card, .proj, .service { transition: opacity 140ms ease !important; }
-      .btn:active, .chip:active, .pcb-chip:active, .proj:active,
-      .service:active, .owc-gallery img:active { transform: none; opacity: 0.72; }
-    }
-  </style>
-  <link rel="canonical" href="https://nyna.co.uk/owc.html" />
-  <meta name="robots" content="index, follow" />
-  <meta property="og:type" content="website" />
-  <meta property="og:site_name" content="NYNA" />
-  <meta property="og:title" content="Optical Wireless Communication, NYNA · Fibre-optic dissertation project" />
-  <meta property="og:description" content="Optical Wireless Communication, a final-year dissertation by NYNA: transmitting data and live audio over a 650 nm laser to a BPW34 photodiode, with custom PCBs, 3D-printed optics and dual-ESP32 firmware." />
-  <meta property="og:url" content="https://nyna.co.uk/owc.html" />
-  <meta property="og:image" content="https://nyna.co.uk/icons/og.png" />
-  <meta property="og:image:width" content="1200" />
-  <meta property="og:image:height" content="630" />
-  <meta name="twitter:card" content="summary_large_image" />
-  <meta name="twitter:title" content="Optical Wireless Communication, NYNA · Fibre-optic dissertation project" />
-  <meta name="twitter:description" content="Optical Wireless Communication, a final-year dissertation by NYNA: transmitting data and live audio over a 650 nm laser to a BPW34 photodiode, with custom PCBs, 3D-printed optics and dual-ESP32 firmware." />
-  <meta name="twitter:image" content="https://nyna.co.uk/icons/og.png" />
+  <link rel="icon" href="/icons/favicon.ico" sizes="any">
+  <link rel="icon" type="image/png" sizes="32x32" href="/icons/favicon-32.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="/icons/favicon-16.png">
+  <link rel="apple-touch-icon" href="/icons/apple-touch-icon.png">
+  <link rel="manifest" href="/site.webmanifest">
+  <link rel="preload" href="/assets/fonts/archivo-wide.woff" as="font" type="font/woff" crossorigin>
+  <link rel="preload" href="/assets/fonts/archivo.woff" as="font" type="font/woff" crossorigin>
+  <link rel="preload" href="/assets/fonts/unbounded-500.woff" as="font" type="font/woff" crossorigin>
+  <script type="importmap">
+    { "imports": {
+      "three": "https://cdn.jsdelivr.net/npm/three@0.160.0/build/three.module.js",
+      "three/addons/": "https://cdn.jsdelivr.net/npm/three@0.160.0/examples/jsm/"
+    } }
+  </script>
+  <link rel="stylesheet" href="/style.css?v=26">
+  <!-- Vercel Web Analytics and Speed Insights -->
+  <script>window.va = window.va || function () { (window.vaq = window.vaq || []).push(arguments); };</script>
+  <script defer src="/_vercel/insights/script.js"></script>
+  <script>window.si = window.si || function () { (window.siq = window.siq || []).push(arguments); };</script>
+  <script defer src="/_vercel/speed-insights/script.js"></script>
 </head>
-<body>
+<body class="case-page">
+  <canvas class="bench" id="bench" aria-hidden="true"></canvas>
+  <a class="skip" href="#main">Skip to content</a>
 
-  <div id="loader"><div class="loader-in"><div class="loader-logo">NYNA</div><div class="loader-track"><i></i></div><div class="loader-pct">0</div></div></div>
+  <div class="board" id="board">
+    <div class="tiles" id="tiles" aria-hidden="true"></div>
 
-  <div class="cur-dot" aria-hidden="true"></div>
-  <div class="cur-ring" aria-hidden="true"><span class="lbl">View</span></div>
-  <div class="progress" aria-hidden="true"></div>
+    <span class="mhole mhole--tl" aria-hidden="true" data-keepout></span>
+    <span class="mhole mhole--tr" aria-hidden="true" data-keepout></span>
 
-  <div class="bg-grad" aria-hidden="true"></div>
-  <canvas id="wave" aria-hidden="true"></canvas>
-  <div class="wave-fallback" aria-hidden="true"></div>
-  <div class="vignette" aria-hidden="true"></div>
-  <div class="grain" aria-hidden="true"></div>
-
-  <header class="bar" id="bar">
-    <a href="index.html" class="brand logo-type" data-cursor="hover">NYNA</a>
-    <button class="menu-btn" id="menuOpen" data-cursor="hover" aria-haspopup="true" aria-expanded="false"><span>Menu</span><span class="bars" aria-hidden="true"><span></span><span></span></span></button>
-  </header>
-
-  <div class="menu" id="menu" role="dialog" aria-modal="true" aria-label="Menu">
-    <div class="menu-bg"></div>
-    <svg class="menu-wave" viewBox="0 0 1440 200" preserveAspectRatio="none" aria-hidden="true">
-      <path fill="none" stroke="var(--accent-line)" stroke-width="1.4" d="M0,100 C240,40 480,160 720,100 C960,40 1200,160 1440,100"/>
-      <path fill="none" stroke="var(--accent-line)" stroke-width="1" opacity="0.5" d="M0,132 C240,72 480,192 720,132 C960,72 1200,192 1440,132"/>
-    </svg>
-    <div class="menu-inner">
-      <div class="menu-top">
-        <a href="index.html" class="brand logo-type" data-cursor="hover" data-menu-link>NYNA</a>
-        <button class="menu-close" id="menuClose" data-cursor="hover"><span>Close</span><span class="x" aria-hidden="true"></span></button>
+    <header class="nav" id="nav" data-keepout>
+      <a class="logo" href="/" aria-label="NYNA, home">NYNA</a>
+      <button class="pwr" type="button" aria-pressed="true" aria-label="Backlight" title="Backlight on / off" data-backlight><span class="led" aria-hidden="true"></span><span class="pwr-label" aria-hidden="true">PWR</span></button>
+      <nav class="nav-links" aria-label="Main">
+        <a href="/#services">Services</a>
+        <a href="/#hardware">Hardware</a>
+        <a href="/#work">Work</a>
+        <a href="/#clients">Clients</a>
+        <a href="/#contact">Contact</a>
+      </nav>
+      <div class="nav-tools">
+        <button class="mode" type="button" role="switch" aria-checked="false" aria-label="Dark mode" title="Dark mode" data-theme-toggle>
+          <svg viewBox="0 0 24 24" aria-hidden="true"><circle class="mode-ring" cx="12" cy="12" r="8.25"/><path class="mode-half" d="M12 3.75a8.25 8.25 0 0 1 0 16.5z"/></svg>
+        </button>
+        <button class="menu-open" type="button" aria-expanded="false" aria-controls="menu" data-menu-open>Menu</button>
       </div>
-      <ul class="menu-links">
-        <li><a href="index.html#services" data-cursor="hover" data-menu-link><span class="idx">01</span>Services</a></li>
-        <li><a href="owc.html" data-cursor="hover" data-menu-link><span class="idx">02</span>Project</a></li>
-        <li><a href="index.html#skills" data-cursor="hover" data-menu-link><span class="idx">03</span>Skills</a></li>
-        <li><a href="index.html#work" data-cursor="hover" data-menu-link><span class="idx">04</span>Work</a></li>
-        <li><a href="#contact" data-cursor="hover" data-menu-link><span class="idx">05</span>Contact</a></li>
-      </ul>
-      <div class="menu-foot">
-        <a href="mailto:info@nyna.co.uk" data-cursor="hover" data-menu-link>info@nyna.co.uk</a>
-        <a href="tel:02080874237" data-cursor="hover" data-menu-link>020 8087 4237</a>
-        <span class="muted">London, UK</span>
-      </div>
-    </div>
-  </div>
+    </header>
 
-  <main class="shell" id="top">
-
-    <!-- OWC FEATURED PROJECT -->
-    <section id="owc" style="padding-top:clamp(7.5rem,16vw,11rem);">
-      <div class="container">
-        <a href="index.html#work" class="owc-back" data-cursor="hover" data-reveal style="display:inline-flex;align-items:center;gap:.55rem;margin-bottom:1.6rem;color:var(--muted);font:600 .72rem/1 var(--font-body);letter-spacing:.16em;text-transform:uppercase;text-decoration:none;">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" style="width:16px;height:16px;"><path d="M19 12H5M12 19l-7-7 7-7"/></svg>
-          <span>All work</span>
-        </a>
-        <div class="sec-head" data-reveal>
-          <span class="eyebrow"><span class="ln"></span><span class="caps">Featured project · Final-year dissertation</span></span>
-          <h2 class="h2" data-split>Sending data through light.</h2>
-          <p class="lead">A low-cost, bidirectional fibre-optic link that carries digital data, and digital audio, between two ESP32 nodes over 1&nbsp;m of TOSLINK plastic optical fibre, a 650&nbsp;nm KY-008 laser into a BPW34 photodiode, recovered through a discrete analogue front end and the ESP32's hardware pulse counter. BEng Electronic Engineering, Royal Holloway, University of London. Supervisor: Dr Shyqyri Haxha.</p>
-        </div>
-
-        <figure class="owc-hero card" data-reveal data-cursor="view" data-full="projects/owc_transceiver.jpg">
-          <img src="projects/owc_transceiver.jpg" alt="Assembled NYNA optical wireless transceiver with dual touchscreens and speakers" loading="lazy">
-          <figcaption class="owc-hero-cap"><span class="caps">The transceiver</span><span class="muted">Two ESP32 nodes · KY-008 laser TX / BPW34 RX · OPA356 TIA + TLV3501 comparator · 1&nbsp;m TOSLINK fibre</span></figcaption>
+    <main id="main">
+      <article class="case" id="top" data-keepout="text">
+        <a class="back" href="/#work"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M19 12H5M12 19l-7-7 7-7"/></svg>All work</a>
+        <header class="case-head">
+          <p class="case-kicker"><span class="led" aria-hidden="true"></span>In-house R&amp;D</p>
+          <h1 class="case-h"><span class="w" style="--i:0">Sending</span> <span class="w" style="--i:1">data</span> <span class="w" style="--i:2">through</span> <span class="w" style="--i:3">light.</span></h1>
+          <p class="case-lead">A low-cost, bidirectional fibre-optic link that carries digital data, and digital audio, between two ESP32 nodes over 1&nbsp;m of TOSLINK plastic optical fibre: a 650&nbsp;nm KY-008 laser into a BPW34 photodiode, recovered through a discrete analogue front end and the ESP32&rsquo;s hardware pulse counter.</p>
+        </header>
+        <div class="perf perf--side" aria-hidden="true" data-keepout></div>
+        <figure class="case-hero">
+          <button class="shot" type="button" data-zoom="/projects/owc_transceiver.jpg" data-cursor="Zoom"><img src="/projects/owc_transceiver.jpg" alt="The assembled optical wireless transceiver, with two touchscreens and speakers" width="1600" height="1200" draggable="false"></button>
+          <figcaption><strong>The transceiver</strong><span>Two ESP32 nodes, a KY-008 laser transmitter and BPW34 receiver, an OPA356 TIA with a TLV3501 comparator, and 1&nbsp;m of TOSLINK fibre.</span></figcaption>
         </figure>
-
-        <div class="owc-specs" data-stagger>
-          <div class="spec card"><span class="spec-n">650<small>nm</small></span><span class="spec-l">KY-008 laser diode transmitter</span></div>
-          <div class="spec card"><span class="spec-n">BPW34</span><span class="spec-l">Vishay PIN photodiode receiver</span></div>
-          <div class="spec card"><span class="spec-n">OPA356</span><span class="spec-l">200 MHz TIA · R<sub>f</sub> 22 k&Omega;</span></div>
-          <div class="spec card"><span class="spec-n">TLV3501</span><span class="spec-l">4.5 ns rail-to-rail comparator</span></div>
-          <div class="spec card"><span class="spec-n">128<small>kbps</small></span><span class="spec-l">Sustained · 640 kbps peak</span></div>
-          <div class="spec card"><span class="spec-n">1<small>m</small></span><span class="spec-l">TOSLINK plastic optical fibre</span></div>
-        </div>
-
-        <div class="owc-cols">
-          <div data-reveal>
-            <h3 class="h3">How it works</h3>
-            <p class="muted">Each byte is framed (0x7E start · length · payload · XOR checksum) and sent as on-off keying: the ESP32 switches a 650&nbsp;nm KY-008 laser through a 2N2222A driver, coupled into 1&nbsp;m of TOSLINK fibre. At the far end a reverse-biased BPW34 photodiode feeds an OPA356 transimpedance amplifier (R<sub>f</sub> 22&nbsp;k&Omega;, C<sub>f</sub> 2.2&nbsp;pF) and a TLV3501 comparator with 100&nbsp;k&Omega; Schmitt-trigger hysteresis. The recovered edges are counted by the ESP32's PCNT hardware pulse-counter over 100&nbsp;ms windows (1&nbsp;&micro;s glitch filter) on GPIO34. A separate Bluetooth A2DP path streams audio through a MAX98357A I&sup2;S amplifier.</p>
+        <dl class="specs"><div class="spec"><dt>650<small>nm</small></dt><dd>KY-008 laser diode transmitter</dd></div><div class="spec"><dt>BPW34</dt><dd>Vishay PIN photodiode receiver</dd></div><div class="spec"><dt>OPA356</dt><dd>200 MHz TIA, R<sub>f</sub> 22&nbsp;k&Omega;</dd></div><div class="spec"><dt>TLV3501</dt><dd>4.5 ns rail-to-rail comparator</dd></div><div class="spec"><dt>128<small>kbps</small></dt><dd>Sustained, 640 kbps peak</dd></div><div class="spec"><dt>1<small>m</small></dt><dd>TOSLINK plastic optical fibre</dd></div></dl>
+        <section class="case-sec" id="how" data-label="How it works">
+          
+          <div class="case-cols">
+            <div class="prose"><h2 class="case-h3">How it works</h2><p>Each byte is framed (a 0x7E start byte, length, payload and XOR checksum) and sent as on-off keying: the ESP32 switches a 650&nbsp;nm KY-008 laser through a 2N2222A driver, coupled into 1&nbsp;m of TOSLINK fibre. At the far end a reverse-biased BPW34 photodiode feeds an OPA356 transimpedance amplifier (R<sub>f</sub> 22&nbsp;k&Omega;, C<sub>f</sub> 2.2&nbsp;pF) and a TLV3501 comparator with 100&nbsp;k&Omega; Schmitt-trigger hysteresis. The recovered edges are counted by the ESP32&rsquo;s PCNT hardware pulse counter over 100&nbsp;ms windows (1&nbsp;&micro;s glitch filter) on GPIO34. A separate Bluetooth A2DP path streams audio through a MAX98357A I&sup2;S amplifier.</p></div>
+            <div><h2 class="case-h3">What we built</h2><ul class="leds"><li>A custom two-layer PCB carrying both transceiver nodes, designed in EasyEDA and fabricated by JLCPCB</li><li>Transmitter and receiver firmware in C++ (Arduino, ESP32) with a framed, XOR-checked protocol</li><li>CAD-modelled, 3D-printed PLA optics for the laser, BPW34 photodiode and TOSLINK ferrule (roughly six iterations)</li><li>A 2.8&Prime; ILI9341 touchscreen UI (XPT2046 touch) showing live telemetry and recovered text</li><li>End-to-end characterisation: DC levels, comparator swing and a PCNT data-rate sweep (8 to 640 kbps)</li></ul></div>
           </div>
-          <div data-reveal>
-            <h3 class="h3">What I built</h3>
-            <ul class="owc-list">
-              <li>A custom two-layer PCB carrying both transceiver nodes, designed in EasyEDA and fabricated by JLCPCB</li>
-              <li>Transmitter &amp; receiver firmware in C++ (Arduino / ESP32) with a framed, XOR-checked protocol</li>
-              <li>CAD-modelled, 3D-printed PLA optics for the laser, BPW34 photodiode &amp; TOSLINK ferrule (roughly six iterations)</li>
-              <li>A 2.8&quot; ILI9341 touchscreen UI (XPT2046 touch) showing live telemetry &amp; recovered text</li>
-              <li>End-to-end characterisation: DC levels, comparator swing &amp; a PCNT data-rate sweep (8 to 640 kbps)</li>
-            </ul>
-          </div>
-        </div>
-
-        <div class="owc-sub" data-reveal>
-          <span class="eyebrow"><span class="ln"></span><span class="caps">Where it started · Breadboard prototype</span></span>
-          <h3 class="h3">The initial transceiver circuit.</h3>
-        </div>
-        <div class="adapters-info" data-reveal style="margin-bottom:clamp(2rem,4vw,3rem)">
-          <p class="muted">Before any boards were fabricated, the whole optical link began on breadboards, an ESP32 driving the 650&nbsp;nm laser on one side; a BPW34 photodiode feeding the OPA356 transimpedance amplifier and TLV3501 comparator on the other, with live telemetry and Bluetooth pairing surfaced on an ILI9341 touchscreen. This is the prototype I characterised, DC levels, timing and the data-rate sweep, before committing the design to a fabricated PCB.</p>
-        </div>
-        <div class="owc-gallery" data-stagger style="margin-bottom:clamp(3rem,6vw,5rem)">
-          <img src="projects/init_breadboard2.jpg" data-cursor="view" data-full="projects/init_breadboard2.jpg" alt="Breadboard transceiver prototype with 650nm laser and touchscreen showing NYNA_AUDIO pairing" loading="lazy">
-          <img src="projects/init_breadboard1.jpg" data-cursor="view" data-full="projects/init_breadboard1.jpg" alt="ESP32 and BPW34 receiver front-end wired on a breadboard" loading="lazy">
-          <img src="projects/init_schematic.png" data-cursor="view" data-full="projects/init_schematic.png" alt="Initial transceiver circuit schematic" loading="lazy">
-        </div>
-
-        <div class="owc-sub" data-reveal>
-          <span class="eyebrow"><span class="ln"></span><span class="caps">Custom optics · 3D-printed</span></span>
-          <h3 class="h3">Adapters I designed &amp; printed.</h3>
-        </div>
-        <div class="adapters-wrap" data-reveal>
-          <div class="adapters-stage" id="adaptersStage" data-cursor="drag">
-            <span class="pcb-badge caps" style="color:var(--accent)">Drag to rotate</span>
-            <canvas id="adapters"></canvas>
-            <div class="adapters-loading" id="adaptersLoading">Loading model</div>
-            <img class="adapters-fallback" id="adaptersFallback" src="projects/render_final_adapter.png" alt="3D-printed optical adapter" />
-            <div class="pcb-switch" id="adaptersSwitch">
-              <button class="pcb-chip active" data-adapter="final" data-cursor="hover">KY-008</button>
-              <button class="pcb-chip" data-adapter="bpw34" data-cursor="hover">BPW34</button>
-              <button class="pcb-chip" data-adapter="coupler" data-cursor="hover">Coupler</button>
-              <button class="pcb-chip" data-adapter="toslink_led" data-cursor="hover">TOSLINK LED</button>
-              <button class="pcb-chip" data-adapter="toslink" data-cursor="hover">TOSLINK</button>
+        </section>
+        <section class="case-sec" id="prototype" data-label="Breadboard prototype">
+          <div class="sec-head"><h2 class="h2">The initial transceiver circuit.</h2><p class="sec-lead">Before any boards were fabricated, the whole optical link began on breadboards: an ESP32 driving the 650&nbsp;nm laser on one side, and a BPW34 photodiode feeding the OPA356 transimpedance amplifier and TLV3501 comparator on the other, with live telemetry and Bluetooth pairing on an ILI9341 touchscreen. This is the prototype we characterised (DC levels, timing and the data-rate sweep) before committing the design to a fabricated PCB.</p></div>
+          <ul class="gallery"><li><button class="shot" type="button" data-zoom="/projects/init_breadboard2.jpg" data-cursor="Zoom"><img src="/assets/thumbs/init_breadboard2.webp" alt="Breadboard transceiver prototype with the 650 nm laser and a touchscreen showing Bluetooth pairing" width="960" height="720" loading="lazy" decoding="async" draggable="false"></button></li><li><button class="shot" type="button" data-zoom="/projects/init_breadboard1.jpg" data-cursor="Zoom"><img src="/assets/thumbs/init_breadboard1.webp" alt="ESP32 and BPW34 receiver front end wired on a breadboard" width="720" height="960" loading="lazy" decoding="async" draggable="false"></button></li><li><button class="shot" type="button" data-zoom="/projects/init_schematic.png" data-cursor="Zoom"><img src="/assets/thumbs/init_schematic.webp" alt="The initial transceiver circuit schematic" width="960" height="687" loading="lazy" decoding="async" draggable="false"></button></li></ul>
+        </section>
+        <section class="case-sec" id="optics" data-label="Custom optics">
+          <div class="sec-head"><h2 class="h2">Adapters we designed &amp; printed.</h2><p class="sec-lead">CAD-modelled and 3D-printed in PLA across roughly six iterations, coupling the KY-008 laser, BPW34 photodiode and TOSLINK ferrule and holding them in precise alignment. Mechanical alignment of this free-space coupling, plus shielding the photodiode from ambient light, proved to be the dominant factor in link stability.</p></div>
+          <figure class="model">
+            <div class="model-stage" data-hole data-keepout data-cursor="Drag">
+              <p class="model-note"><span class="led" aria-hidden="true"></span>Drag to rotate</p>
+              <img class="model-fallback" src="/projects/render_final_adapter.png" alt="The final 3D-printed optical adapter" width="1200" height="900">
+              <canvas id="adapters" aria-label="3D model of the selected adapter" role="img"></canvas>
             </div>
+            <div class="viewer-tabs" role="group" aria-label="Choose an adapter">
+              <button type="button" aria-pressed="true" data-adapter="final">KY-008</button>
+              <button type="button" aria-pressed="false" data-adapter="bpw34">BPW34</button>
+              <button type="button" aria-pressed="false" data-adapter="coupler">Coupler</button>
+              <button type="button" aria-pressed="false" data-adapter="toslink_led">TOSLINK LED</button>
+              <button type="button" aria-pressed="false" data-adapter="toslink">TOSLINK</button>
+            </div>
+          </figure>
+          <ul class="gallery contain"><li><button class="shot" type="button" data-zoom="/projects/render_final_adapter.png" data-cursor="Zoom"><img src="/assets/thumbs/render_final_adapter.webp" alt="Render of the final assembled optical adapter" width="960" height="421" loading="lazy" decoding="async" draggable="false"></button></li><li><button class="shot" type="button" data-zoom="/projects/render_bpw34_adapter.png" data-cursor="Zoom"><img src="/assets/thumbs/render_bpw34_adapter.webp" alt="Render of the BPW34 photodiode mount" width="960" height="421" loading="lazy" decoding="async" draggable="false"></button></li><li><button class="shot" type="button" data-zoom="/projects/render_bpw34_spdif.png" data-cursor="Zoom"><img src="/assets/thumbs/render_bpw34_spdif.webp" alt="Render of the BPW34 TOSLINK coupling" width="960" height="361" loading="lazy" decoding="async" draggable="false"></button></li><li><button class="shot" type="button" data-zoom="/projects/render_laser_adapter.png" data-cursor="Zoom"><img src="/assets/thumbs/render_laser_adapter.webp" alt="Render of the 650 nm laser coupler" width="960" height="421" loading="lazy" decoding="async" draggable="false"></button></li><li><button class="shot" type="button" data-zoom="/projects/render_laser_module.png" data-cursor="Zoom"><img src="/assets/thumbs/render_laser_module.webp" alt="Render of the KY-008 laser module" width="960" height="421" loading="lazy" decoding="async" draggable="false"></button></li></ul>
+        </section>
+        <section class="case-sec" id="results" data-label="Results">
+          <div class="sec-head"><h2 class="h2">What the link actually does.</h2></div>
+          <div class="case-cols">
+            <div class="prose"><h3 class="case-h3">Demonstrated</h3><p>Bidirectional binary text was sent end to end across the 1&nbsp;m TOSLINK link and shown live on the receiver&rsquo;s touchscreen and the host serial monitor, with 1,000-packet integrity tests passing at 8, 64 and 128&nbsp;kbps. The PCNT sweep held a stable 128&nbsp;kbps under hand-held alignment and briefly peaked at 640&nbsp;kbps in a dark room. On the populated PCB the comparator swung a clean 3.3&nbsp;V to 0.05&nbsp;V, fast enough to read with digitalRead().</p></div>
+            <div class="prose"><h3 class="case-h3">Honest limits</h3><p>Those rates reflect hand-held fibre alignment rather than the 7.2&nbsp;MHz closed-loop bandwidth the front end can support. A Bluetooth A2DP path (MAX98357A I&sup2;S amp) reproduces tones and voice-band audio over the link; wide-band music stays partial, limited by the 8&nbsp;kHz firmware sample rate. Residual comparator spikes traced to SOIC solder joints and ambient-light pickup at the BPW34 are the next revision&rsquo;s targets.</p></div>
           </div>
-          <div class="adapters-info" data-reveal>
-            <p class="muted">CAD-modelled and 3D-printed in PLA across roughly six iterations, coupling the KY-008 laser, BPW34 photodiode and TOSLINK ferrule and holding them in precise alignment. Mechanical alignment of this free-space coupling, plus shielding the photodiode from ambient light, proved to be the dominant factor in link stability.</p>
-          </div>
-        </div>
-        <div class="owc-render-grid" data-stagger>
-          <img src="projects/render_final_adapter.png" data-cursor="view" data-full="projects/render_final_adapter.png" alt="Final assembled optical adapter render" loading="lazy">
-          <img src="projects/render_bpw34_adapter.png" data-cursor="view" data-full="projects/render_bpw34_adapter.png" alt="BPW34 photodiode mount render" loading="lazy">
-          <img src="projects/render_bpw34_spdif.png" data-cursor="view" data-full="projects/render_bpw34_spdif.png" alt="BPW34 TOSLINK coupling render" loading="lazy">
-          <img src="projects/render_laser_adapter.png" data-cursor="view" data-full="projects/render_laser_adapter.png" alt="650 nm laser coupler render" loading="lazy">
-          <img src="projects/render_laser_module.png" data-cursor="view" data-full="projects/render_laser_module.png" alt="KY-008 laser module render" loading="lazy">
-        </div>
+        </section>
+        <section class="case-sec" id="gallery" data-label="Gallery">
+          <div class="sec-head"><h2 class="h2">Build, boards &amp; results.</h2></div>
+          <ul class="gallery"><li><button class="shot" type="button" data-zoom="/projects/build_pcb_white.jpeg" data-cursor="Zoom"><img src="/assets/thumbs/build_pcb_white.webp" alt="The fabricated white PCB" width="720" height="960" loading="lazy" decoding="async" draggable="false"></button></li><li><button class="shot" type="button" data-zoom="/projects/build_pcb_orange.jpeg" data-cursor="Zoom"><img src="/assets/thumbs/build_pcb_orange.webp" alt="The PCB in orange solder mask" width="720" height="960" loading="lazy" decoding="async" draggable="false"></button></li><li><button class="shot" type="button" data-zoom="/projects/build_enclosure.jpeg" data-cursor="Zoom"><img src="/assets/thumbs/build_enclosure.webp" alt="Purple acrylic enclosure base with speakers" width="720" height="960" loading="lazy" decoding="async" draggable="false"></button></li><li><button class="shot" type="button" data-zoom="/projects/render_pcb_purple.png" data-cursor="Zoom"><img src="/assets/thumbs/render_pcb_purple.webp" alt="Render of the PCB on its purple acrylic base" width="960" height="446" loading="lazy" decoding="async" draggable="false"></button></li><li><button class="shot" type="button" data-zoom="/projects/render_pcb_base.png" data-cursor="Zoom"><img src="/assets/thumbs/render_pcb_base.webp" alt="Render of the bare PCB layout" width="960" height="446" loading="lazy" decoding="async" draggable="false"></button></li><li><button class="shot" type="button" data-zoom="/projects/scope_0.png" data-cursor="Zoom"><img src="/assets/thumbs/scope_0.webp" alt="Oscilloscope capture of the on-off keyed bitstream" width="800" height="480" loading="lazy" decoding="async" draggable="false"></button></li><li><button class="shot" type="button" data-zoom="/projects/scope_1.png" data-cursor="Zoom"><img src="/assets/thumbs/scope_1.webp" alt="Oscilloscope capture of the recovered signal" width="800" height="480" loading="lazy" decoding="async" draggable="false"></button></li><li><button class="shot" type="button" data-zoom="/projects/scope_2.png" data-cursor="Zoom"><img src="/assets/thumbs/scope_2.webp" alt="Oscilloscope capture of the comparator output" width="800" height="480" loading="lazy" decoding="async" draggable="false"></button></li><li><button class="shot" type="button" data-zoom="/projects/schematic.png" data-cursor="Zoom"><img src="/assets/thumbs/schematic.webp" alt="The full system schematic" width="960" height="679" loading="lazy" decoding="async" draggable="false"></button></li></ul>
+        </section>
+      </article>
 
-        <div class="owc-sub" data-reveal>
-          <span class="eyebrow"><span class="ln"></span><span class="caps">Results · Measured</span></span>
-          <h3 class="h3">What the link actually does.</h3>
-        </div>
-        <div class="owc-cols">
-          <div data-reveal>
-            <h3 class="h3">Demonstrated</h3>
-            <p class="muted">Bidirectional binary text was sent end-to-end across the 1&nbsp;m TOSLINK link and shown live on the receiver's touchscreen and the host serial monitor, with 1,000-packet integrity tests passing at 8, 64 and 128&nbsp;kbps. The PCNT sweep held a stable 128&nbsp;kbps under hand-held alignment and briefly peaked at 640&nbsp;kbps in a dark room. On the populated PCB the comparator swung a clean 3.3&nbsp;V / 0.05&nbsp;V, fast enough to read with digitalRead().</p>
-          </div>
-          <div data-reveal>
-            <h3 class="h3">Honest limits</h3>
-            <p class="muted">Those rates reflect hand-held fibre alignment rather than the 7.2&nbsp;MHz closed-loop bandwidth the front end can support. A Bluetooth A2DP path (MAX98357A I&sup2;S amp) reproduces tones and voice-band audio over the link; wide-band music stays partial, limited by the 8&nbsp;kHz firmware sample rate. Residual comparator spikes traced to SOIC solder joints and ambient-light pickup at the BPW34 are the next revision's targets.</p>
-          </div>
-        </div>
+      <nav class="case-next" aria-label="More projects" data-keepout>
+        <a class="next-link" href="/computer-setup.html"><span class="next-dir">Previous project</span><span class="next-title">Computer System Setup</span></a>
+        <a class="next-link next-link--next" href="/trading-bot.html"><span class="next-dir">Next project</span><span class="next-title">Algorithmic Trading Bot</span></a>
+      </nav>
+    </main>
 
-        <div class="owc-sub" data-reveal>
-          <span class="eyebrow"><span class="ln"></span><span class="caps">Gallery</span></span>
-          <h3 class="h3">Build, boards &amp; results.</h3>
-        </div>
-        <div class="owc-gallery" data-stagger>
-          <img src="projects/build_pcb_white.jpeg" data-cursor="view" data-full="projects/build_pcb_white.jpeg" alt="Fabricated white PCB" loading="lazy">
-          <img src="projects/build_pcb_orange.jpeg" data-cursor="view" data-full="projects/build_pcb_orange.jpeg" alt="Orange soldermask PCB" loading="lazy">
-          <img src="projects/build_enclosure.jpeg" data-cursor="view" data-full="projects/build_enclosure.jpeg" alt="Purple acrylic enclosure base with speakers" loading="lazy">
-          <img src="projects/render_pcb_purple.png" data-cursor="view" data-full="projects/render_pcb_purple.png" alt="PCB on purple acrylic render" loading="lazy">
-          <img src="projects/render_pcb_base.png" data-cursor="view" data-full="projects/render_pcb_base.png" alt="Bare PCB layout render" loading="lazy">
-          <img src="projects/scope_0.png" data-cursor="view" data-full="projects/scope_0.png" alt="Oscilloscope capture of OOK bitstream" loading="lazy">
-          <img src="projects/scope_1.png" data-cursor="view" data-full="projects/scope_1.png" alt="Oscilloscope capture of the recovered signal" loading="lazy">
-          <img src="projects/scope_2.png" data-cursor="view" data-full="projects/scope_2.png" alt="Oscilloscope capture of the comparator output" loading="lazy">
-          <img src="projects/schematic.png" data-cursor="view" data-full="projects/schematic.png" alt="System schematic" loading="lazy">
-        </div>
+    <footer class="foot" data-keepout>
+      <div class="perf perf--foot" aria-hidden="true"></div>
+      <div class="foot-main">
+        <a class="logo" href="#top" aria-label="NYNA, back to top">NYNA</a>
+        <p class="foot-tag">Your partner in professional IT, web &amp; hardware solutions.</p>
+        <nav class="foot-links" aria-label="Footer">
+          <a href="/#services">Services</a>
+          <a href="/#hardware">Hardware</a>
+          <a href="/#work">Work</a>
+          <a href="/#clients">Clients</a>
+          <a href="/#contact">Contact</a>
+        </nav>
+        <address class="foot-contact">
+          <a href="tel:+442080874237">020 8087 4237</a>
+          <a href="mailto:info@nyna.co.uk">info@nyna.co.uk</a>
+          <a href="https://www.google.com/maps/search/?api=1&amp;query=Croxley+Business+Park+Building+2+WD18+8YA" target="_blank" rel="noopener">Office 1.42, Building 2, Croxley Business Park, WD18 8YA</a>
+        </address>
       </div>
-    </section>
-
-    <!-- CONTACT -->
-    <section id="contact">
-      <div class="container">
-        <div class="sec-head" data-reveal style="max-width:760px;">
-          <span class="eyebrow"><span class="ln"></span><span class="caps">Get in touch</span></span>
-          <h2 class="h2" data-split>Let's build something that performs.</h2>
-        </div>
-        <div class="contact-wrap" data-reveal>
-          <article class="card contact-main">
-            <h2 class="h2">Ready when you are.</h2>
-            <p class="muted">A brand-new website, a network rebuild, a custom board or a tricky hardware fault, drop us a line and we'll respond within one working day. Quotes are free.</p>
-            <a href="mailto:info@nyna.co.uk" class="btn btn-solid" style="align-self:flex-start;" data-cursor="hover" data-magnetic>info@nyna.co.uk
-              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M7 17 17 7M7 7h10v10"/></svg>
-            </a>
-          </article>
-          <div class="contact-list">
-            <a class="card contact-item" href="mailto:info@nyna.co.uk" data-cursor="hover"><span class="ic"><svg viewBox="0 0 24 24" stroke-linecap="round" stroke-linejoin="round"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/><polyline points="22 6 12 13 2 6"/></svg></span><span><span class="k">Email</span><br><span class="v">info@nyna.co.uk</span></span></a>
-            <a class="card contact-item" href="tel:02080874237" data-cursor="hover"><span class="ic"><svg viewBox="0 0 24 24" stroke-linecap="round" stroke-linejoin="round"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72c.13.96.37 1.9.72 2.81a2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45c.91.35 1.85.59 2.81.72A2 2 0 0 1 22 16.92z"/></svg></span><span><span class="k">Phone</span><br><span class="v">020 8087 4237</span></span></a>
-            <div class="card contact-item"><span class="ic"><svg viewBox="0 0 24 24" stroke-linecap="round" stroke-linejoin="round"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/></svg></span><span><span class="k">Office</span><br><span class="v">Office 1.42, Building 2, Croxley Business Park, WD18 8YA</span></span></div>
-          </div>
-        </div>
+      <div class="foot-row">
+        <p>© <span id="year">2026</span> NYNA</p>
+        <a class="top-link" href="#top">Back to top</a>
       </div>
-    </section>
-
-    <footer>
-      <div class="container">
-        <div class="footer-top" data-stagger>
-          <div class="footer-col">
-            <h4 style="font-family:var(--f-logo);font-weight:500;font-size:1.5rem;letter-spacing:.04em;text-transform:none;color:var(--light);margin-bottom:1rem;">NYNA</h4>
-            <p class="footer-lead">Your partner in professional IT, web &amp; hardware solutions.</p>
-          </div>
-          <div class="footer-col">
-            <h4>Contact</h4>
-            <a href="mailto:info@nyna.co.uk" data-cursor="hover">info@nyna.co.uk</a>
-            <a href="tel:02080874237" data-cursor="hover">020 8087 4237</a>
-            <p>Office 1.42, Building 2,<br>Croxley Business Park,<br>WD18 8YA</p>
-          </div>
-          <div class="footer-col">
-            <h4>Explore</h4>
-            <a href="index.html#services" data-cursor="hover">Services</a>
-            <a href="index.html#hardware" data-cursor="hover">Hardware</a>
-            <a href="index.html#work" data-cursor="hover">Work</a>
-            <a href="#contact" data-cursor="hover">Contact</a>
-          </div>
-        </div>
-        <a href="index.html" class="footer-brand" data-cursor="hover"><span class="footer-mark logo-type">NYNA</span></a>
-        <div class="footer-row">
-          <span>&copy; <span id="year">2026</span> <span style="font-family:var(--f-logo);font-weight:500;letter-spacing:.04em;">NYNA</span>. Crafted with precision in London.</span>
-          <span class="variant"><span class="muted">Theme:</span><button class="theme-opt" data-theme="dark" data-cursor="hover">Dark</button><span class="muted">·</span><button class="theme-opt" data-theme="light" data-cursor="hover">Light</button></span>
-        </div>
-      </div>
+      <p class="fab fab--foot" aria-hidden="true">NYNA-MAIN REV B 2026-09</p>
     </footer>
 
-  </main>
+    <span class="mhole mhole--bl" aria-hidden="true" data-keepout></span>
+    <span class="mhole mhole--br" aria-hidden="true" data-keepout></span>
+  </div>
 
-  <!-- MODAL -->
-  <div class="modal" id="projModal" role="dialog" aria-modal="true" aria-label="Project detail" aria-hidden="true">
-    <div class="modal-scrim" data-modal-close></div>
-    <div class="modal-card">
-      <button class="modal-close" data-modal-close aria-label="Close" data-cursor="hover"><span class="x" aria-hidden="true"></span></button>
-      <div class="modal-img"><img alt="" /></div>
-      <div class="modal-pad">
-        <span class="modal-cat caps"></span>
-        <h3 class="modal-title h2"></h3>
-        <span class="modal-client muted"></span>
-        <p class="modal-desc"></p>
-        <div class="modal-tags"></div>
+  <!-- vertical section marker in the left margin (wide screens) -->
+  <div class="rail-v" id="railv" aria-hidden="true">
+    <span class="rail-v-brand">NYNA</span>
+    <span class="rail-v-track" id="rail-track"><span class="rail-v-fill" id="rail-fill"></span><span class="rail-v-dot" id="rail-dot"></span></span>
+    <span class="rail-v-labels" id="rail-labels"></span>
+  </div>
+
+  <!-- floating control, appears once the header scrolls away -->
+  <div class="float" id="float" aria-hidden="true">
+    <a class="float-logo" href="#top" tabindex="-1">NYNA</a>
+    <button class="float-btn" type="button" data-menu-open aria-expanded="false" aria-controls="menu" tabindex="-1">Menu</button>
+    <a class="float-btn float-btn--solid" href="/#contact" tabindex="-1">Contact</a>
+  </div>
+
+  <!-- menu: a small popover that grows out of whichever Menu button opened it -->
+  <div class="pop" id="menu" role="dialog" aria-label="Menu" hidden>
+    <div class="pop-in">
+      <nav class="pop-nav" aria-label="Sections">
+        <a href="/#services" data-sec="services" style="--i:0"><span>Services</span><i class="pop-trace" aria-hidden="true"></i></a>
+        <a href="/#hardware" data-sec="hardware" style="--i:1"><span>Hardware</span><i class="pop-trace" aria-hidden="true"></i></a>
+        <a href="/#work" data-sec="work" style="--i:2"><span>Work</span><i class="pop-trace" aria-hidden="true"></i></a>
+        <a href="/#why" data-sec="why" style="--i:3"><span>Why NYNA</span><i class="pop-trace" aria-hidden="true"></i></a>
+        <a href="/#capabilities" data-sec="capabilities" style="--i:4"><span>Capabilities</span><i class="pop-trace" aria-hidden="true"></i></a>
+        <a href="/#clients" data-sec="clients" style="--i:5"><span>Clients</span><i class="pop-trace" aria-hidden="true"></i></a>
+        <a href="/#contact" data-sec="contact" style="--i:6"><span>Contact</span><i class="pop-trace" aria-hidden="true"></i></a>
+      </nav>
+      <div class="pop-set">
+        <button class="set" type="button" role="switch" aria-checked="true" data-backlight>
+          <span class="set-label">Backlight</span>
+          <span class="set-state" aria-hidden="true"><span class="set-on">On</span><span class="set-off">Off</span><span class="led"></span></span>
+        </button>
+        <button class="set" type="button" role="switch" aria-checked="false" data-theme-toggle>
+          <span class="set-label">Dark mode</span>
+          <span class="set-state" aria-hidden="true"><span class="set-on">On</span><span class="set-off">Off</span><span class="led"></span></span>
+        </button>
+      </div>
+      <div class="pop-foot">
+        <a href="mailto:info@nyna.co.uk">info@nyna.co.uk</a>
+        <a href="tel:+442080874237">020 8087 4237</a>
+        <p class="pop-status"><span class="led" aria-hidden="true"></span>London <time id="ldn-time"></time></p>
       </div>
     </div>
   </div>
 
-  <!-- PCB FULLSCREEN LIGHTBOX -->
-  <div class="pcb-lightbox" id="pcbLightbox" role="dialog" aria-modal="true" aria-label="PCB full view" aria-hidden="true">
-    <div class="pcb-lightbox-scrim" data-lb-close></div>
-    <button class="pcb-lightbox-close" data-lb-close aria-label="Close" data-cursor="hover"><span class="x" aria-hidden="true"></span></button>
-    <img alt="NYNA custom PCB, full view" />
-  </div>
+  <div class="cursor" id="cursor" aria-hidden="true"><span class="cursor-ring"><span class="cursor-label"></span></span><span class="cursor-dot"></span></div>
 
-  <script type="module">
-    const html = document.documentElement; html.classList.add('js');
-    if ('scrollRestoration' in history) history.scrollRestoration = 'manual';
-    const reduce = matchMedia('(prefers-reduced-motion: reduce)').matches;
-    const fine = matchMedia('(hover: hover) and (pointer: fine)').matches;
-    const lerp = (a,b,n)=>(1-n)*a+n*b, clamp=(v,a,b)=>Math.max(a,Math.min(b,v));
-    document.getElementById('year').textContent = new Date().getFullYear();
-    let lenis = null;
-    const lockScroll = on => { if (lenis) { on ? lenis.stop() : lenis.start(); } else { document.body.style.overflow = on ? 'hidden' : ''; } };
-
-    /* preloader */
-    (function(){ const el=document.getElementById('loader'),bar=el.querySelector('.loader-track i'),pct=el.querySelector('.loader-pct'); let p=0;
-      (function t(){ p+=(100-p)*0.07+0.8; if(p>=99.5)p=100; bar.style.right=(100-p)+'%'; pct.textContent=Math.round(p); if(p<100)requestAnimationFrame(t); else setTimeout(()=>{el.classList.add('done');revealHero();},180); })();
-      setTimeout(()=>{ if(!el.classList.contains('done')){el.classList.add('done');revealHero();} },4000);
-    })();
-    function revealHero(){
-      document.querySelectorAll('[data-hero-title] .line > span').forEach((s,i)=>setTimeout(()=>{s.style.transition='transform 1s var(--ease)';s.style.transform='translateY(0)';},90*i));
-      setTimeout(()=>document.querySelector('[data-hero-title] .accent-underline')?.classList.add('lit'),560);
-      document.querySelectorAll('.hero [data-reveal]').forEach((e,i)=>setTimeout(()=>e.classList.add('in'),230+i*110));
-    }
-
-    /* cursor */
-    if (fine) {
-      const dot=document.querySelector('.cur-dot'),ring=document.querySelector('.cur-ring');
-      let mx=innerWidth/2,my=innerHeight/2,dx=mx,dy=my,rx=mx,ry=my;
-      addEventListener('mousemove',e=>{mx=e.clientX;my=e.clientY;},{passive:true});
-      (function loop(){ dx=lerp(dx,mx,0.5);dy=lerp(dy,my,0.5);rx=lerp(rx,mx,0.2);ry=lerp(ry,my,0.2);
-        dot.style.transform=`translate(${dx}px,${dy}px) translate(-50%,-50%)`; ring.style.transform=`translate(${rx}px,${ry}px) translate(-50%,-50%)`; requestAnimationFrame(loop); })();
-      const lbl=ring?ring.querySelector('.lbl'):null; const set=el=>{document.body.classList.remove('c-hover','c-view','c-drag'); if(!el)return; const t=el.getAttribute('data-cursor'); if(t==='view'){document.body.classList.add('c-view'); if(lbl)lbl.textContent='View';} else if(t==='drag'){document.body.classList.add('c-drag'); if(lbl)lbl.textContent='Drag';} else if(t==='hover')document.body.classList.add('c-hover');};
-      document.addEventListener('mouseover',e=>set(e.target.closest('[data-cursor]')));
-      document.addEventListener('mouseout',e=>{const t=e.relatedTarget; if(!t||!t.closest||!t.closest('[data-cursor]'))document.body.classList.remove('c-hover','c-view','c-drag');});
-    }
-    if (fine && !reduce) document.querySelectorAll('[data-magnetic]').forEach(el=>{
-      el.addEventListener('mousemove',e=>{const r=el.getBoundingClientRect();el.style.transform=`translate(${(e.clientX-(r.left+r.width/2))*0.22}px,${(e.clientY-(r.top+r.height/2))*0.36}px)`;});
-      el.addEventListener('mouseleave',()=>{el.style.transform='';});
-    });
-
-    /* menu */
-    (function(){ const menu=document.getElementById('menu'),open=document.getElementById('menuOpen'),close=document.getElementById('menuClose');
-      const toggle=o=>{menu.classList.toggle('open',o);open.setAttribute('aria-expanded',String(o));lockScroll(o);};
-      open.addEventListener('click',()=>toggle(true)); close.addEventListener('click',()=>toggle(false));
-      document.querySelectorAll('[data-menu-link]').forEach(a=>a.addEventListener('click',()=>toggle(false)));
-      addEventListener('keydown',e=>{if(e.key==='Escape')toggle(false);});
-    })();
-
-    /* modal */
-    (function(){ const modal=document.getElementById('projModal'),q=s=>modal.querySelector(s);
-      const open=card=>{
-        if(card.dataset.jump){ const t=document.getElementById(card.dataset.jump); if(t){ if(lenis)lenis.scrollTo(t,{offset:-10}); else t.scrollIntoView({behavior:reduce?'auto':'smooth'}); } return; }
-        const id=card.dataset.img;
-        q('.modal-img img').src = id ? `https://images.unsplash.com/photo-${id}?auto=format&fit=crop&w=900&q=80` : '';
-        q('.modal-cat').textContent=card.querySelector('.proj-cat').textContent;
-        q('.modal-title').textContent=card.querySelector('h3').textContent;
-        q('.modal-client').textContent=card.querySelector('.client').textContent;
-        q('.modal-desc').textContent=card.dataset.more||card.querySelector('p').textContent;
-        const tags=q('.modal-tags');tags.innerHTML=''; card.querySelectorAll('.proj-tags span').forEach(t=>{const s=document.createElement('span');s.textContent=t.textContent;tags.appendChild(s);});
-        modal.classList.add('open');modal.setAttribute('aria-hidden','false');lockScroll(true);
-      };
-      const close=()=>{modal.classList.remove('open');modal.setAttribute('aria-hidden','true');lockScroll(false);};
-      document.querySelectorAll('.proj').forEach(p=>p.addEventListener('click',()=>open(p)));
-      modal.querySelectorAll('[data-modal-close]').forEach(b=>b.addEventListener('click',close));
-      addEventListener('keydown',e=>{if(e.key==='Escape')close();});
-    })();
-
-    /* bar + progress */
-    const bar=document.getElementById('bar'),progress=document.querySelector('.progress'); let lastY=0;
-    function baseScroll(y){ const max=document.documentElement.scrollHeight-innerHeight; progress.style.transform=`scaleX(${max>0?y/max:0})`;
-      if(y<=240){ bar.classList.remove('hide'); lastY=y; } else if(y>lastY+8){ bar.classList.add('hide'); lastY=y; } else if(y<lastY-8){ bar.classList.remove('hide'); lastY=y; }
-      const c=document.getElementById('wave'); if(c&&c.classList.contains('ready'))c.style.opacity=String(clamp(1-y/(innerHeight*1.2),0.25,1));
-    }
-
-    /* PCB board viewer (Gerber-rendered top views) */
-    (function pcbViewer(){
-      const board=document.getElementById('pcbBoard'); if(!board) return;
-      const host=board.closest('.pcb-stage'); const GLOW={systems:'232,238,245',transceiver:'52,182,98',tia:'56,150,228',vdivider:'200,66,162',speaker:'44,140,234'}; const setGlow=function(k){ if(host&&GLOW[k])host.style.setProperty('--pcb-glow',GLOW[k]); }; setGlow('systems');
-      const MAP={systems:'boards/systems.png',transceiver:'boards/transceiver.png',tia:'boards/tia.png',vdivider:'boards/vdivider.png',speaker:'boards/speaker.png'};
-      board.dataset.cur='boards/systems.png';
-      document.querySelectorAll('#pcbSwitch .pcb-chip').forEach(c=>c.addEventListener('click',()=>{
-        document.querySelectorAll('#pcbSwitch .pcb-chip').forEach(x=>x.classList.remove('active')); c.classList.add('active'); setGlow(c.dataset.board);
-        const url=MAP[c.dataset.board]; if(!url||board.dataset.cur===url) return; board.dataset.cur=url;
-        board.classList.add('swapping');
-        const pre=new Image(); pre.onload=()=>{ board.src=url; requestAnimationFrame(()=>board.classList.remove('swapping')); }; pre.onerror=()=>board.classList.remove('swapping'); pre.src=url;
-      }));
-      // fullscreen lightbox
-      const lb=document.getElementById('pcbLightbox'), lbImg=lb?lb.querySelector('img'):null;
-      const openLb=()=>{ if(!lb)return; lbImg.src=board.src; lb.classList.add('open'); lb.setAttribute('aria-hidden','false'); lockScroll(true); };
-      const closeLb=()=>{ if(!lb)return; lb.classList.remove('open'); lb.setAttribute('aria-hidden','true'); lockScroll(false); };
-      board.addEventListener('click', openLb);
-      if(lb){ lb.querySelectorAll('[data-lb-close]').forEach(x=>x.addEventListener('click',closeLb)); addEventListener('keydown',e=>{ if(e.key==='Escape'&&lb.classList.contains('open'))closeLb(); }); }
-      if(fine && !reduce && host){
-        host.addEventListener('mousemove',e=>{ const b=host.getBoundingClientRect(); const nx=((e.clientX-b.left)/b.width)*2-1, ny=((e.clientY-b.top)/b.height)*2-1; board.style.transform=`rotateX(${8-ny*11}deg) rotateY(${nx*15}deg)`; });
-        host.addEventListener('mouseleave',()=>{ board.style.transform='rotateX(8deg)'; });
-      }
-    })();
-
-    /* gallery / image lightbox (any [data-full]) */
-    (function(){ const lb=document.getElementById('pcbLightbox'); if(!lb) return; const img=lb.querySelector('img');
-      document.querySelectorAll('[data-full]').forEach(el=>el.addEventListener('click',()=>{ img.src=el.dataset.full; lb.classList.add('open'); lb.setAttribute('aria-hidden','false'); lockScroll(true); })); const _lbX=()=>{ lb.classList.remove('open'); lb.setAttribute('aria-hidden','true'); lockScroll(false); }; lb.querySelectorAll('[data-lb-close]').forEach(x=>x.addEventListener('click',_lbX)); addEventListener('keydown',e=>{ if(e.key==='Escape'&&lb.classList.contains('open'))_lbX(); });
-    })();
-
-    /* interactive 3D adapters viewer (GLB; falls back to render image on file://) */
-    (async function adapters(){
-      const cv=document.getElementById('adapters'); if(!cv||reduce) return;
-      const stage=cv.closest('.adapters-stage'); const loadingEl=document.getElementById('adaptersLoading');
-      let THREE, GLTFLoader, RoomEnvironment;
-      try{ THREE=await import('three'); ({GLTFLoader}=await import('three/addons/loaders/GLTFLoader.js')); ({RoomEnvironment}=await import('three/addons/environments/RoomEnvironment.js')); }catch(e){ return; }
-      const r=new THREE.WebGLRenderer({canvas:cv,antialias:true,alpha:true}); r.setPixelRatio(Math.min(devicePixelRatio||1,2)); r.toneMapping=THREE.ACESFilmicToneMapping; r.toneMappingExposure=1.05;
-      let w=stage.clientWidth||500,h=stage.clientHeight||500; r.setSize(w,h);
-      const sc=new THREE.Scene(); const cam=new THREE.PerspectiveCamera(38,w/h,0.1,100); cam.position.set(0,0.45,5.4); cam.lookAt(0,0,0);
-      try{ const pmrem=new THREE.PMREMGenerator(r); sc.environment=pmrem.fromScene(new RoomEnvironment(),0.04).texture; }catch(e){}
-      sc.add(new THREE.AmbientLight(0xffffff,0.58));
-      const d1=new THREE.DirectionalLight(0xffffff,1.55); d1.position.set(5,3.5,4); sc.add(d1);
-      const d2=new THREE.DirectionalLight(0x5ECFF9,1.0); d2.position.set(-5,1,-4); sc.add(d2);
-      const d3=new THREE.DirectionalLight(0x9be4ff,0.45); d3.position.set(0,-4,2); sc.add(d3);
-      const grp=new THREE.Group(); sc.add(grp);
-      const loader=new GLTFLoader();
-      const MODELS={final:'models/adapter_final.glb',bpw34:'models/adapter_bpw34.glb',coupler:'models/adapter_coupler.glb',toslink_led:'models/adapter_toslink_led.glb',toslink:'models/adapter_toslink.glb'};
-      // FDM 3D-print texture: horizontal layer ridges + fine grain (bump), plus a matte roughness speckle
-      const bc=document.createElement('canvas'); bc.width=bc.height=512; const bx=bc.getContext('2d');
-      for(let y=0;y<512;y++){ const v=Math.round(128+Math.sin(y/512*6.2831*74)*46); bx.fillStyle='rgb('+v+','+v+','+v+')'; bx.fillRect(0,y,512,1); }
-      { const id=bx.getImageData(0,0,512,512),d=id.data; for(let i=0;i<d.length;i+=4){ const n=(Math.random()-0.5)*48; d[i]+=n; d[i+1]+=n; d[i+2]+=n; } bx.putImageData(id,0,0); }
-      const bump=new THREE.CanvasTexture(bc); bump.wrapS=bump.wrapT=THREE.RepeatWrapping; bump.anisotropy=4;
-      const rc=document.createElement('canvas'); rc.width=rc.height=256; const rx=rc.getContext('2d'); { const rid=rx.createImageData(256,256),d=rid.data; for(let i=0;i<d.length;i+=4){ const g=140+(Math.random()*95|0); d[i]=d[i+1]=d[i+2]=g; d[i+3]=255; } rx.putImageData(rid,0,0); }
-      const rough=new THREE.CanvasTexture(rc); rough.wrapS=rough.wrapT=THREE.RepeatWrapping; rough.repeat.set(3,3);
-      const mat=new THREE.MeshStandardMaterial({color:0xc7ced7,roughness:0.72,metalness:0.08,bumpMap:bump,bumpScale:0.22,roughnessMap:bump,envMapIntensity:0.95});
-      let token=0,current=null;
-      function loadIt(key){ const url=MODELS[key]; if(!url)return; const my=++token; if(loadingEl)loadingEl.style.opacity='1';
-        loader.load(url,gltf=>{ if(my!==token)return; const mdl=gltf.scene; mdl.traverse(o=>{ if(o.isMesh){ o.material=mat; const g=o.geometry; if(!g.attributes.normal)g.computeVertexNormals(); g.computeBoundingBox(); const bb=g.boundingBox, sx=Math.max(1e-4,bb.max.x-bb.min.x), sy=Math.max(1e-4,bb.max.y-bb.min.y), P=g.attributes.position, uv=new Float32Array(P.count*2); for(let q=0;q<P.count;q++){ uv[q*2]=(P.getX(q)-bb.min.x)/sx; uv[q*2+1]=(P.getY(q)-bb.min.y)/sy; } g.setAttribute('uv',new THREE.BufferAttribute(uv,2)); } });
-          const box=new THREE.Box3().setFromObject(mdl),ctr=box.getCenter(new THREE.Vector3()),sz=box.getSize(new THREE.Vector3()); mdl.position.sub(ctr);
-          const inner=new THREE.Group(); inner.add(mdl); inner.scale.setScalar(2.5/Math.hypot(sz.x,sz.y,sz.z)); if(key==='final')inner.rotation.z=Math.PI/2;
-          if(current)grp.remove(current); grp.add(inner); current=inner;
-          stage.classList.add('has3d'); if(loadingEl)loadingEl.style.opacity='0';
-        },undefined,()=>{ if(loadingEl){ loadingEl.textContent='Serve over http for 3D'; loadingEl.style.opacity='1'; setTimeout(()=>loadingEl.style.opacity='0',2000);} });
-      }
-      document.querySelectorAll('#adaptersSwitch .pcb-chip').forEach(c=>c.addEventListener('click',()=>{
-        document.querySelectorAll('#adaptersSwitch .pcb-chip').forEach(x=>x.classList.remove('active')); c.classList.add('active'); loadIt(c.dataset.adapter);
-        const fb=document.getElementById('adaptersFallback'); if(fb){ const m={final:'render_final_adapter',bpw34:'render_bpw34_adapter',coupler:'render_laser_adapter',toslink_led:'render_laser_module',toslink:'render_laser_adapter'}; fb.src='projects/'+(m[c.dataset.adapter]||'render_final_adapter')+'.png'; }
-      }));
-      let lazy=false; new IntersectionObserver(es=>{ if(es[0].isIntersecting&&!lazy){ lazy=true; loadIt('final'); } },{threshold:0.15}).observe(stage);
-      let vis=true; new IntersectionObserver(es=>vis=es[0].isIntersecting,{threshold:0}).observe(stage);
-      const tm={x:0,y:0},mm={x:0,y:0}; let drag=false,px=0,py=0,axis=0;
-      stage.addEventListener('pointermove',e=>{ const b=stage.getBoundingClientRect(); tm.x=((e.clientX-b.left)/b.width)*2-1; tm.y=((e.clientY-b.top)/b.height)*2-1; if(!drag)return; if(axis===0){ const adx=Math.abs(e.clientX-px), ady=Math.abs(e.clientY-py); if(adx>4||ady>4){ if(adx>=ady){ axis=1; try{stage.setPointerCapture(e.pointerId);}catch(_){} } else { axis=2; drag=false; return; } } } if(axis===1){ grp.rotation.y+=(e.clientX-px)*0.01; px=e.clientX; } });
-      stage.addEventListener('pointerdown',e=>{ if(e.target.closest('.pcb-switch'))return; drag=true; px=e.clientX; py=e.clientY; axis=(e.pointerType==='touch')?0:1; if(axis===1){ try{stage.setPointerCapture(e.pointerId);}catch(_){} } });
-      addEventListener('pointerup',()=>{drag=false;axis=0;}); stage.addEventListener('pointercancel',()=>{drag=false;axis=0;});
-      stage.addEventListener('pointerleave',()=>{tm.x=0;tm.y=0;});
-      new ResizeObserver(()=>{ w=stage.clientWidth;h=stage.clientHeight; if(w&&h){cam.aspect=w/h;cam.updateProjectionMatrix();r.setSize(w,h);} }).observe(stage);
-      const clk=new THREE.Clock();
-      (function loop(){ requestAnimationFrame(loop); if(document.hidden||!vis)return; const dt=clk.getDelta();
-        if(!drag)grp.rotation.y+=dt*0.4; mm.x=lerp(mm.x,tm.x,0.06);mm.y=lerp(mm.y,tm.y,0.06); grp.rotation.x=lerp(grp.rotation.x,-0.1+mm.y*0.3,0.1);
-        r.render(sc,cam); })();
-    })();
-
-    /* filter */
-    (function(){ const chips=document.querySelectorAll('.chip'),projs=document.querySelectorAll('.proj');
-      chips.forEach(c=>c.addEventListener('click',()=>{ chips.forEach(x=>x.classList.remove('active'));c.classList.add('active');
-        const f=c.dataset.filter; projs.forEach(p=>p.classList.toggle('hidden',!(f==='all'||p.dataset.category===f)));
-        if(window.ScrollTrigger)ScrollTrigger.refresh();
-      }));
-    })();
-
-    /* splits + reveals */
-    function splitHeads(){ if(reduce)return; document.querySelectorAll('[data-split]').forEach(h=>{ const words=h.textContent.trim().split(/\s+/);h.textContent='';
-      words.forEach((w,i)=>{ const o=document.createElement('span');o.style.cssText='display:inline-block;overflow:hidden;vertical-align:top;padding-bottom:0.12em;margin-bottom:-0.12em;';
-        const inner=document.createElement('span');inner.style.cssText='display:inline-block;transform:translateY(110%);transition:transform 0.7s var(--ease);';inner.textContent=w;
-        o.appendChild(inner);h.appendChild(o); if(i<words.length-1)h.appendChild(document.createTextNode(' ')); }); }); }
-    function playSplit(h){ h.querySelectorAll('span > span').forEach((s,i)=>setTimeout(()=>s.style.transform='translateY(0)',i*48)); }
-    function ioReveals(){ const items=document.querySelectorAll('[data-reveal],[data-stagger]');
-      const io=new IntersectionObserver(es=>es.forEach(en=>{if(en.isIntersecting){en.target.classList.add('in');io.unobserve(en.target);}}),{threshold:0.12,rootMargin:'0px 0px -5% 0px'});
-      items.forEach(i=>{if(i.closest('.hero'))return;io.observe(i);}); }
-    function gsapless(){ document.querySelectorAll('[data-split] span > span').forEach(s=>s.style.transform='none'); document.querySelectorAll('.accent-underline').forEach(u=>u.classList.add('lit')); }
-
-    async function boot(){
-      const gsap=window.gsap, ST=window.ScrollTrigger; splitHeads();
-      if(!reduce&&fine){ try{ const m=await import('lenis'); const L=m.default||m.Lenis; lenis=new L({lerp:0.09}); }catch(e){} }
-      if(gsap&&ST&&!reduce){
-        gsap.registerPlugin(ST);
-        if(lenis){ lenis.on('scroll',ST.update); gsap.ticker.add(t=>lenis.raf(t*1000)); gsap.ticker.lagSmoothing(0); }
-        ST.create({start:0,end:'max',onUpdate:self=>baseScroll(self.scroll())});
-        gsap.utils.toArray('[data-reveal]').forEach(el=>{ if(el.closest('.hero'))return; gsap.fromTo(el,{y:24,autoAlpha:0},{y:0,autoAlpha:1,duration:0.55,ease:'power2.inOut',scrollTrigger:{trigger:el,start:'top 90%'}}); });
-        gsap.utils.toArray('[data-stagger]').forEach(el=>gsap.fromTo(el.children,{y:24,autoAlpha:0},{y:0,autoAlpha:1,duration:0.5,ease:'power2.inOut',stagger:0.06,scrollTrigger:{trigger:el,start:'top 90%'}}));
-        gsap.utils.toArray('[data-split]').forEach(h=>ST.create({trigger:h,start:'top 90%',once:true,onEnter:()=>playSplit(h)}));
-        gsap.utils.toArray('.accent-underline').forEach(u=>{if(u.closest('.hero'))return;ST.create({trigger:u,start:'top 92%',once:true,onEnter:()=>u.classList.add('lit')});});
-        gsap.to('.footer-mark',{yPercent:-12,ease:'none',scrollTrigger:{trigger:'footer',start:'top bottom',end:'bottom bottom',scrub:true}});
-        ST.refresh(); if(document.fonts)document.fonts.ready.then(()=>ST.refresh());
-      } else {
-        if(lenis)requestAnimationFrame(function r(t){lenis.raf(t);requestAnimationFrame(r);});
-        ioReveals(); gsapless();
-        if(lenis)lenis.on('scroll',({scroll})=>baseScroll(scroll)); else addEventListener('scroll',()=>baseScroll(scrollY),{passive:true});
-        baseScroll(scrollY);
-      }
-    }
-    document.querySelectorAll('a[href^="#"]').forEach(a=>a.addEventListener('click',e=>{
-      const id=a.getAttribute('href'); if(id.length<2)return; const t=document.querySelector(id); if(!t)return;
-      e.preventDefault(); if(lenis)lenis.scrollTo(t,{offset:-10}); else t.scrollIntoView({behavior:reduce?'auto':'smooth'});
-    }));
-
-    /* ============ THREE.js: wave bg + PCB showcase ============ */
-    (async function three(){
-      if(reduce){ html.classList.add('no-webgl'); return; }
-      let THREE; try{ THREE=await import('three'); }catch(e){ html.classList.add('no-webgl'); return; }
-
-      /* ---- old line-wave disabled; smooth shader environment below ---- */
-      if (false) try {
-        let EffectComposer,RenderPass,UnrealBloomPass;
-        const mobile=innerWidth<760;
-        try{ ({EffectComposer}=await import('three/addons/postprocessing/EffectComposer.js')); ({RenderPass}=await import('three/addons/postprocessing/RenderPass.js')); ({UnrealBloomPass}=await import('three/addons/postprocessing/UnrealBloomPass.js')); }catch(e){}
-        const canvas=document.getElementById('wave');
-        const renderer=new THREE.WebGLRenderer({canvas,antialias:true,alpha:true,powerPreference:'high-performance'});
-        renderer.setPixelRatio(Math.min(devicePixelRatio||1,2)); renderer.setSize(innerWidth,innerHeight);
-        const scene=new THREE.Scene();
-        const camera=new THREE.PerspectiveCamera(50,innerWidth/innerHeight,0.1,100); camera.position.set(0,0,7);
-        const LINES=mobile?34:66, SEG=mobile?120:230, W=32, H=14;
-        const uniforms={uTime:{value:0},uMouse:{value:new THREE.Vector2(0,0)},uAccent:{value:new THREE.Color('#5ECFF9')},uW:{value:W},uH:{value:H}};
-        const vert=`uniform float uTime;uniform vec2 uMouse;uniform float uW;uniform float uH;attribute float aLine;varying float vLine;varying float vEdge;varying float vProg;
-          void main(){ vLine=aLine; float x=position.x; vProg=x/uW+0.5; float t=uTime; float baseY=(aLine-0.5)*uH;
-            float w=sin(x*0.18+t*0.34+aLine*2.2)*0.85+sin(x*0.33-t*0.26+aLine*1.3)*0.42+sin(x*0.07+t*0.18)*0.55;
-            float z=sin(x*0.12+t*0.22+aLine*1.7)*1.05; vec3 pos=vec3(x,baseY+w,z);
-            float d=distance(vec2(pos.x*0.12,pos.y*0.16),uMouse*2.0); pos.y+=exp(-d*d)*0.85;
-            vEdge=1.0-smoothstep(0.34,0.5,abs(x)/(uW*0.5)); gl_Position=projectionMatrix*modelViewMatrix*vec4(pos,1.0); }`;
-        const frag=`precision highp float;uniform float uTime;uniform vec3 uAccent;varying float vLine;varying float vEdge;varying float vProg;
-          void main(){ float c=1.0-abs(vLine-0.5)*2.0; float beam=pow(sin(vProg*9.4248-uTime*1.25+vLine*5.0)*0.5+0.5,9.0);
-            float beam2=pow(sin(vProg*6.2831+uTime*0.8-vLine*3.0)*0.5+0.5,14.0);
-            vec3 base=vec3(0.78,0.86,0.95); vec3 col=mix(base,uAccent,smoothstep(0.5,1.0,c)*0.4+ (beam+beam2)*0.8);
-            float a=((0.045+c*0.16)+ (beam*0.55+beam2*0.5))*vEdge; gl_FragColor=vec4(col,a); }`;
-        const mat=new THREE.ShaderMaterial({uniforms,vertexShader:vert,fragmentShader:frag,transparent:true,depthWrite:false,depthTest:false,blending:THREE.AdditiveBlending});
-        const group=new THREE.Group();
-        for(let i=0;i<LINES;i++){ const pos=new Float32Array((SEG+1)*3),al=new Float32Array(SEG+1);
-          for(let j=0;j<=SEG;j++){pos[j*3]=(j/SEG-0.5)*W;al[j]=i/(LINES-1);}
-          const g=new THREE.BufferGeometry(); g.setAttribute('position',new THREE.BufferAttribute(pos,3)); g.setAttribute('aLine',new THREE.BufferAttribute(al,1));
-          group.add(new THREE.Line(g,mat)); }
-        group.rotation.x=-0.3; group.rotation.z=0.03; scene.add(group);
-
-        /* drifting square particles */
-        const PCOUNT=mobile?180:620; const ppos=new Float32Array(PCOUNT*3);
-        for(let i=0;i<PCOUNT;i++){ ppos[i*3]=(Math.random()-0.5)*W; ppos[i*3+1]=(Math.random()-0.5)*H*1.1; ppos[i*3+2]=(Math.random()-0.5)*6; }
-        const pgeo=new THREE.BufferGeometry(); pgeo.setAttribute('position',new THREE.BufferAttribute(ppos,3));
-        const pmat=new THREE.PointsMaterial({color:new THREE.Color('#7FD8FB'),size:mobile?0.05:0.045,transparent:true,opacity:0.7,blending:THREE.AdditiveBlending,depthWrite:false,sizeAttenuation:true});
-        const points=new THREE.Points(pgeo,pmat); points.rotation.x=-0.3; scene.add(points);
-
-        let composer=null;
-        if(!mobile&&EffectComposer&&RenderPass&&UnrealBloomPass){ composer=new EffectComposer(renderer); composer.addPass(new RenderPass(scene,camera));
-          const bloom=new UnrealBloomPass(new THREE.Vector2(innerWidth,innerHeight),0.62,0.6,0.5); composer.addPass(bloom); composer.setPixelRatio(Math.min(devicePixelRatio||1,2)); composer.setSize(innerWidth,innerHeight); }
-
-        const tM=new THREE.Vector2(0,0),m=new THREE.Vector2(0,0);
-        addEventListener('mousemove',e=>{tM.x=(e.clientX/innerWidth)*2-1;tM.y=-((e.clientY/innerHeight)*2-1);},{passive:true});
-        addEventListener('resize',()=>{camera.aspect=innerWidth/innerHeight;camera.updateProjectionMatrix();renderer.setSize(innerWidth,innerHeight);if(composer)composer.setSize(innerWidth,innerHeight);});
-        const clock=new THREE.Clock(); canvas.classList.add('ready'); baseScroll(scrollY);
-        (function render(){ requestAnimationFrame(render); if(document.hidden)return; const dt=clock.getDelta();
-          uniforms.uTime.value+=dt; m.x=lerp(m.x,tM.x,0.04);m.y=lerp(m.y,tM.y,0.04); uniforms.uMouse.value.set(m.x,m.y);
-          group.rotation.z=0.03+m.x*0.035; group.position.y=m.y*0.35; points.position.y=m.y*0.35;
-          points.rotation.z+=dt*0.01; for(let i=1;i<PCOUNT*3;i+=3){ ppos[i]+=dt*0.25; if(ppos[i]>H*0.55)ppos[i]=-H*0.55; } pgeo.attributes.position.needsUpdate=true;
-          if(composer)composer.render(); else renderer.render(scene,camera); })();
-      } catch(e){ html.classList.add('no-webgl'); }
-
-      /* ---- smooth flowing environment (fullscreen shader) ---- */
-      try {
-        const canvas=document.getElementById('wave');
-        const renderer=new THREE.WebGLRenderer({canvas,antialias:true,alpha:true,powerPreference:'high-performance'});
-        const DPR=Math.min(devicePixelRatio||1,1.5); renderer.setPixelRatio(DPR); renderer.setSize(innerWidth,innerHeight);
-        const scene=new THREE.Scene(); const camera=new THREE.OrthographicCamera(-1,1,1,-1,0,1);
-        const uniforms={ uTime:{value:0}, uRes:{value:new THREE.Vector2(innerWidth*DPR,innerHeight*DPR)}, uMouse:{value:new THREE.Vector2(0,0)}, uClick:{value:new THREE.Vector3(0,0,-10)}, uTheme:{value:document.documentElement.classList.contains('light')?1.0:0.0} };
-        const frag=`precision highp float;uniform float uTime;uniform vec2 uRes;uniform vec2 uMouse;uniform vec3 uClick;uniform float uTheme;
-          vec3 mod289(vec3 x){return x-floor(x*(1.0/289.0))*289.0;} vec2 mod289(vec2 x){return x-floor(x*(1.0/289.0))*289.0;}
-          vec3 permute(vec3 x){return mod289(((x*34.0)+1.0)*x);}
-          float snoise(vec2 v){ const vec4 C=vec4(0.211324865405187,0.366025403784439,-0.577350269189626,0.024390243902439);
-            vec2 i=floor(v+dot(v,C.yy)); vec2 x0=v-i+dot(i,C.xx); vec2 i1=(x0.x>x0.y)?vec2(1.0,0.0):vec2(0.0,1.0);
-            vec4 x12=x0.xyxy+C.xxzz; x12.xy-=i1; i=mod289(i);
-            vec3 p=permute(permute(i.y+vec3(0.0,i1.y,1.0))+i.x+vec3(0.0,i1.x,1.0));
-            vec3 m=max(0.5-vec3(dot(x0,x0),dot(x12.xy,x12.xy),dot(x12.zw,x12.zw)),0.0); m=m*m; m=m*m;
-            vec3 x=2.0*fract(p*C.www)-1.0; vec3 h=abs(x)-0.5; vec3 ox=floor(x+0.5); vec3 a0=x-ox;
-            m*=1.79284291400159-0.85373472095314*(a0*a0+h*h);
-            vec3 g; g.x=a0.x*x0.x+h.x*x0.y; g.yz=a0.yz*x12.xz+h.yz*x12.yw; return 130.0*dot(m,g); }
-          float fbm(vec2 p){ float s=0.0,a=0.55; for(int i=0;i<3;i++){ s+=a*snoise(p); p*=2.02; a*=0.5; } return s; }
-          void main(){ vec2 p=(gl_FragCoord.xy-0.5*uRes)/uRes.y; float t=uTime*0.010;
-            float asp=uRes.x/uRes.y; vec2 mp=vec2(uMouse.x*0.5*asp, uMouse.y*0.5);
-            vec2 toM=p-mp; float dm=length(toM); float infl=exp(-dm*dm*2.2);
-            vec2 pw=p+toM*infl*0.40;
-            float cd=length(p-uClick.xy); float age=uClick.z; float ringR=age*0.7;
-            float ripple=exp(-pow(cd-ringR,2.0)*55.0)*max(0.0,1.0-age*0.85);
-            pw+=normalize(p-uClick.xy+1e-4)*ripple*0.0;
-            vec2 q=vec2(fbm(pw*0.85+vec2(0.0,t)), fbm(pw*0.85+vec2(5.2,-t)));
-            float n=fbm(pw*1.0+1.5*q+vec2(t*0.6,-t*0.4));
-            float v=n*1.3+t*1.2; float d=abs(fract(v)-0.5); float lines=1.0-smoothstep(0.0,0.3,d);
-            float field=smoothstep(-0.3,0.9,n);
-            vec3 dark=vec3(0.035,0.05,0.07); vec3 cyan=vec3(0.36,0.80,0.98);
-            vec3 col=mix(dark,cyan,field*0.18)+cyan*lines*0.08;
-            col+=cyan*infl*(0.03+0.02*lines); float lpat=clamp(field*0.52+lines*0.34+infl*(0.05+0.05*lines),0.0,1.0); vec3 lcol=mix(vec3(0.93,0.95,0.975),vec3(0.46,0.58,0.74),lpat); col=mix(col,lcol,uTheme);
-            col+=cyan*ripple*0.0;
-            float cen=smoothstep(0.12,0.96,length((p-vec2(-0.1,0.0))*vec2(0.72,1.15)));
-            col*=mix(mix(0.42,0.92,uTheme),1.0,cen);
-            gl_FragColor=vec4(col,1.0); }`;
-        const mat=new THREE.ShaderMaterial({uniforms,vertexShader:'void main(){gl_Position=vec4(position.xy,0.0,1.0);}',fragmentShader:frag});
-        scene.add(new THREE.Mesh(new THREE.PlaneGeometry(2,2),mat));
-        const tM=new THREE.Vector2(0,0),m=new THREE.Vector2(0,0);
-        addEventListener('mousemove',e=>{tM.x=(e.clientX/innerWidth)*2-1;tM.y=-((e.clientY/innerHeight)*2-1);},{passive:true});
-        addEventListener('pointerdown',e=>{ const cx=(e.clientX-innerWidth/2)/innerHeight, cy=-(e.clientY-innerHeight/2)/innerHeight; uniforms.uClick.value.set(cx,cy,0.0); },{passive:true});
-        addEventListener('resize',()=>{ renderer.setSize(innerWidth,innerHeight); uniforms.uRes.value.set(innerWidth*DPR,innerHeight*DPR); });
-        const clock=new THREE.Clock(); canvas.classList.add('ready'); canvas.style.filter='blur(5px)'; baseScroll(scrollY);
-        let vx=0,vy=0; const K=42, D=12;
-        (function render(){ requestAnimationFrame(render); if(document.hidden)return; let dt=clock.getDelta(); if(dt>0.05)dt=0.05; uniforms.uTime.value+=dt; uniforms.uTheme.value+=((document.documentElement.classList.contains('light')?1.0:0.0)-uniforms.uTheme.value)*0.08;
-          if(uniforms.uClick.value.z<10.0) uniforms.uClick.value.z+=dt*1.6;
-          const ax=(tM.x-m.x)*K-vx*D, ay=(tM.y-m.y)*K-vy*D; vx+=ax*dt; vy+=ay*dt; m.x+=vx*dt; m.y+=vy*dt;
-          uniforms.uMouse.value.set(m.x,m.y); renderer.render(scene,camera); })();
-      } catch(e){ html.classList.add('no-webgl'); }
-
-      /* ---- PCB Three disabled; Gerber-rendered board images used instead ---- */
-      if (false) try {
-        const cv=document.getElementById('pcb'); if(!cv)return;
-        const host=cv.parentElement; let w=host.clientWidth,h=host.clientHeight;
-        const r=new THREE.WebGLRenderer({canvas:cv,antialias:true,alpha:true}); r.setPixelRatio(Math.min(devicePixelRatio||1,2)); r.setSize(w,h);
-        const sc=new THREE.Scene(); const cam=new THREE.PerspectiveCamera(38,w/h,0.1,100); cam.position.set(0,3.2,4.4); cam.lookAt(0,0,0);
-        sc.add(new THREE.AmbientLight(0xffffff,0.85));
-        const d1=new THREE.DirectionalLight(0xffffff,1.1); d1.position.set(3,6,4); sc.add(d1);
-        const d2=new THREE.DirectionalLight(0x5ECFF9,0.7); d2.position.set(-4,2,-3); sc.add(d2);
-        const board=new THREE.Group();
-        // PCB substrate (white)
-        const sub=new THREE.Mesh(new THREE.BoxGeometry(4,0.12,3),new THREE.MeshStandardMaterial({color:0xf4f6f8,roughness:0.55,metalness:0.1}));
-        board.add(sub);
-        // trace texture (cyan, glowing) on top
-        const tc=document.createElement('canvas'); tc.width=tc.height=512; const ctx=tc.getContext('2d');
-        ctx.fillStyle='rgba(0,0,0,0)'; ctx.fillRect(0,0,512,512);
-        ctx.strokeStyle='#5ECFF9'; ctx.lineWidth=3; ctx.shadowColor='#5ECFF9'; ctx.shadowBlur=6;
-        const grid=64; for(let gx=1;gx<8;gx++){ ctx.beginPath(); let x=gx*grid; ctx.moveTo(x,40); ctx.lineTo(x,180); ctx.lineTo(x+grid,180); ctx.lineTo(x+grid,360); ctx.stroke(); }
-        for(let gy=1;gy<8;gy++){ ctx.beginPath(); let y=gy*grid; ctx.moveTo(30,y); ctx.lineTo(220,y); ctx.lineTo(220,y+grid); ctx.lineTo(470,y+grid); ctx.stroke(); }
-        // pads
-        ctx.fillStyle='#9be4ff'; for(let i=0;i<26;i++){ const px=40+Math.floor(Math.random()*7)*grid, py=40+Math.floor(Math.random()*7)*grid; ctx.fillRect(px-4,py-4,8,8); }
-        const tex=new THREE.CanvasTexture(tc);
-        const traces=new THREE.Mesh(new THREE.PlaneGeometry(4,3),new THREE.MeshBasicMaterial({map:tex,transparent:true,opacity:0.95}));
-        traces.rotation.x=-Math.PI/2; traces.position.y=0.062; board.add(traces);
-        // components
-        const ic=(x,z,sx,sz)=>{ const m=new THREE.Mesh(new THREE.BoxGeometry(sx,0.18,sz),new THREE.MeshStandardMaterial({color:0x14181d,roughness:0.5,metalness:0.3})); m.position.set(x,0.15,z); board.add(m); };
-        ic(-0.9,0.2,1.1,0.8); ic(1.0,-0.6,0.7,0.7); ic(0.7,0.8,0.5,0.5);
-        const cap=(x,z)=>{ const m=new THREE.Mesh(new THREE.CylinderGeometry(0.12,0.12,0.26,18),new THREE.MeshStandardMaterial({color:0xc8a23a,roughness:0.35,metalness:0.7})); m.position.set(x,0.16,z); board.add(m); };
-        cap(-1.5,-0.9); cap(-1.3,0.9); cap(1.6,0.7);
-        sc.add(board);
-
-        const tm={x:0,y:0},mm2={x:0,y:0};
-        host.addEventListener('mousemove',e=>{ const b=host.getBoundingClientRect(); tm.x=((e.clientX-b.left)/b.width)*2-1; tm.y=((e.clientY-b.top)/b.height)*2-1; });
-        host.addEventListener('mouseleave',()=>{tm.x=0;tm.y=0;});
-        new ResizeObserver(()=>{ w=host.clientWidth;h=host.clientHeight; if(w&&h){cam.aspect=w/h;cam.updateProjectionMatrix();r.setSize(w,h);} }).observe(host);
-        let vis=true; new IntersectionObserver(es=>vis=es[0].isIntersecting,{threshold:0}).observe(host);
-        const clk=new THREE.Clock(); let tt=0;
-        (function loop(){ requestAnimationFrame(loop); if(document.hidden||!vis)return; const dt=clk.getDelta(); tt+=dt;
-          mm2.x=lerp(mm2.x,tm.x,0.06);mm2.y=lerp(mm2.y,tm.y,0.06);
-          board.rotation.y=Math.sin(tt*0.4)*0.5 + mm2.x*0.5;
-          board.rotation.x=mm2.y*0.12; r.render(sc,cam); })();
-
-        /* real boards via GLTF + switcher (loads over http; file:// keeps the procedural board) */
-        const loadingEl=document.getElementById('pcbLoading');
-        let GLTFLoader; try{ ({GLTFLoader}=await import('three/addons/loaders/GLTFLoader.js')); }catch(e){}
-        if(GLTFLoader){
-          const loader=new GLTFLoader();
-          const MODELS={systems:'models/pcb_systems.glb',tia:'models/pcb_tia.glb',transceiver:'models/pcb_transceiver.glb',speaker:'models/pcb_speaker.glb'};
-          const wmat=new THREE.MeshStandardMaterial({color:0xeef2f6,roughness:0.46,metalness:0.32});
-          let token=0,realInner=null,proc=true;
-          function loadBoard(key){ const url=MODELS[key]; if(!url)return; const my=++token; if(loadingEl)loadingEl.style.opacity='1';
-            loader.load(url,gltf=>{ if(my!==token)return; const mdl=gltf.scene; mdl.traverse(o=>{ if(o.isMesh)o.material=wmat; });
-              const box=new THREE.Box3().setFromObject(mdl),ctr=box.getCenter(new THREE.Vector3()),sz=box.getSize(new THREE.Vector3()); mdl.position.sub(ctr);
-              const inner=new THREE.Group(); inner.add(mdl);
-              if(sz.z<=sz.x&&sz.z<=sz.y)inner.rotation.x=-Math.PI/2; else if(sz.x<=sz.y&&sz.x<=sz.z)inner.rotation.z=Math.PI/2;
-              inner.scale.setScalar(3.7/Math.max(sz.x,sz.y,sz.z));
-              if(proc){ board.clear(); proc=false; } if(realInner)board.remove(realInner);
-              board.add(inner); realInner=inner; if(loadingEl)loadingEl.style.opacity='0';
-            },undefined,()=>{ if(loadingEl){ loadingEl.textContent='Serve over http to view 3D'; loadingEl.style.opacity='1'; setTimeout(()=>{loadingEl.style.opacity='0';},2000);} });
-          }
-          const chips=document.querySelectorAll('.pcb-chip');
-          chips.forEach(c=>c.addEventListener('click',()=>{ chips.forEach(x=>x.classList.remove('active')); c.classList.add('active'); loadBoard(c.dataset.board); }));
-          let lazy=false; new IntersectionObserver(es=>{ if(es[0].isIntersecting&&!lazy){ lazy=true; loadBoard('systems'); } },{threshold:0.12}).observe(host);
-        }
-      } catch(e){ /* PCB optional */ }
-    })();
-
-    if(document.readyState==='loading')addEventListener('DOMContentLoaded',boot); else boot();
-  </script>
-<script>(function(){var root=document.documentElement;var opts=document.querySelectorAll('.theme-opt');var mc=document.querySelector('meta[name=theme-color]');function apply(mode){root.classList.toggle('light',mode==='light');if(mc)mc.setAttribute('content',mode==='light'?'#ECEFF3':'#181D24');try{localStorage.setItem('nyna-theme-v2',mode);}catch(e){}opts.forEach(function(o){if(o.dataset.theme===mode){o.setAttribute('aria-current','true');}else{o.removeAttribute('aria-current');}});}opts.forEach(function(o){o.addEventListener('click',function(){apply(o.dataset.theme);});});apply(root.classList.contains('light')?'light':'dark');})();</script>
-  <!-- Vercel Speed Insights -->
-  <script>window.si=window.si||function(){(window.siq=window.siq||[]).push(arguments);};</script>
-  <script defer src="/_vercel/speed-insights/script.js"></script>
-  <!-- Vercel Web Analytics -->
-  <script>window.va=window.va||function(){(window.vaq=window.vaq||[]).push(arguments);};</script>
-  <script defer src="/_vercel/insights/script.js"></script>
+  <script src="/main.js?v=26" defer></script>
+  <script src="/work.js?v=26" defer></script>
 </body>
 </html>

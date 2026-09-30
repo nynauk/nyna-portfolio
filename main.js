@@ -1,4 +1,4 @@
-/* NYNA draft: "Backlit"
+/* NYNA: "Backlit"
    The page is NYNA's board and the cursor is a light held behind it.
    Two copper layers are routed around the real layout (all content is a keep-out):
    the top layer sharp, an inner layer softer and set deeper. The routing shows
@@ -31,7 +31,7 @@
   };
 
   const TAU = Math.PI * 2;
-  const THEME_KEY = 'nyna-draft-theme';
+  const THEME_KEY = 'nyna-theme';
   const IN_S = 0.991;          // inner copper sits deeper in the board: projected toward the screen centre
   const HOLE_S = 0.993;        // the far side of a drilled hole, likewise (kept shallow: a hint, not a trench)
   const WANDER_AFTER = 2600;   // ms without input before the light starts wandering on its own
@@ -129,7 +129,7 @@
     x: innerWidth * (fine ? 0.8 : 0.68),
     y: innerHeight * (fine ? 0.5 : 0.42),
     tx: 0, ty: 0, i: 0, r: 0, tr: baseR(), boost: 0,
-    on: store.get('nyna-draft-backlight') !== 'off'
+    on: store.get('nyna-backlight') !== 'off'
   };
   light.tx = light.x; light.ty = light.y; light.r = light.tr * 0.62;
   const cursor = { x: light.x, y: light.y };
@@ -848,7 +848,7 @@
   function setBacklight(on, quiet) {
     light.on = on;
     backlights.forEach(b => b.setAttribute(b.getAttribute('role') === 'switch' ? 'aria-checked' : 'aria-pressed', String(on)));
-    if (!quiet) store.set('nyna-draft-backlight', on ? 'on' : 'off');
+    if (!quiet) store.set('nyna-backlight', on ? 'on' : 'off');
     active();
   }
   backlights.forEach(b => b.addEventListener('click', () => setBacklight(!light.on)));
@@ -1167,7 +1167,7 @@ void main(){
   if (vImg && vTabs.length) {
     let cur = 'systems';
     const cache = {};
-    const src = key => `/draft/assets/boards/${key}.webp?v=2`;
+    const src = key => `/assets/boards/${key}.webp?v=2`;
     const load = key => cache[key] || (cache[key] = new Promise(res => {
       const im = new Image();
       im.onload = im.onerror = () => res();

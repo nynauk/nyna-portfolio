@@ -1,4 +1,4 @@
-/* NYNA draft: case studies.
+/* NYNA: case studies.
    The photo viewer, the turning 3D optics on the OWC page, and the interactive
    strategy chart on the trading page. main.js runs the board itself. */
 (() => {

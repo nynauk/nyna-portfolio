@@ -1,19 +1,23 @@
-# NYNA — Portfolio & Business Site
+# NYNA
 
-Static marketing and portfolio site for **NYNA** — professional IT, web & hardware solutions, London.
+Website for **NYNA**: professional IT, web and hardware solutions in London. Live at [nyna.co.uk](https://nyna.co.uk).
 
 ## Structure
-- `index.html` — homepage: WebGL wave hero, services, hardware/PCB showcase (per-board colour glow), selected work grid, skills, contact.
-- `owc.html` — Optical Wireless Communication dissertation case study, with an interactive 3D adapter viewer.
-- `trading-bot.html`, `corporate-web.html`, `construction-website.html`, `baby-soother.html`, `train-timetable.html`, `temperature-sensor.html`, `network-ring.html`, `accountancy-web.html`, `email-hosting.html`, `computer-setup.html` — individual work case-study pages (placeholder content for now).
-- `models/` — `.glb` 3D adapter models.
-- `projects/` — case-study photos, CAD renders, scope captures, schematics.
-- `boards/` — PCB top-view renders for the hardware switcher.
-- `logos/` — client logos.
-- `vercel.json` — static hosting config (long-cache headers for assets).
+- `index.html`: the homepage. The page is drawn as one of NYNA's circuit boards, lit from behind by the cursor.
+- `owc.html`, `trading-bot.html`, `autonomous-buggy.html`, `peg-dhcp-security.html`, `train-timetable.html`, `corporate-web.html`, `construction-website.html`, `accountancy-web.html`, `network-ring.html`, `email-hosting.html`, `computer-setup.html`: the case studies. They share the homepage's head, nav, footer and menus, so change those on `index.html` first and then carry the change across to every case study.
+- `style.css`: every style, in light and dark themes.
+- `main.js`: the board itself (copper routing, the light, the charges, the WebGL bench behind the board, the honeycomb cut-outs), plus the menus, cursor, work panel and enquiry form.
+- `work.js`: case-study extras: the photo viewer, the 3D adapter viewer on `owc.html` and the strategy chart on `trading-bot.html`.
+- `assets/`: self-hosted fonts (fixed-width Archivo instances and Unbounded), board renders, client logos and photo thumbnails.
+- `projects/`: full-size case-study photos and renders, the buggy demo video, and `strategies.js` (chart data).
+- `models/`: `.glb` models for the 3D adapter viewer.
+- `icons/`, `site.webmanifest`: favicons, app icons and the social preview image.
+- `boards/`, `logos/`: original source images; the site uses the optimised copies in `assets/`.
+- `brand/`: brand guidelines PDF and social graphics.
+- `vercel.json`: redirects the old `/draft` preview to `/` and sets long caching on static folders.
 
 ## Tech
-Hand-coded HTML / CSS / JS. Three.js, GSAP + ScrollTrigger and Lenis are loaded via CDN. No build step. Includes a dark/light theme toggle (in the footer) and a custom cursor.
+Hand-coded HTML, CSS and JavaScript with no build step. three.js is loaded from a CDN on the OWC case study only. The site follows the visitor's light or dark setting until they pick one, and respects reduced motion.
 
-## Deploy (Vercel)
-Import this repo into Vercel. No framework preset or build command is required — it deploys as a static site served from the repository root (`index.html`). `vercel.json` applies caching headers to the asset folders.
+## Deploy
+Pushing to `main` deploys to Vercel as a static site served from the repository root.
