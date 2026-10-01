@@ -20,6 +20,20 @@ social profiles, decks, documents, ads.
 | `twitter-header.png` | 1500 × 500 | X (Twitter) header |
 | `profile-avatar.png` | 512 × 512 | Profile picture (any platform) |
 
+## Social graphics in the current site style (`/social/backlit`)
+
+Drawn by the live site's own board engine, so they match nyna.co.uk exactly. Regenerate with
+`node _social_gen.mjs` (in the `artifacts` folder, with the local preview running on port 8123).
+
+| File | Size (px) | Use |
+|------|-----------|-----|
+| `linkedin-banner.png` | 1584 × 396 | LinkedIn profile banner; the name and line sit in the middle band, so a company page's wider crop keeps them |
+| `instagram-01-intro.png` | 1080 × 1350 | Instagram post: who NYNA is |
+| `instagram-02-services.png` | 1080 × 1350 | Instagram post: the four services |
+| `instagram-03-hardware.png` | 1080 × 1350 | Instagram post: PCB design |
+| `instagram-04-project.png` | 1080 × 1350 | Instagram post: the optical link project |
+| `instagram-05-contact.png` | 1080 × 1350 | Instagram post: contact details |
+
 ## Colour
 
 | Token | Hex | Role |

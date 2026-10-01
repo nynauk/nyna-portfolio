@@ -117,7 +117,7 @@
   function watchLight() {
     if (litIO) litIO.disconnect();
     litEls.clear();
-    const sel = surfaceOn ? '.mhole, .brand-v, .thole, .tab, .tp-pad' : '.mhole, .perf, .brand-v, .window, .thole, .tab, .tp-pad, .model-stage';
+    const sel = surfaceOn ? '.mhole, .brand-v, .tab, .tp-pad, .pin-pad' : '.mhole, .perf, .brand-v, .window, .tab, .tp-pad, .pin-pad, .model-stage';
     litDirty = true;
     $$(sel).forEach(el => { if (litIO) litIO.observe(el); else litEls.add(el); });
   }
@@ -379,6 +379,7 @@
     C: { pre: 'C', ext: [13, 5.5], pads: CHIP, silk: 'M-11.5 -5.5H11.5A1.5 1.5 0 0 1 13 -4V4A1.5 1.5 0 0 1 11.5 5.5H-11.5A1.5 1.5 0 0 1 -13 4V-4A1.5 1.5 0 0 1 -11.5 -5.5Z' },
     D: { pre: 'D', ext: [12.5, 5], pads: CHIP, silk: 'M-2.5 -3.5L3 0L-2.5 3.5ZM3.5 -3.5V3.5' },
     F: { pre: 'F', ext: [12.5, 5], pads: CHIP, silk: rect(4, 5) },
+    L: { pre: 'L', ext: [12.5, 5], pads: CHIP, silk: 'M-5 2A2.5 2.5 0 0 1 0 2A2.5 2.5 0 0 1 5 2' },
     Y: { pre: 'Y', ext: [16, 7], pads: pair(10, 7, 9), silk: 'M-9 -7H9A7 7 0 0 1 9 7H-9A7 7 0 0 1 -9 -7Z' },
     SW: { pre: 'SW', ext: [11, 13], pads: pair(15, 8, 9), silk: rect(11, 13) + ring(6) },
     PD: { pre: 'PD', ext: [20, 14], pads: pair(12, 9, 11), silk: rect(20, 14) + rect(7, 8) },
@@ -387,6 +388,9 @@
     LD: { pre: 'LD', ext: [20, 14], pads: pair(12, 9, 11), silk: rect(20, 14), lens: ring(5.5), glow: 16 },
     PX: { pre: 'D', ext: [11, 11], pads: [pad(-13, -6, 7, 6), pad(-13, 6, 7, 6), pad(13, 6, 7, 6), pad(13, -6, 7, 6)], silk: rect(11, 11), lens: ring(6), glow: 15 },
     LS: { pre: 'LS', ext: [19, 19], pads: [pad(0, -5, 8, 6), pad(0, 5, 8, 6)], silk: ring(19) + ring(12), glow: 27 },
+    // an antenna printed in the copper itself: a meander, and the waves that leave it while it is sending
+    ANT: { pre: 'ANT', ext: [34, 13], pads: [pad(-30, 0, 6, 6)], cu: 'M-27 0H-20V-10H-13V10H-6V-10H1V10H8V-10H15V0',
+      wave: 'M21.9 -5.8A9 9 0 0 1 21.9 5.8M25.7 -9A14 14 0 0 1 25.7 9M29.6 -12.2A19 19 0 0 1 29.6 12.2', glow: 0 },
     USB: { pre: 'J', ext: [16, 26], pads: row([-15, -5, 5, 15], 14), silk: 'M-16 -26H6V26H-16ZM-11 -18H-3V18H-11Z' },
     J9: { pre: 'J', hole: 1.9, ext: [6, 46], silk: rect(6, 46), pads: row([-40, -30, -20, -10, 0, 10, 20, 30, 40], 0, 1) },
     J4: { pre: 'J', hole: 1.9, ext: [6, 21], silk: rect(6, 21), pads: row([-15, -5, 5, 15], 0, 1) },
@@ -454,7 +458,18 @@
           hits: (d, on) => Array.from({ length: n }, (_, j) => [T, at + d / sp + j * dt, on])   // an LED there flickers with each pulse
         };
       },
-      led(i, win) { const rec = { i, win }; leds.push(rec); return rec; },
+      // the same, but sent when the page fires a named signal (see `fire`) instead of on a timer
+      on(name, { sp = 100, at = 0 }, ...ws) {
+        let D = 0, last = null;
+        for (const t of ws) {
+          if (last) D += Math.hypot(t.p[0][0] - last[0], t.p[0][1] - last[1]);
+          t.ch.push({ ev: name, sp, off: D + sp * at, rev: false });
+          D += polyLen(t.p); last = t.p[t.p.length - 1];
+        }
+        return { L: D, at: d => at + d / sp, hits: (d, dur) => [[name, at + d / sp, dur]] };
+      },
+      // an LED: `win` is when it is lit on its own clock, `ev` when it is lit after a fired signal
+      led(i, win, ev) { const rec = { i, win, ev }; leds.push(rec); return rec; },
       gate(rec, ...ws) { for (const t of ws) t.gate = rec; }       // current that only runs while that LED is lit
     };
     build(m);
@@ -732,6 +747,26 @@
       m.gate(m.led(d2, [[T, 6.2, 2.8]]), l2);                                // then full
       m.port('out', 70, 15); m.title(-88, -32);
     }),
+    // the enquiry form's transmitter: whatever is typed is keyed onto a 433MHz carrier (a MAX1472
+    // on a 13.56MHz crystal), matched through L and C and sent from an antenna printed on the board
+    RADIO: circuit('RADIO TX', m => {
+      const u = m.add('SO8', 0, 0, 2, 'MAX1472');
+      const r1 = m.add('R', -50, -5, 0, null, 'below'), r2 = m.add('R', -78, -30), d = m.add('LED', -48, -30);
+      const y = m.add('Y', 0, 36, 0, null, 'below');
+      const l = m.add('L', 52, -15), c = m.add('C', 76, 3, 1, null, 'left'), ant = m.add('ANT', 124, -15);
+      const din = m.wire([-110, -5], m.pad(r1, 0), m.pad(r1, 1), m.pad(u, 5));
+      const ind = m.wire([-96, -5], [-96, -30], m.pad(r2, 0), m.pad(r2, 1), m.pad(d, 0), m.pad(d, 1), [-26, -30]); m.via(-26, -30);
+      m.wire(m.pad(u, 7), [-23, 36], m.pad(y, 0)); m.wire(m.pad(u, 0), [23, 36], m.pad(y, 1));
+      const rf = m.wire(m.pad(u, 3), m.pad(l, 0), m.pad(l, 1), [76, -15], m.pad(ant, 0));
+      m.wire([76, -15], m.pad(c, 0)); m.vip(c, 1); m.vip(u, 1, 2, 4, 6);
+      m.net('DATA', -114, -2, 'end'); m.net('TX', -48, -17); m.net('433MHZ', 124, 9);
+      const T = 5.6, P = { n: 2, dt: 0.2, T, sp: 170 };
+      const a = m.send(P, din), b = m.send({ ...P, at: a.at(a.L + 46) }, rf), i = m.send({ ...P, at: a.at(14) }, ind);   // a beacon every few seconds,
+      const e = m.on('tx', { sp: 210 }, din), f = m.on('tx', { sp: 210, at: e.at(e.L + 46) }, rf), g = m.on('tx', { sp: 210, at: e.at(14) }, ind);   // and each thing typed
+      m.led(d, i.hits(73, 0.11), g.hits(73, 0.11));
+      m.led(ant, b.hits(b.L, 0.3), f.hits(f.L, 0.3));
+      m.title(-140, -50);
+    }),
     // the battery's voltage halved for the ADC, with a capacitor to hold it steady while it is sampled
     DIV: circuit('V-DIVIDER', m => {
       const r1 = m.add('R', -20, -10), r2 = m.add('R', 4, 6, 1, null, 'left'), c = m.add('C', 24, 6, 1, null, 'right');
@@ -774,6 +809,7 @@
         if (!surfaceOn) body += `<circle class="k-drill" cx="${x}" cy="${y}" r="${hr}"/>`;
       }
       if (P.silk) body += `<path class="k-silk" d="${P.silk}"/>`;
+      if (P.cu) body += `<path class="k-cu" d="${P.cu}"/>`;
       if (P.lens) body += `<path class="k-lens" d="${P.lens}"/>`;
     }
     return `<g transform="translate(${f(part.cx)} ${f(part.cy)})${part.q ? ` rotate(${part.q * 90})` : ''}">${body}</g>`;
@@ -823,7 +859,8 @@
     drive: ['T555:2', 'LED:1', 'RGB:3'],
     sense: ['LIGHT:2', 'I2C:1', 'ROM:3'],
     output: ['AMP:1', 'PWM:2', 'UART:3'],
-    battery: ['CHG:1', 'DIV:2']
+    battery: ['CHG:1', 'DIV:2'],
+    comms: ['RADIO:1']
   };
   // neighbours that really are joined: one's output is the next one's input, by a trace or by fibre
   const LINKS = { 'USB>REG': 'trace', 'TX>RX': 'fibre', 'CHG>DIV': 'trace' };
@@ -834,11 +871,11 @@
     const br = board.getBoundingClientRect();
     const slots = $$('.kit').map(el => ({ row: ROWS[el.dataset.kit], r: el.getBoundingClientRect() })).filter(s => s.row && s.r.width > 200 && s.r.height > 80);
     if (!slots.length) return out;
-    const all = Object.values(KITS), TALL = Math.max(...all.map(M => M.h)), WIDE = Math.max(...all.map(M => M.w)) + 16;
-    // one scale for the whole page: the tallest block fits the shortest slot, the widest the narrowest
+    const TALL = Math.max(...Object.values(KITS).map(M => M.h)), wide = row => Math.max(...row.map(x => KITS[x.split(':')[0]].w)) + 16;
+    // one scale for the whole page: the tallest block fits the shortest slot, and each row's widest block its own slot
     // (never enlarged on a phone, where the slots are sized for two lines of blocks at their own size)
     let k = W < 700 ? 1 : 1.5;
-    for (const s of slots) k = Math.min(k, (s.r.height - 12) / TALL, s.r.width / WIDE);
+    for (const s of slots) k = Math.min(k, (s.r.height - 12) / TALL, s.r.width / wide(s.row));
     k = Math.max(0.7, Math.floor(k * 100) / 100);
     const GAP = (W < 700 ? 16 : 26) * k, LG = 18 * k, IN = 16 * k, MAR = 14, count = {};
     const at = (o, q) => [o.ox + q[0] * k, o.oy + q[1] * k];
@@ -935,14 +972,15 @@
           for (const part of M.parts) if (part.P.hole) for (const pd of part.pads) out.drills.push([...at(o, [pd.x, pd.y]), part.P.hole * k]);
           const leds = M.leds.map(rec => {
             const part = M.parts[rec.i], [lx, ly] = at(o, [part.cx, part.cy]);
-            const d = { x: lx, y: ly, k, q: part.q, P: part.P, win: rec.win, o, on: false, el: null };
+            const d = { x: lx, y: ly, k, q: part.q, P: part.P, win: rec.win, ev: rec.ev, o, on: false, el: null };
             if (rec.win === 'light') { const eye = M.parts.find(q => q.P === PKG.PD); [d.sx, d.sy] = at(o, [eye.cx, eye.cy]); }
             out.leds.push(d);
             return d;
           });
           for (const t of M.traces) {
             out.traces.push({ p: t.p.map(q => at(o, q)), w: t.w, fib: t.fib, gate: t.gate ? leds[M.leds.indexOf(t.gate)] : null,
-              ch: t.ch.map(c => ({ sp: c.sp * k, per: c.per * k, ph: (c.ph - c.sp * o.tOff) * k, rev: c.rev })) });
+              ch: t.ch.map(c => (c.ev ? { ev: c.ev, sp: c.sp * k, off: c.off * k, rev: c.rev }
+                : { sp: c.sp * k, per: c.per * k, ph: (c.ph - c.sp * o.tOff) * k, rev: c.rev })) });
           }
           for (const v of M.vias) out.vias.push(at(o, v));
           // nothing else gets routed through a circuit
@@ -955,7 +993,7 @@
       }
     }
     // every phase inside its own period, so each charge is where it belongs from the first frame
-    for (const t of out.traces) for (const c of t.ch) c.ph = ((c.ph % c.per) + c.per) % c.per;
+    for (const t of out.traces) for (const c of t.ch) if (!c.ev) c.ph = ((c.ph % c.per) + c.per) % c.per;
     return out;
   }
 
@@ -1199,39 +1237,54 @@
     pts.push(pointAt(t, b));
     return pts;
   }
+  // One-off signals: the page puts pulses onto a named line (the enquiry form does, as it is typed
+  // in and when it is sent), and whichever circuits listen to that line carry them and light up.
+  const bus = {};
+  function fire(name, n = 1, dt = 0.09) {
+    const q = bus[name] || (bus[name] = []);
+    while (q.length && (q[0] < chargeT - 12 || q.length > 90)) q.shift();
+    const t0 = Math.max(chargeT, q.length ? q[q.length - 1] + 0.05 : 0);
+    for (let k = 0; k < n; k++) q.push(t0 + k * dt);
+    kick();
+  }
+
   function runCharges(ctx, L, list, time, A, sharp, col, only) {
     for (const idx of list) {
       const t = L.traces[idx];
       // `only` the printed circuits; and a circuit's switched current runs only while it is switched on
       if (!t.ch || (only && !t.net) || (t.gate && !t.gate.on)) continue;
-      const ramp = t.net ? 5 : 16, reach = t.net ? 13 : 30;      // a circuit's wires are short and its pulses close together
       for (const c of t.ch) {
-        let s = (c.ph + c.sp * time) % c.per;
-        if (s > t.L) continue;                          // resting between pulses
-        const a = A * Math.min(1, s / ramp, (t.L - s) / ramp);
-        if (a < 0.03) continue;
-        if (c.rev) s = t.L - s;
-        const tail = Math.min(reach, t.L * 0.45);
-        const s0 = c.rev ? Math.min(t.L, s + tail) : Math.max(0, s - tail);
-        const pts = subPath(t, s0, s), q = pts[0], h = pts[pts.length - 1];
-        if (Math.abs(h[0] - q[0]) + Math.abs(h[1] - q[1]) > 0.5) {
-          const gr = ctx.createLinearGradient(q[0], q[1], h[0], h[1]);
-          gr.addColorStop(0, `rgba(${col.tail},0)`);
-          gr.addColorStop(1, `rgba(${col.tail},${(0.95 * a).toFixed(3)})`);
-          ctx.strokeStyle = gr;
-          ctx.lineWidth = t.w > 2 ? 2.6 : 1.6;
-          ctx.beginPath(); ctx.moveTo(q[0], q[1]);
-          for (let k = 1; k < pts.length; k++) ctx.lineTo(pts[k][0], pts[k][1]);
-          ctx.stroke();
-        }
-        if (sharp) {
-          ctx.fillStyle = `rgba(${col.halo},${(0.45 * a).toFixed(3)})`;
-          ctx.beginPath(); ctx.arc(h[0], h[1], 3.8, 0, TAU); ctx.fill();
-        }
-        ctx.fillStyle = `rgba(${col.head},${a.toFixed(3)})`;
-        ctx.beginPath(); ctx.arc(h[0], h[1], sharp ? 1.5 : 1.8, 0, TAU); ctx.fill();
+        if (!c.ev) spark(ctx, t, (c.ph + c.sp * time) % c.per, c.rev, A, sharp, col);
+        else if (bus[c.ev]) for (const t0 of bus[c.ev]) spark(ctx, t, c.sp * (time - t0) - c.off, c.rev, A, sharp, col);
       }
     }
+  }
+  // one charge, s along its trace: a bright head and the tail it leaves
+  function spark(ctx, t, s, rev, A, sharp, col) {
+    if (s < 0 || s > t.L) return;                       // not on this wire: resting between pulses, or not there yet
+    const ramp = t.net ? 5 : 16, reach = t.net ? 13 : 30;        // a circuit's wires are short and its pulses close together
+    const a = A * Math.min(1, s / ramp, (t.L - s) / ramp);
+    if (a < 0.03) return;
+    if (rev) s = t.L - s;
+    const tail = Math.min(reach, t.L * 0.45);
+    const s0 = rev ? Math.min(t.L, s + tail) : Math.max(0, s - tail);
+    const pts = subPath(t, s0, s), q = pts[0], h = pts[pts.length - 1];
+    if (Math.abs(h[0] - q[0]) + Math.abs(h[1] - q[1]) > 0.5) {
+      const gr = ctx.createLinearGradient(q[0], q[1], h[0], h[1]);
+      gr.addColorStop(0, `rgba(${col.tail},0)`);
+      gr.addColorStop(1, `rgba(${col.tail},${(0.95 * a).toFixed(3)})`);
+      ctx.strokeStyle = gr;
+      ctx.lineWidth = t.w > 2 ? 2.6 : 1.6;
+      ctx.beginPath(); ctx.moveTo(q[0], q[1]);
+      for (let k = 1; k < pts.length; k++) ctx.lineTo(pts[k][0], pts[k][1]);
+      ctx.stroke();
+    }
+    if (sharp) {
+      ctx.fillStyle = `rgba(${col.halo},${(0.45 * a).toFixed(3)})`;
+      ctx.beginPath(); ctx.arc(h[0], h[1], 3.8, 0, TAU); ctx.fill();
+    }
+    ctx.fillStyle = `rgba(${col.head},${a.toFixed(3)})`;
+    ctx.beginPath(); ctx.arc(h[0], h[1], sharp ? 1.5 : 1.8, 0, TAU); ctx.fill();
   }
 
   function draw() {
@@ -1359,6 +1412,10 @@
       } else if (live) {
         const t = chargeT - d.o.tOff;
         for (const [T, t0, dur] of d.win) if ((((t - t0) % T) + T) % T < dur) { on = true; break; }
+        // and for a moment after each fired signal reaches it
+        if (!on && d.ev) for (const [name, delay, dur] of d.ev) {
+          for (const t0 of bus[name] || []) { const x = chargeT - t0 - delay; if (x >= 0 && x < dur) { on = true; break; } }
+        }
       }
       if (on !== d.on) { d.on = on; d.el.classList.toggle('is-on', on); }
     }
@@ -1769,7 +1826,7 @@
     let lit = '';
     for (const d of net.leds) {
       lit += `<g class="k-led" transform="translate(${f(d.x)} ${f(d.y)}) scale(${d.k})${d.q ? ` rotate(${d.q * 90})` : ''}"><circle class="k-halo" r="${d.P.glow}"/>`
-        + (d.P.lens ? `<path class="k-lit" d="${d.P.lens}"/>` : '') + '</g>';
+        + (d.P.lens ? `<path class="k-lit" d="${d.P.lens}"/>` : '') + (d.P.wave ? `<path class="k-wave" d="${d.P.wave}"/>` : '') + '</g>';
     }
     perfs.forEach((p, k) => {
       const r = p.el.getBoundingClientRect();
@@ -2028,6 +2085,27 @@ void main(){
       win.style.setProperty('--bl', Math.max(0, Math.min(1, s / 70)).toFixed(3));
       win.style.setProperty('--br', Math.max(0, Math.min(1, (m - s) / 70)).toFixed(3));
     };
+    // the track under the window shows how far along you are, and the counter which boards are in view
+    const pos = $('.panel-pos'), count = $('#panel-count');
+    const two = n => String(n).padStart(2, '0');
+    const progress = () => {
+      const m = maxScroll(), at = Math.max(0, Math.min(m, panel.scrollLeft - tx));
+      if (pos) {
+        pos.style.setProperty('--pp', (m ? at / m : 0).toFixed(4));
+        pos.style.setProperty('--pw', Math.min(1, panel.clientWidth / Math.max(1, panel.scrollWidth)).toFixed(4));
+      }
+      if (!count) return;
+      const pr = panel.getBoundingClientRect(), mid = pr.left + pr.width / 2;
+      let a = 0, b = 0, near = 1, best = Infinity;
+      boards.forEach((el, i) => {
+        const r = el.getBoundingClientRect(), d = Math.abs(r.left + r.width / 2 - mid);
+        if (r.left >= pr.left - 6 && r.right <= pr.right + 6) { if (!a) a = i + 1; b = i + 1; }
+        if (d < best) { best = d; near = i + 1; }
+      });
+      if (!a) a = b = near;                               // too narrow to hold a whole board: the one in the middle
+      const text = a === b ? two(a) : two(a) + '-' + two(b);
+      if (count.textContent !== text) count.textContent = text;
+    };
     // V is the virtual position: scrollLeft, plus any rubber-band overshoot shown as a transform
     function apply(V) {
       const m = maxScroll();
@@ -2116,10 +2194,11 @@ void main(){
     }
     if (prev) prev.addEventListener('click', () => page(-1));
     if (next) next.addEventListener('click', () => page(1));
-    panel.addEventListener('scroll', () => { edges(); litDirty = true; kick(); if (!anim) updateArrows(); }, { passive: true });
-    addEventListener('resize', edges, { passive: true });
+    panel.addEventListener('scroll', () => { edges(); progress(); litDirty = true; kick(); if (!anim) updateArrows(); }, { passive: true });
+    addEventListener('resize', () => { edges(); progress(); }, { passive: true });
     updateArrows();
     edges();
+    progress();
 
     // the first time the panel comes into view it gives a little nudge, so it reads as something you can move
     if ('IntersectionObserver' in window) {
@@ -2150,12 +2229,26 @@ void main(){
       return validEmail(v);
     };
 
-    $$('.dip-sw', form).forEach(b => b.addEventListener('click', () => {
-      b.setAttribute('aria-checked', String(b.getAttribute('aria-checked') !== 'true'));
-    }));
+    // each field's LED lights once it holds something usable, and the send key's once there is enough to send
+    const done = { name: () => !!fName.value.trim(), email: () => validEmail(fEmail.value.trim()), msg: () => !!fMsg.value.trim() };
+    const mark = () => {
+      for (const [f, ok] of [[fName, done.name()], [fEmail, done.email()], [fMsg, done.msg()]]) f.closest('.field').classList.toggle('is-set', ok);
+      form.classList.toggle('is-ready', done.email() && done.msg());
+    };
+    // what is typed goes out through the board's radio as it is typed: a pulse a keystroke
+    let lastKey = 0;
+    const typed = () => {
+      const t = performance.now();
+      if (t - lastKey > 85) { lastKey = t; fire('tx'); }
+      active();
+    };
+    form.addEventListener('input', () => { mark(); typed(); });
+    form.addEventListener('change', mark);
     fEmail.addEventListener('blur', () => { if (fEmail.value.trim()) setErr(fEmail, !checkEmail()); });
     fEmail.addEventListener('input', () => { if (fEmail.getAttribute('aria-invalid') === 'true' && checkEmail()) setErr(fEmail, false); });
     fMsg.addEventListener('input', () => { if (fMsg.getAttribute('aria-invalid') === 'true' && fMsg.value.trim()) setErr(fMsg, false); });
+    mark();                                             // a browser may have put back what was typed before
+    addEventListener('pageshow', mark);
 
     form.addEventListener('submit', e => {
       e.preventDefault();
@@ -2165,7 +2258,7 @@ void main(){
       if (badEmail) { fEmail.focus(); return; }
       if (badMsg) { fMsg.focus(); return; }
 
-      const services = $$('.dip-sw[aria-checked="true"]', form).map(b => b.dataset.service);
+      const services = $$('.key input:checked', form).map(b => b.value);
       const subject = 'Project enquiry' + (services.length ? ': ' + services.join(', ') : '');
       const lines = [msg, ''];
       if (services.length) lines.push('Services: ' + services.join(', '));
@@ -2173,7 +2266,8 @@ void main(){
       lines.push('Reply to: ' + email);
       window.location.href = 'mailto:info@nyna.co.uk?subject=' + encodeURIComponent(subject) + '&body=' + encodeURIComponent(lines.join('\n'));
       status.textContent = 'Your email app should open with the enquiry ready. Press send there to deliver it.';
-      if (light.on && !reduce) { light.boost = 1.1; active(); }     // the board lights up as it goes
+      fire('tx', 16, 0.08);                                         // the whole frame goes out,
+      if (light.on && !reduce) { light.boost = 1.1; active(); }     // and the board lights up as it goes
     });
   }
 
@@ -2309,7 +2403,7 @@ void main(){
     const lit = new IntersectionObserver(es => {
       for (const e of es) e.target.classList.toggle('is-lit', e.isIntersecting);
     }, { rootMargin: '-42% 0px -42% 0px' });
-    $$('.chip-inc li, .bom li, .feat, .leds li').forEach(el => lit.observe(el));
+    $$('.chip-inc li, .bom li, .feat, .leds li, .direct > div').forEach(el => lit.observe(el));
   }
 
   // looping trace animations only run while they're on screen

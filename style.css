@@ -39,7 +39,10 @@
   --board-hi: rgba(255, 255, 255, .75);
   --btn-edge: #000;
   --wall: rgba(3, 9, 14, .3);
-  --dip: #151617;
+  /* an LED set into an ink-coloured key: unlit, lit, and its glow */
+  --kled-off: rgba(255, 255, 255, .24);
+  --kled-on: #D8F4FF;
+  --kled-glow: 0 0 0 1px rgba(12, 143, 203, .45), 0 0 5px 1px rgba(94, 207, 249, .8), 0 0 12px 3px rgba(94, 207, 249, .3);
   --mark: brightness(0);    /* client marks printed in silkscreen ink */
   --sheen: rgba(255, 255, 255, .42);
 
@@ -100,7 +103,9 @@
   --board-hi: rgba(255, 255, 255, .06);
   --btn-edge: #A7B0B7;
   --wall: rgba(0, 0, 0, .42);
-  --dip: #20262C;
+  --kled-off: rgba(13, 17, 22, .2);
+  --kled-on: #0E9BDD;
+  --kled-glow: 0 0 0 1px rgba(12, 143, 203, .3), 0 0 6px 1px rgba(14, 155, 221, .45);
   --mark: brightness(0) invert(.94);
   --sheen: rgba(255, 255, 255, .1);
   --accent: #5ECFF9;
@@ -141,7 +146,7 @@
 }
 .no-fixed-bg :is(.perf, .window, .model-stage) { --light: linear-gradient(transparent, transparent); }
 /* small plated holes glow as a whole, by how close the light is (main.js writes --hl) */
-.mhole, .thole, .tp-pad, .tab {
+.mhole, .tp-pad, .pin-pad, .tab {
   --hole-bg:
     radial-gradient(circle at 50% 42%, rgba(226, 246, 254, calc(var(--hl, 0) * .7)), rgba(94, 207, 249, calc(var(--hl, 0) * .55)) 55%, rgba(12, 143, 203, calc(var(--hl, 0) * .3))),
     var(--bench);
@@ -232,6 +237,9 @@ a { color: inherit; }
 .silk .k-led.is-on { opacity: 1; }
 .silk .k-lit { fill: var(--led-on); }
 .silk .k-halo { fill: url(#led-halo); }
+/* an antenna is bare copper, and while it is sending the waves leave it */
+.silk .k-cu { fill: none; stroke: var(--hasl); stroke-width: 1.9; stroke-linejoin: round; stroke-linecap: round; }
+.silk .k-wave { fill: none; stroke: var(--led-on); stroke-width: 1.3; stroke-linecap: round; }
 
 /* the routing, faintly visible through the mask everywhere, even without the light */
 .ghost { position: absolute; left: 0; top: 0; overflow: visible; pointer-events: none; }
@@ -742,16 +750,28 @@ a { color: inherit; }
 /* ---------------------------------------------------------------- work: a production panel */
 
 .work { padding-top: clamp(120px, 12vw, 180px); }
-.work-head {
-  display: grid;
-  grid-template-columns: minmax(0, 1fr) auto;
-  grid-template-areas: "h ctrl" "note ctrl";
-  gap: 14px 24px; align-items: end;
-  padding: 0 var(--pad);
+.work-head { display: grid; gap: 14px; padding: 0 var(--pad); }
+.work-head .h2 { max-width: 16em; }
+.work-note { margin: 0; max-width: 46ch; color: var(--ink-2); }
+/* under the window: how far along the panel you are, which boards are in view, and the arrows */
+.panel-foot { display: flex; align-items: center; gap: clamp(16px, 2.2vw, 28px); margin-top: clamp(18px, 2vw, 26px); padding: 0 var(--pad); }
+.panel-pos { position: relative; flex: 1; height: 14px; }
+.panel-pos::before {
+  content: ""; position: absolute; left: 0; right: 0; top: 50%; height: 2px; margin-top: -1px; border-radius: 1px;
+  background: var(--rule);
 }
-.work-head .h2 { grid-area: h; max-width: 16em; }
-.work-note { grid-area: note; margin: 0; max-width: 46ch; color: var(--ink-2); }
-.panel-ctrl { grid-area: ctrl; display: flex; gap: 10px; }
+.panel-thumb {
+  position: absolute; left: 0; top: 50%; height: 4px; margin-top: -2px; border-radius: 2px;
+  width: calc(var(--pw, .3) * 100%); background: var(--silk);
+  transform: translateX(calc(var(--pp, 0) * (100% / var(--pw, .3) - 100%)));
+}
+.panel-count {
+  margin: 0; min-width: 6.2em; text-align: right; white-space: nowrap;
+  font-family: var(--wide); font-size: .72rem; font-weight: 600; letter-spacing: .1em; font-variant-numeric: tabular-nums;
+  color: var(--ink-3);
+}
+.panel-count span { color: var(--silk); }
+.panel-ctrl { display: flex; gap: 10px; }
 .arrow {
   display: grid; place-items: center;
   width: 50px; height: 50px; padding: 0; border: 0; border-radius: 6px;
@@ -769,8 +789,8 @@ a { color: inherit; }
 .arrow:disabled:active { transform: none; }
 
 /* the window routed out of the main board. A soft bore wall shows on the far side
-   (main.js moves it with scroll), and the panel only goes soft at an edge while
-   there are more boards hidden past it. */
+   (main.js moves it with scroll). The boards slide beneath its edges, into the shadow
+   the main board casts on them, wherever there are more hidden past that edge. */
 .window {
   position: relative;
   margin: clamp(30px, 4vw, 50px) max(clamp(10px, 1.6vw, 22px), calc(var(--pad) - 64px)) 0;
@@ -780,23 +800,14 @@ a { color: inherit; }
   box-shadow: inset 0 3px 10px -4px var(--wall), inset 0 0 0 1px var(--wall), inset 0 14px 26px -22px rgba(0, 0, 0, .4);
 }
 .has-surface .window, .has-surface [data-hole] { background: none; }
-.window-blur {
+.window-edge {
   position: absolute; top: 0; bottom: 0; z-index: 2;
-  width: clamp(26px, 4vw, 64px);
+  width: clamp(28px, 4.4vw, 68px);
   pointer-events: none;
-  -webkit-backdrop-filter: blur(5px); backdrop-filter: blur(5px);
   transition: opacity .3s var(--ease-out);
 }
-.window-blur--l {
-  left: 0; opacity: var(--bl, 0);
-  -webkit-mask: linear-gradient(90deg, #000 10%, transparent);
-          mask: linear-gradient(90deg, #000 10%, transparent);
-}
-.window-blur--r {
-  right: 0; opacity: var(--br, 1);
-  -webkit-mask: linear-gradient(270deg, #000 10%, transparent);
-          mask: linear-gradient(270deg, #000 10%, transparent);
-}
+.window-edge--l { left: 0; opacity: var(--bl, 0); background: linear-gradient(90deg, rgba(4, 8, 12, .5), rgba(4, 8, 12, 0)); }
+.window-edge--r { right: 0; opacity: var(--br, 1); background: linear-gradient(270deg, rgba(4, 8, 12, .5), rgba(4, 8, 12, 0)); }
 
 .panel {
   overflow-x: auto; overflow-y: hidden;
@@ -804,7 +815,7 @@ a { color: inherit; }
   scrollbar-width: none;
   scroll-snap-type: x proximity;
   scroll-padding-inline: var(--rail-pad);
-  padding-block: clamp(22px, 2.6vw, 34px);
+  padding-block: clamp(26px, 3vw, 42px);
   cursor: grab;
   --rail-pad: clamp(18px, 2.4vw, 36px);
   --tabw: clamp(26px, 2.6vw, 36px);
@@ -813,41 +824,18 @@ a { color: inherit; }
 .panel:focus-visible { outline: 2px solid var(--glow); outline-offset: -4px; border-radius: 12px; }
 .panel.is-dragging { cursor: grabbing; scroll-snap-type: none; user-select: none; }
 
-.track { display: flex; flex-direction: column; width: max-content; padding: 0 var(--rail-pad); }
+.track { width: max-content; padding: 0 var(--rail-pad); }
 
-/* each part of the panel casts its own shadow onto the bench below */
-.rail-txt {
-  position: absolute; left: 66px; top: 50%; transform: translateY(-50%);
-  font-family: var(--wide); font-size: .54rem; font-weight: 600; letter-spacing: .16em; white-space: nowrap; color: var(--silk-deco);
-}
-.rail { position: relative; height: 26px; background: var(--mask); border-radius: 5px; box-shadow: inset 0 1px 0 var(--board-hi), 0 10px 18px -10px rgba(0, 0, 0, .45); }
-.thole {
-  position: absolute; top: 50%; width: 8px; height: 8px; margin-top: -4px; border-radius: 50%;
-  background: var(--hole-bg); box-shadow: inset 0 1.5px 2px -1px var(--wall), 0 0 0 3px var(--hasl);
-}
-.thole:nth-child(1) { left: 16px; }
-.thole:nth-child(2) { right: 16px; }
-.rail-fid {
-  position: absolute; top: 50%; left: 46px; width: 6px; height: 6px; margin-top: -3px; border-radius: 50%;
-  background: var(--hasl); box-shadow: 0 0 0 4px var(--mask), 0 0 0 5px var(--rule);
-}
-
-.boards { display: flex; align-items: stretch; gap: var(--tabw); margin: 30px 0; padding: 0; list-style: none; }
-
-.pcb { position: relative; flex: none; width: clamp(262px, 23.5vw, 322px); scroll-snap-align: start; }
-/* tabs tying each board to the rails */
-.pcb::before, .pcb::after {
-  content: ""; position: absolute; left: 50%; width: 30px; height: 30px; margin-left: -15px;
-  background: var(--mask);
-}
-.pcb::before { top: -30px; }
-.pcb::after { bottom: -30px; }
+/* a strip of boards, each floating over the bench and tied to the next by a break-off tab */
+.boards { display: flex; align-items: stretch; gap: var(--tabw); margin: 0; padding: 0; list-style: none; }
+.pcb { position: relative; flex: none; width: clamp(272px, 25.5vw, 356px); scroll-snap-align: start; }
 /* mouse-bite tab to the next board, perforated at both break lines */
 .tab {
   position: absolute; top: 50%; right: calc(-1 * var(--tabw));
   width: var(--tabw); height: 24px; margin-top: -12px;
   background: var(--mask);
 }
+.pcb:last-child .tab { display: none; }
 .tab::before, .tab::after {
   content: ""; position: absolute; top: 3px; bottom: 3px; width: 6px;
   background: var(--hole-bg);
@@ -859,8 +847,8 @@ a { color: inherit; }
 
 .pcb-link {
   position: relative;
-  display: flex; flex-direction: column; gap: 16px;
-  height: 100%; padding: 14px 14px 20px;
+  display: flex; flex-direction: column;
+  height: 100%; padding: 12px 12px 18px;
   border-radius: 12px; background: var(--mask);
   box-shadow: inset 0 1px 0 var(--board-hi), 0 16px 26px -14px rgba(0, 0, 0, .5);
   color: var(--silk); text-decoration: none;
@@ -870,27 +858,27 @@ a { color: inherit; }
 .pcb-link:active { transform: scale(.985); }
 .pcb-link:focus-visible { outline: 2px solid var(--silk); outline-offset: 3px; box-shadow: 0 0 0 7px var(--focus); }
 .pcb-fid {
-  position: absolute; right: 16px; bottom: 16px; width: 6px; height: 6px; border-radius: 50%;
+  position: absolute; right: 16px; bottom: 18px; width: 6px; height: 6px; border-radius: 50%;
   background: var(--hasl); box-shadow: 0 0 0 4px var(--mask), 0 0 0 5px var(--rule);
 }
+/* the picture is mounted on the board like a display, in its own bezel */
 .pcb-art {
-  display: grid; place-items: center;
+  flex: none; display: grid; place-items: center;
   aspect-ratio: 4 / 3; border-radius: 7px; overflow: hidden;
   box-shadow: inset 0 0 0 1.5px var(--silk);
 }
+.pcb-art--photo { position: relative; background: var(--mask-deep); }
 .pcb-art--photo img { width: 100%; height: 100%; object-fit: cover; transition: transform .6s var(--ease-out); }
+.pcb-art--photo::after { content: ""; position: absolute; inset: 0; border-radius: inherit; box-shadow: inset 0 0 0 1.5px var(--silk); pointer-events: none; }
 .pcb-link:hover .pcb-art--photo img { transform: scale(1.04); }
 .pcb-art--dark { background: #0C0F14; }
-.pcb-art svg { width: 84%; height: auto; }
-.ink { fill: none; stroke: currentColor; stroke-width: 1.6; stroke-linecap: round; stroke-linejoin: round; }
-.ink .fill { fill: currentColor; }
-.ink .fill-bg { fill: var(--mask); }
 
-.pcb-meta { display: grid; gap: 7px; margin-top: auto; padding-right: 18px; }
+/* title and line under the picture; who it was for sits on the board's bottom edge */
+.pcb-meta { flex: 1; display: grid; grid-template-rows: auto auto 1fr; gap: 6px; padding: 16px 22px 0 4px; }
 .pcb-title { font-family: var(--wide); font-weight: 600; font-size: 1.12rem; line-height: 1.15; letter-spacing: -.015em; }
 .pcb-link:hover .pcb-title { text-decoration: underline; text-decoration-thickness: 1.5px; text-underline-offset: .22em; }
 .pcb-line { font-size: .9rem; line-height: 1.45; color: var(--ink-2); }
-.pcb-ctx { font-size: .8rem; color: var(--ink-3); }
+.pcb-ctx { align-self: end; padding-top: 14px; font-size: .8rem; color: var(--ink-3); }
 
 /* ---------------------------------------------------------------- why: test points */
 
@@ -995,11 +983,20 @@ a { color: inherit; }
 
 .contact {
   display: grid; grid-template-columns: minmax(0, 5fr) minmax(0, 6fr);
-  gap: clamp(44px, 6vw, 100px); align-items: start;
+  grid-template-areas: "intro form" "kit form"; grid-template-rows: auto 1fr;
+  column-gap: clamp(44px, 6vw, 100px); align-items: start;
   padding: clamp(120px, 13vw, 190px) var(--pad) clamp(100px, 10vw, 150px);
 }
+.contact-intro { grid-area: intro; }
+.enquiry { grid-area: form; }
+.contact .perf--divider { grid-area: div; }
+/* the form's own transmitter stands at the foot of the left column, level with the send key */
+.contact .kit { grid-area: kit; align-self: end; margin: clamp(34px, 3.6vw, 52px) 0 0; }
 @media (min-width: 1100px) {
-  .contact { grid-template-columns: minmax(0, 5fr) auto minmax(0, 6fr); column-gap: clamp(30px, 3.2vw, 58px); }
+  .contact {
+    grid-template-columns: minmax(0, 5fr) auto minmax(0, 6fr); grid-template-areas: "intro div form" "kit div form";
+    column-gap: clamp(30px, 3.2vw, 58px);
+  }
 }
 .contact-intro p { margin: 1.2em 0 0; max-width: 30em; font-size: 1.1rem; color: var(--ink-2); }
 .contact-intro .contact-sub {
@@ -1007,58 +1004,115 @@ a { color: inherit; }
   font-size: clamp(1.2rem, 1rem + .8vw, 1.6rem); font-weight: 500; font-family: var(--wide); letter-spacing: -.015em;
   color: var(--silk);
 }
-.direct { display: grid; gap: 14px; margin: 36px 0 0; }
-.direct div { display: grid; grid-template-columns: 5.5rem 1fr; gap: 12px; }
-.direct dt { padding-top: 2px; font-size: .9rem; color: var(--ink-3); }
-.direct dd { margin: 0; font-weight: 500; line-height: 1.45; }
-.direct a { text-decoration-thickness: 1.5px; text-underline-offset: .25em; }
+
+/* J1: the direct lines are the pins of a header, each with a short trace out to what it carries */
+.direct { --pitch: 46px; position: relative; display: grid; margin: 52px 0 0; }
+.direct::after {
+  content: "J1"; position: absolute; left: 1px; top: -19px;
+  font-family: var(--wide); font-size: .6rem; font-weight: 600; letter-spacing: .14em; line-height: 1; color: var(--silk-deco);
+}
+.direct > div {
+  position: relative; display: grid; grid-template-columns: 4.6rem minmax(0, 1fr); column-gap: 10px; align-items: baseline;
+  min-height: var(--pitch); padding-left: 66px;
+}
+/* the header's outline, drawn a pin at a time, so it keeps to its pads however the lines wrap */
+.direct > div::before {
+  content: ""; position: absolute; left: 0; top: 0; bottom: 0; width: 30px;
+  border-inline: 1px solid var(--silk-deco);
+}
+.direct > div:first-child::before { border-top: 1px solid var(--silk-deco); border-radius: 3px 3px 0 0; }
+.direct > div:last-child::before { bottom: auto; height: 32px; border-bottom: 1px solid var(--silk-deco); border-radius: 0 0 3px 3px; }
+.direct > div::after {
+  content: ""; position: absolute; left: 30px; top: 15px; width: 26px; height: 2px; border-radius: 0 1px 1px 0;
+  background: var(--ghost-net);
+}
+/* a plated pad with its hole: pin 1 is the square one */
+.pin-pad {
+  position: absolute; left: 7px; top: 8px; width: 16px; height: 16px; border-radius: 50%;
+  background: var(--hasl);
+  transition: background-color .25s var(--ease-out), box-shadow .25s var(--ease-out);
+}
+.direct > div:first-child .pin-pad { border-radius: 3px; }
+.pin-pad::after {
+  content: ""; position: absolute; inset: 4px; border-radius: 50%;
+  background: var(--hole-bg); box-shadow: inset 0 1.5px 2px -1px var(--wall);
+}
+.direct dt {
+  font-family: var(--wide); font-size: .64rem; font-weight: 600; letter-spacing: .14em; text-transform: uppercase;
+  color: var(--ink-3);
+}
+.direct dd { margin: 0; font-size: 1.05rem; font-weight: 500; line-height: 1.45; }
+.direct a {
+  display: block; min-height: var(--pitch); padding-top: 4px;
+  text-decoration-thickness: 1.5px; text-underline-offset: .25em;
+}
+/* point at a line (on a touch screen, bring it to the middle) and its pin is probed */
+.direct > div:is(.is-lit, :has(a:hover), :has(a:focus-visible)) .pin-pad {
+  background: var(--glow);
+  box-shadow: 0 0 0 3px rgba(94, 207, 249, .16), 0 0 14px 3px rgba(94, 207, 249, .24);
+}
+.direct > div:is(.is-lit, :has(a:hover), :has(a:focus-visible)) dt { color: var(--silk); }
+@media (prefers-reduced-motion: no-preference) {
+  .direct > div:is(.is-lit, :has(a:hover), :has(a:focus-visible))::after {
+    background: linear-gradient(90deg, transparent, rgba(94, 207, 249, .95), transparent) -26px 0 / 26px 100% no-repeat, var(--ghost-net);
+    animation: pin-run .85s linear infinite;
+  }
+}
+@keyframes pin-run { to { background-position: 52px 0, 0 0; } }
 
 .enquiry { display: grid; }
-.dip-set { min-width: 0; margin: 0 0 6px; padding: 0; border: 0; }
-.dip-set legend { margin-bottom: 18px; padding: 0; font-weight: 600; font-size: 1.05rem; }
-.dip-set .opt { margin-left: 6px; font-weight: 400; font-size: .9rem; color: var(--ink-3); }
+.keys-set { min-width: 0; margin: 0 0 8px; padding: 0; border: 0; }
+.keys-set legend { margin-bottom: 16px; padding: 0; font-weight: 600; font-size: 1.05rem; }
+.keys-set .opt { margin-left: 6px; font-weight: 400; font-size: .9rem; color: var(--ink-3); }
 
-/* a real 4-way DIP switch: flip the ones you need */
-.dip { position: relative; display: grid; grid-template-columns: repeat(4, 78px); column-gap: 6px; width: max-content; padding: 0 12px; }
-/* SW1: a courtyard round the switch body and its reference beside it */
-.dip::after {
-  content: ""; position: absolute; left: -7px; right: -7px; top: -7px; height: 118px; pointer-events: none;
-  border: 1px solid var(--silk-deco); border-radius: 4px;
+/* four illuminated keys, one for each thing NYNA does: press one and it latches down with its LED on */
+/* (four in a row where the form is wide enough to hold them, otherwise two and two: never three and one) */
+.keys {
+  display: grid; gap: 13px 10px; padding-bottom: 3px;
+  grid-template-columns: repeat(auto-fit, minmax(clamp(25% - 8px, (540px - 100%) * 999, 50% - 6px), 1fr));
 }
-.dip-ref {
-  position: absolute; left: calc(100% + 16px); top: -6px;
-  font-family: var(--wide); font-size: .6rem; font-weight: 600; letter-spacing: .14em; color: var(--silk-deco);
+.key { position: relative; display: block; -webkit-tap-highlight-color: transparent; touch-action: manipulation; }
+.key input { position: absolute; inset: 0; z-index: 1; width: 100%; height: 100%; margin: 0; opacity: 0; cursor: pointer; }
+.key-cap {
+  display: grid; grid-template-columns: minmax(0, 1fr) auto; align-content: start;
+  height: 100%; min-height: 84px; padding: 12px 13px 13px;
+  border-radius: 7px; background: var(--pkg); color: var(--silk);
+  box-shadow: inset 0 0 0 1.5px var(--silk), 0 3px 0 var(--silk), 0 14px 20px -14px rgba(var(--shade), .5);
+  transition: transform .16s var(--ease-out), box-shadow .16s var(--ease-out), background-color .2s var(--ease-out), color .2s var(--ease-out);
 }
-.dip-body {
-  position: absolute; left: 0; right: 0; top: 0; height: 104px; border-radius: 6px;
-  background: var(--dip);
-  box-shadow: inset 0 1px 0 rgba(255, 255, 255, .1), 0 0 0 1px rgba(255, 255, 255, .04), 0 2px 0 rgba(0, 0, 0, .3), 0 14px 24px -14px rgba(var(--shade), .6);
+.key-led {
+  width: 12px; height: 6px; margin-top: 2px; border-radius: 2px;
+  background: var(--led-off); box-shadow: inset 0 0 0 1px rgba(0, 0, 0, .16);
+  transition: background-color .15s var(--ease-out), box-shadow .15s var(--ease-out);
 }
-.dip-on { position: absolute; left: 12px; top: 8px; font-size: .62rem; font-weight: 700; font-family: var(--wide); letter-spacing: .1em; color: #E6E6E0; }
-.dip-sw {
-  position: relative; display: flex; flex-direction: column; align-items: center;
-  margin: 0; padding: 28px 0 0; border: 0; background: none;
-  font: inherit; color: var(--silk); cursor: pointer;
-  -webkit-tap-highlight-color: transparent; touch-action: manipulation;
+.key-ref { font-family: var(--wide); font-size: .56rem; font-weight: 600; letter-spacing: .14em; line-height: 1; opacity: .5; }
+.key-name { grid-column: 1 / -1; margin-top: 16px; font-family: var(--wide); font-weight: 600; font-size: 1rem; line-height: 1.15; letter-spacing: -.01em; }
+.key-sub { grid-column: 1 / -1; margin-top: 3px; font-size: .8rem; line-height: 1.3; color: var(--ink-3); transition: color .2s var(--ease-out); }
+@media (hover: hover) {
+  .key:hover .key-cap { transform: translateY(-1px); box-shadow: inset 0 0 0 1.5px var(--silk), 0 4px 0 var(--silk), 0 16px 22px -14px rgba(var(--shade), .5); }
 }
-.dip-slot { position: relative; width: 24px; height: 48px; border-radius: 3px; background: #2B2D2F; box-shadow: inset 0 2px 3px rgba(0, 0, 0, .75); }
-.dip-knob {
-  position: absolute; left: 3px; right: 3px; bottom: 3px; height: 20px; border-radius: 2px;
-  background: linear-gradient(#F8F8F3, #D8D8D0);
-  box-shadow: inset 0 1px 0 rgba(255, 255, 255, .7), 0 1px 2px rgba(0, 0, 0, .55);
-  transition: transform .16s var(--ease-out), box-shadow .2s;
+.key:active .key-cap, .key input:checked + .key-cap {
+  transform: translateY(3px);
+  box-shadow: inset 0 0 0 1.5px var(--silk), 0 0 0 var(--silk), 0 6px 12px -8px rgba(var(--shade), .4);
 }
-.dip-sw[aria-checked="true"] .dip-knob { transform: translateY(-22px); box-shadow: inset 0 1px 0 rgba(255, 255, 255, .7), 0 1px 2px rgba(0, 0, 0, .55), 0 0 12px rgba(94, 207, 249, .45); }
-.dip-sw:active .dip-knob { filter: brightness(.93); }
-.dip-num { height: 16px; margin-top: 7px; font-size: .66rem; font-weight: 600; color: #CFCFC8; }
-.dip-label { margin-top: 18px; max-width: 80px; font-size: .86rem; font-weight: 500; line-height: 1.25; text-align: center; }
-.dip-sw[aria-checked="true"] .dip-label { font-weight: 650; }
-.dip-sw:focus-visible { outline: none; }
-.dip-sw:focus-visible .dip-slot { box-shadow: inset 0 2px 3px rgba(0, 0, 0, .75), 0 0 0 3px var(--dip), 0 0 0 5px var(--glow); }
-.dip-sw:focus-visible .dip-label { text-decoration: underline; text-decoration-thickness: 1.5px; text-underline-offset: .25em; }
+.key:active .key-cap { transition-duration: .08s; }
+.key input:checked + .key-cap { background: var(--silk); color: var(--mask); }
+.key input:checked + .key-cap .key-sub { color: inherit; opacity: .72; }
+.key input:checked + .key-cap .key-led { background: var(--kled-on); box-shadow: var(--kled-glow); }
+.key input:focus-visible + .key-cap { outline: 2px solid var(--silk); outline-offset: 4px; }
 
 .field { display: grid; gap: 8px; margin-top: 24px; }
-.field label { font-weight: 600; font-size: .98rem; }
+.field label { display: flex; align-items: center; gap: 9px; font-weight: 600; font-size: .98rem; }
+/* the LED beside each label comes on once its field holds something usable */
+.fled {
+  flex: none; width: 9px; height: 5px; border-radius: 1.5px;
+  background: var(--led-off); box-shadow: inset 0 0 0 1px rgba(0, 0, 0, .16);
+  transition: background-color .3s var(--ease-out), box-shadow .3s var(--ease-out);
+}
+.field.is-set .fled {
+  background: #D8F4FF;
+  box-shadow: 0 0 0 1px rgba(12, 143, 203, .45), 0 0 4px 1px rgba(94, 207, 249, .7), 0 0 10px 2px rgba(94, 207, 249, .2);
+}
 .field input, .field textarea {
   width: 100%; padding: 13px 14px;
   border: 1.5px solid var(--field-line); border-radius: 6px;
@@ -1071,7 +1125,14 @@ a { color: inherit; }
 .field [aria-invalid="true"] { border-color: var(--err); }
 .err { margin: 0; font-size: .9rem; color: var(--err); }
 .send-row { display: flex; flex-wrap: wrap; align-items: center; gap: 16px 22px; margin-top: 28px; }
-.status { margin: 0; font-size: .95rem; color: var(--ink-2); }
+/* the send key's LED comes on when there is enough to send */
+.send { gap: 11px; }
+.send-led {
+  width: 12px; height: 6px; border-radius: 2px; background: var(--kled-off);
+  transition: background-color .3s var(--ease-out), box-shadow .3s var(--ease-out);
+}
+.enquiry.is-ready .send-led { background: var(--kled-on); box-shadow: var(--kled-glow); }
+.status { flex: 1 1 14rem; margin: 0; font-size: .95rem; color: var(--ink-2); }
 
 /* ---------------------------------------------------------------- footer */
 
@@ -1361,6 +1422,10 @@ a { color: inherit; }
 .reveals :is(.sec-head, .work-head, .hw-copy, .contact-intro).is-in .h2 .w { animation: word-in .9s var(--ease-out) calc(var(--i) * 45ms) backwards; }
 .reveals :is(.sec-head, .hw-copy, .contact-intro):not(.is-in) :is(.sec-lead, .contact-sub) { opacity: 0; filter: blur(6px); }
 .reveals :is(.sec-head, .hw-copy, .contact-intro).is-in :is(.sec-lead, .contact-sub) { animation: focus-in .9s var(--ease-out) .3s backwards; }
+.reveals .contact-intro:not(.is-in) .direct > div { opacity: 0; }
+.reveals .contact-intro.is-in .direct > div { animation: row-in .7s var(--ease-out) calc(.45s + var(--n, 0) * .12s) backwards; }
+.direct > div:nth-child(2) { --n: 1; }
+.direct > div:nth-child(3) { --n: 2; }
 .reveals .hw-copy:not(.is-in) .feat { opacity: 0; }
 .reveals .hw-copy.is-in .feat { animation: row-in .7s var(--ease-out) calc(.4s + var(--n, 0) * .12s) backwards; }
 
@@ -1644,7 +1709,10 @@ table.data { width: 100%; min-width: 520px; border-collapse: collapse; font-size
   display: grid; place-items: center; aspect-ratio: 4 / 3; border-radius: 14px;
   background: var(--pkg); box-shadow: inset 0 0 0 1.5px var(--silk), 0 22px 44px -30px rgba(var(--shade), .55);
 }
-.stub-art svg { width: 72%; height: auto; }
+.stub-art { position: relative; overflow: hidden; }
+.stub-art img { width: 100%; height: 100%; object-fit: cover; }
+.stub-art::after { content: ""; position: absolute; inset: 0; border-radius: inherit; box-shadow: inset 0 0 0 1.5px var(--silk); pointer-events: none; }
+.case-hero .stub-art { aspect-ratio: 16 / 7; }      /* a write-up opens with a wide cut of its picture */
 .stub-meta { display: grid; gap: 16px; margin: 0; }
 .stub-meta div { display: grid; grid-template-columns: 6rem minmax(0, 1fr); gap: 12px; align-items: baseline; }
 .stub-meta dt { font-size: .9rem; color: var(--ink-3); }
@@ -1776,7 +1844,8 @@ table.data { width: 100%; min-width: 520px; border-collapse: collapse; font-size
   .hardware { grid-template-columns: minmax(0, 1fr); }
   .viewer-stage { aspect-ratio: 1 / 1; }
 
-  .work-head { grid-template-columns: minmax(0, 1fr); grid-template-areas: "h" "note" "ctrl"; }
+  .panel-count { min-width: 0; }
+  .arrow { width: 46px; height: 46px; }
   .pcb { width: min(78vw, 300px); }
 
   .tps { grid-template-columns: minmax(0, 1fr); gap: 34px; padding-left: 50px; }
@@ -1794,12 +1863,11 @@ table.data { width: 100%; min-width: 520px; border-collapse: collapse; font-size
 
   .boms { grid-template-columns: minmax(0, 1fr); }
   .quotes { grid-template-columns: minmax(0, 1fr); }
-  .contact { grid-template-columns: minmax(0, 1fr); }
+  .contact { grid-template-columns: minmax(0, 1fr); grid-template-areas: "intro" "form" "kit"; grid-template-rows: auto; }
+  .enquiry { margin-top: clamp(44px, 8vw, 60px); }
+  .contact .kit { margin-top: 40px; }
 }
 
-@media (max-width: 600px) {
-  .dip-ref { display: none; }
-}
 /* ---------------------------------------------------------------- circuit rows */
 
 /* A row of printed circuits before a section. The slot is an ordinary box in the page, so the row
@@ -1826,8 +1894,7 @@ main > .kit + section { padding-top: clamp(26px, 2.8vw, 44px); }
 @media (max-width: 420px) {
   .hero-h { font-size: clamp(2rem, .9rem + 5.6vw, 2.45rem); }
   .pwr-label { display: none; }
-  .dip { grid-template-columns: repeat(4, minmax(0, 1fr)); width: 100%; padding: 0 8px; column-gap: 2px; }
-  .dip-label { font-size: .8rem; }
+  .direct > div { grid-template-columns: 4.2rem minmax(0, 1fr); padding-left: 62px; }
   .quote-mark { height: 58px; }
   .mark--mh, .mark--spoton { height: 58px; }
   .mark--shc { height: 44px; }
