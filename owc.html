@@ -46,7 +46,7 @@
       "three/addons/": "https://cdn.jsdelivr.net/npm/three@0.160.0/examples/jsm/"
     } }
   </script>
-  <link rel="stylesheet" href="/style.css?v=26">
+  <link rel="stylesheet" href="/style.css?v=38">
   <!-- Vercel Web Analytics and Speed Insights -->
   <script>window.va = window.va || function () { (window.vaq = window.vaq || []).push(arguments); };</script>
   <script defer src="/_vercel/insights/script.js"></script>
@@ -89,12 +89,14 @@
           <h1 class="case-h"><span class="w" style="--i:0">Sending</span> <span class="w" style="--i:1">data</span> <span class="w" style="--i:2">through</span> <span class="w" style="--i:3">light.</span></h1>
           <p class="case-lead">A low-cost, bidirectional fibre-optic link that carries digital data, and digital audio, between two ESP32 nodes over 1&nbsp;m of TOSLINK plastic optical fibre: a 650&nbsp;nm KY-008 laser into a BPW34 photodiode, recovered through a discrete analogue front end and the ESP32&rsquo;s hardware pulse counter.</p>
         </header>
+        <div class="perf perf--band perf--band-head" aria-hidden="true" data-keepout></div>
         <div class="perf perf--side" aria-hidden="true" data-keepout></div>
         <figure class="case-hero">
           <button class="shot" type="button" data-zoom="/projects/owc_transceiver.jpg" data-cursor="Zoom"><img src="/projects/owc_transceiver.jpg" alt="The assembled optical wireless transceiver, with two touchscreens and speakers" width="1600" height="1200" draggable="false"></button>
           <figcaption><strong>The transceiver</strong><span>Two ESP32 nodes, a KY-008 laser transmitter and BPW34 receiver, an OPA356 TIA with a TLV3501 comparator, and 1&nbsp;m of TOSLINK fibre.</span></figcaption>
         </figure>
         <dl class="specs"><div class="spec"><dt>650<small>nm</small></dt><dd>KY-008 laser diode transmitter</dd></div><div class="spec"><dt>BPW34</dt><dd>Vishay PIN photodiode receiver</dd></div><div class="spec"><dt>OPA356</dt><dd>200 MHz TIA, R<sub>f</sub> 22&nbsp;k&Omega;</dd></div><div class="spec"><dt>TLV3501</dt><dd>4.5 ns rail-to-rail comparator</dd></div><div class="spec"><dt>128<small>kbps</small></dt><dd>Sustained, 640 kbps peak</dd></div><div class="spec"><dt>1<small>m</small></dt><dd>TOSLINK plastic optical fibre</dd></div></dl>
+        <div class="kit" data-kit="link" aria-hidden="true"></div>
         <section class="case-sec" id="how" data-label="How it works">
           
           <div class="case-cols">
@@ -102,12 +104,16 @@
             <div><h2 class="case-h3">What we built</h2><ul class="leds"><li>A custom two-layer PCB carrying both transceiver nodes, designed in EasyEDA and fabricated by JLCPCB</li><li>Transmitter and receiver firmware in C++ (Arduino, ESP32) with a framed, XOR-checked protocol</li><li>CAD-modelled, 3D-printed PLA optics for the laser, BPW34 photodiode and TOSLINK ferrule (roughly six iterations)</li><li>A 2.8&Prime; ILI9341 touchscreen UI (XPT2046 touch) showing live telemetry and recovered text</li><li>End-to-end characterisation: DC levels, comparator swing and a PCNT data-rate sweep (8 to 640 kbps)</li></ul></div>
           </div>
         </section>
-        <section class="case-sec" id="prototype" data-label="Breadboard prototype">
+        <div class="kit" data-kit="power" aria-hidden="true"></div>
+        <section class="case-sec has-side" id="prototype" data-label="Breadboard prototype">
           <div class="sec-head"><h2 class="h2">The initial transceiver circuit.</h2><p class="sec-lead">Before any boards were fabricated, the whole optical link began on breadboards: an ESP32 driving the 650&nbsp;nm laser on one side, and a BPW34 photodiode feeding the OPA356 transimpedance amplifier and TLV3501 comparator on the other, with live telemetry and Bluetooth pairing on an ILI9341 touchscreen. This is the prototype we characterised (DC levels, timing and the data-rate sweep) before committing the design to a fabricated PCB.</p></div>
+          <div class="perf perf--side" aria-hidden="true" data-keepout></div>
           <ul class="gallery"><li><button class="shot" type="button" data-zoom="/projects/init_breadboard2.jpg" data-cursor="Zoom"><img src="/assets/thumbs/init_breadboard2.webp" alt="Breadboard transceiver prototype with the 650 nm laser and a touchscreen showing Bluetooth pairing" width="960" height="720" loading="lazy" decoding="async" draggable="false"></button></li><li><button class="shot" type="button" data-zoom="/projects/init_breadboard1.jpg" data-cursor="Zoom"><img src="/assets/thumbs/init_breadboard1.webp" alt="ESP32 and BPW34 receiver front end wired on a breadboard" width="720" height="960" loading="lazy" decoding="async" draggable="false"></button></li><li><button class="shot" type="button" data-zoom="/projects/init_schematic.png" data-cursor="Zoom"><img src="/assets/thumbs/init_schematic.webp" alt="The initial transceiver circuit schematic" width="960" height="687" loading="lazy" decoding="async" draggable="false"></button></li></ul>
         </section>
-        <section class="case-sec" id="optics" data-label="Custom optics">
+        <div class="kit" data-kit="sense" aria-hidden="true"></div>
+        <section class="case-sec has-side" id="optics" data-label="Custom optics">
           <div class="sec-head"><h2 class="h2">Adapters we designed &amp; printed.</h2><p class="sec-lead">CAD-modelled and 3D-printed in PLA across roughly six iterations, coupling the KY-008 laser, BPW34 photodiode and TOSLINK ferrule and holding them in precise alignment. Mechanical alignment of this free-space coupling, plus shielding the photodiode from ambient light, proved to be the dominant factor in link stability.</p></div>
+          <div class="perf perf--side" aria-hidden="true" data-keepout></div>
           <figure class="model">
             <div class="model-stage" data-hole data-keepout data-cursor="Drag">
               <p class="model-note"><span class="led" aria-hidden="true"></span>Drag to rotate</p>
@@ -124,18 +130,24 @@
           </figure>
           <ul class="gallery contain"><li><button class="shot" type="button" data-zoom="/projects/render_final_adapter.png" data-cursor="Zoom"><img src="/assets/thumbs/render_final_adapter.webp" alt="Render of the final assembled optical adapter" width="960" height="421" loading="lazy" decoding="async" draggable="false"></button></li><li><button class="shot" type="button" data-zoom="/projects/render_bpw34_adapter.png" data-cursor="Zoom"><img src="/assets/thumbs/render_bpw34_adapter.webp" alt="Render of the BPW34 photodiode mount" width="960" height="421" loading="lazy" decoding="async" draggable="false"></button></li><li><button class="shot" type="button" data-zoom="/projects/render_bpw34_spdif.png" data-cursor="Zoom"><img src="/assets/thumbs/render_bpw34_spdif.webp" alt="Render of the BPW34 TOSLINK coupling" width="960" height="361" loading="lazy" decoding="async" draggable="false"></button></li><li><button class="shot" type="button" data-zoom="/projects/render_laser_adapter.png" data-cursor="Zoom"><img src="/assets/thumbs/render_laser_adapter.webp" alt="Render of the 650 nm laser coupler" width="960" height="421" loading="lazy" decoding="async" draggable="false"></button></li><li><button class="shot" type="button" data-zoom="/projects/render_laser_module.png" data-cursor="Zoom"><img src="/assets/thumbs/render_laser_module.webp" alt="Render of the KY-008 laser module" width="960" height="421" loading="lazy" decoding="async" draggable="false"></button></li></ul>
         </section>
-        <section class="case-sec" id="results" data-label="Results">
+        <div class="kit" data-kit="drive" aria-hidden="true"></div>
+        <section class="case-sec has-side" id="results" data-label="Results">
           <div class="sec-head"><h2 class="h2">What the link actually does.</h2></div>
+          <div class="perf perf--side" aria-hidden="true" data-keepout></div>
           <div class="case-cols">
             <div class="prose"><h3 class="case-h3">Demonstrated</h3><p>Bidirectional binary text was sent end to end across the 1&nbsp;m TOSLINK link and shown live on the receiver&rsquo;s touchscreen and the host serial monitor, with 1,000-packet integrity tests passing at 8, 64 and 128&nbsp;kbps. The PCNT sweep held a stable 128&nbsp;kbps under hand-held alignment and briefly peaked at 640&nbsp;kbps in a dark room. On the populated PCB the comparator swung a clean 3.3&nbsp;V to 0.05&nbsp;V, fast enough to read with digitalRead().</p></div>
             <div class="prose"><h3 class="case-h3">Honest limits</h3><p>Those rates reflect hand-held fibre alignment rather than the 7.2&nbsp;MHz closed-loop bandwidth the front end can support. A Bluetooth A2DP path (MAX98357A I&sup2;S amp) reproduces tones and voice-band audio over the link; wide-band music stays partial, limited by the 8&nbsp;kHz firmware sample rate. Residual comparator spikes traced to SOIC solder joints and ambient-light pickup at the BPW34 are the next revision&rsquo;s targets.</p></div>
           </div>
         </section>
-        <section class="case-sec" id="gallery" data-label="Gallery">
+        <div class="kit" data-kit="output" aria-hidden="true"></div>
+        <section class="case-sec has-side" id="gallery" data-label="Gallery">
           <div class="sec-head"><h2 class="h2">Build, boards &amp; results.</h2></div>
+          <div class="perf perf--side" aria-hidden="true" data-keepout></div>
           <ul class="gallery"><li><button class="shot" type="button" data-zoom="/projects/build_pcb_white.jpeg" data-cursor="Zoom"><img src="/assets/thumbs/build_pcb_white.webp" alt="The fabricated white PCB" width="720" height="960" loading="lazy" decoding="async" draggable="false"></button></li><li><button class="shot" type="button" data-zoom="/projects/build_pcb_orange.jpeg" data-cursor="Zoom"><img src="/assets/thumbs/build_pcb_orange.webp" alt="The PCB in orange solder mask" width="720" height="960" loading="lazy" decoding="async" draggable="false"></button></li><li><button class="shot" type="button" data-zoom="/projects/build_enclosure.jpeg" data-cursor="Zoom"><img src="/assets/thumbs/build_enclosure.webp" alt="Purple acrylic enclosure base with speakers" width="720" height="960" loading="lazy" decoding="async" draggable="false"></button></li><li><button class="shot" type="button" data-zoom="/projects/render_pcb_purple.png" data-cursor="Zoom"><img src="/assets/thumbs/render_pcb_purple.webp" alt="Render of the PCB on its purple acrylic base" width="960" height="446" loading="lazy" decoding="async" draggable="false"></button></li><li><button class="shot" type="button" data-zoom="/projects/render_pcb_base.png" data-cursor="Zoom"><img src="/assets/thumbs/render_pcb_base.webp" alt="Render of the bare PCB layout" width="960" height="446" loading="lazy" decoding="async" draggable="false"></button></li><li><button class="shot" type="button" data-zoom="/projects/scope_0.png" data-cursor="Zoom"><img src="/assets/thumbs/scope_0.webp" alt="Oscilloscope capture of the on-off keyed bitstream" width="800" height="480" loading="lazy" decoding="async" draggable="false"></button></li><li><button class="shot" type="button" data-zoom="/projects/scope_1.png" data-cursor="Zoom"><img src="/assets/thumbs/scope_1.webp" alt="Oscilloscope capture of the recovered signal" width="800" height="480" loading="lazy" decoding="async" draggable="false"></button></li><li><button class="shot" type="button" data-zoom="/projects/scope_2.png" data-cursor="Zoom"><img src="/assets/thumbs/scope_2.webp" alt="Oscilloscope capture of the comparator output" width="800" height="480" loading="lazy" decoding="async" draggable="false"></button></li><li><button class="shot" type="button" data-zoom="/projects/schematic.png" data-cursor="Zoom"><img src="/assets/thumbs/schematic.webp" alt="The full system schematic" width="960" height="679" loading="lazy" decoding="async" draggable="false"></button></li></ul>
         </section>
       </article>
+
+      <div class="perf perf--band" aria-hidden="true" data-keepout></div>
 
       <nav class="case-next" aria-label="More projects" data-keepout>
         <a class="next-link" href="/computer-setup.html"><span class="next-dir">Previous project</span><span class="next-title">Computer System Setup</span></a>
@@ -165,7 +177,18 @@
         <p>© <span id="year">2026</span> NYNA</p>
         <a class="top-link" href="#top">Back to top</a>
       </div>
-      <p class="fab fab--foot" aria-hidden="true">NYNA-MAIN REV B 2026-09</p>
+      <div class="dim" aria-hidden="true"><span class="dim-val" id="dim-val">0.00 mm</span></div>
+      <div class="tblock" aria-hidden="true">
+        <dl class="tb-grid">
+          <div><dt>Board</dt><dd>NYNA-MAIN</dd></div>
+          <div><dt>Rev</dt><dd>B</dd></div>
+          <div><dt>Date</dt><dd>2026-09</dd></div>
+          <div><dt>Layers</dt><dd>2</dd></div>
+          <div><dt>Finish</dt><dd>HASL</dd></div>
+          <div><dt>Mask</dt><dd class="tb-mask"></dd></div>
+        </dl>
+        <figure class="tb-qr"><svg class="tb-code" viewBox="-4 -4 49 49" shape-rendering="crispEdges"><rect class="tb-code-bg" x="-4" y="-4" width="49" height="49"/><path d="M0 0h7v1h-7zM8 0h1v1h-1zM12 0h1v1h-1zM15 0h2v1h-2zM19 0h1v1h-1zM21 0h5v1h-5zM27 0h2v1h-2zM30 0h3v1h-3zM34 0h7v1h-7zM0 1h1v1h-1zM6 1h1v1h-1zM11 1h2v1h-2zM14 1h1v1h-1zM17 1h1v1h-1zM20 1h2v1h-2zM23 1h1v1h-1zM25 1h2v1h-2zM28 1h1v1h-1zM31 1h2v1h-2zM34 1h1v1h-1zM40 1h1v1h-1zM0 2h1v1h-1zM2 2h3v1h-3zM6 2h1v1h-1zM8 2h7v1h-7zM19 2h2v1h-2zM23 2h2v1h-2zM26 2h1v1h-1zM28 2h1v1h-1zM30 2h1v1h-1zM32 2h1v1h-1zM34 2h1v1h-1zM36 2h3v1h-3zM40 2h1v1h-1zM0 3h1v1h-1zM2 3h3v1h-3zM6 3h1v1h-1zM8 3h1v1h-1zM11 3h1v1h-1zM18 3h2v1h-2zM21 3h4v1h-4zM28 3h1v1h-1zM30 3h1v1h-1zM32 3h1v1h-1zM34 3h1v1h-1zM36 3h3v1h-3zM40 3h1v1h-1zM0 4h1v1h-1zM2 4h3v1h-3zM6 4h1v1h-1zM8 4h2v1h-2zM11 4h1v1h-1zM16 4h1v1h-1zM20 4h2v1h-2zM23 4h3v1h-3zM28 4h2v1h-2zM32 4h1v1h-1zM34 4h1v1h-1zM36 4h3v1h-3zM40 4h1v1h-1zM0 5h1v1h-1zM6 5h1v1h-1zM10 5h1v1h-1zM12 5h1v1h-1zM15 5h3v1h-3zM21 5h3v1h-3zM26 5h2v1h-2zM29 5h1v1h-1zM34 5h1v1h-1zM40 5h1v1h-1zM0 6h7v1h-7zM8 6h1v1h-1zM10 6h1v1h-1zM12 6h1v1h-1zM14 6h1v1h-1zM16 6h1v1h-1zM18 6h1v1h-1zM20 6h1v1h-1zM22 6h1v1h-1zM24 6h1v1h-1zM26 6h1v1h-1zM28 6h1v1h-1zM30 6h1v1h-1zM32 6h1v1h-1zM34 6h7v1h-7zM9 7h1v1h-1zM11 7h2v1h-2zM15 7h3v1h-3zM19 7h1v1h-1zM26 7h2v1h-2zM0 8h4v1h-4zM6 8h1v1h-1zM8 8h1v1h-1zM11 8h7v1h-7zM19 8h1v1h-1zM23 8h1v1h-1zM25 8h3v1h-3zM30 8h2v1h-2zM33 8h1v1h-1zM36 8h3v1h-3zM40 8h1v1h-1zM0 9h2v1h-2zM4 9h1v1h-1zM12 9h2v1h-2zM15 9h1v1h-1zM17 9h2v1h-2zM20 9h2v1h-2zM25 9h1v1h-1zM27 9h4v1h-4zM33 9h1v1h-1zM35 9h3v1h-3zM0 10h1v1h-1zM2 10h1v1h-1zM4 10h5v1h-5zM12 10h2v1h-2zM16 10h1v1h-1zM18 10h1v1h-1zM21 10h1v1h-1zM23 10h1v1h-1zM25 10h1v1h-1zM30 10h3v1h-3zM34 10h1v1h-1zM36 10h5v1h-5zM1 11h5v1h-5zM7 11h2v1h-2zM10 11h3v1h-3zM17 11h1v1h-1zM19 11h7v1h-7zM27 11h1v1h-1zM29 11h1v1h-1zM33 11h1v1h-1zM37 11h1v1h-1zM39 11h1v1h-1zM0 12h1v1h-1zM3 12h2v1h-2zM6 12h1v1h-1zM8 12h3v1h-3zM14 12h3v1h-3zM21 12h1v1h-1zM26 12h1v1h-1zM30 12h1v1h-1zM32 12h1v1h-1zM34 12h3v1h-3zM39 12h2v1h-2zM0 13h1v1h-1zM2 13h2v1h-2zM8 13h4v1h-4zM14 13h1v1h-1zM19 13h3v1h-3zM23 13h2v1h-2zM28 13h3v1h-3zM36 13h1v1h-1zM38 13h1v1h-1zM0 14h1v1h-1zM2 14h8v1h-8zM12 14h1v1h-1zM17 14h1v1h-1zM20 14h2v1h-2zM24 14h2v1h-2zM27 14h1v1h-1zM30 14h3v1h-3zM34 14h1v1h-1zM37 14h1v1h-1zM39 14h1v1h-1zM3 15h1v1h-1zM5 15h1v1h-1zM9 15h2v1h-2zM12 15h2v1h-2zM15 15h1v1h-1zM19 15h1v1h-1zM21 15h1v1h-1zM26 15h1v1h-1zM30 15h1v1h-1zM32 15h3v1h-3zM2 16h2v1h-2zM5 16h2v1h-2zM8 16h1v1h-1zM10 16h3v1h-3zM14 16h1v1h-1zM16 16h2v1h-2zM19 16h2v1h-2zM22 16h1v1h-1zM25 16h3v1h-3zM29 16h1v1h-1zM32 16h1v1h-1zM34 16h2v1h-2zM37 16h3v1h-3zM3 17h2v1h-2zM9 17h1v1h-1zM13 17h4v1h-4zM18 17h4v1h-4zM24 17h1v1h-1zM26 17h1v1h-1zM29 17h1v1h-1zM31 17h2v1h-2zM34 17h1v1h-1zM36 17h1v1h-1zM38 17h3v1h-3zM0 18h1v1h-1zM2 18h1v1h-1zM4 18h3v1h-3zM8 18h1v1h-1zM11 18h2v1h-2zM16 18h1v1h-1zM18 18h1v1h-1zM21 18h1v1h-1zM24 18h2v1h-2zM27 18h1v1h-1zM29 18h2v1h-2zM32 18h3v1h-3zM36 18h2v1h-2zM39 18h2v1h-2zM0 19h4v1h-4zM5 19h1v1h-1zM8 19h1v1h-1zM10 19h1v1h-1zM12 19h1v1h-1zM15 19h1v1h-1zM17 19h2v1h-2zM25 19h1v1h-1zM27 19h1v1h-1zM29 19h1v1h-1zM31 19h5v1h-5zM37 19h1v1h-1zM39 19h1v1h-1zM2 20h1v1h-1zM4 20h4v1h-4zM9 20h3v1h-3zM13 20h1v1h-1zM16 20h1v1h-1zM19 20h2v1h-2zM22 20h4v1h-4zM27 20h2v1h-2zM32 20h1v1h-1zM35 20h1v1h-1zM37 20h2v1h-2zM1 21h1v1h-1zM3 21h1v1h-1zM5 21h1v1h-1zM7 21h1v1h-1zM9 21h1v1h-1zM14 21h3v1h-3zM19 21h1v1h-1zM22 21h1v1h-1zM24 21h4v1h-4zM38 21h1v1h-1zM0 22h1v1h-1zM2 22h1v1h-1zM4 22h1v1h-1zM6 22h1v1h-1zM14 22h2v1h-2zM17 22h1v1h-1zM24 22h4v1h-4zM29 22h4v1h-4zM34 22h1v1h-1zM36 22h2v1h-2zM39 22h2v1h-2zM0 23h3v1h-3zM4 23h1v1h-1zM7 23h3v1h-3zM11 23h5v1h-5zM20 23h1v1h-1zM23 23h1v1h-1zM25 23h3v1h-3zM34 23h1v1h-1zM36 23h4v1h-4zM5 24h3v1h-3zM9 24h4v1h-4zM14 24h1v1h-1zM17 24h9v1h-9zM28 24h1v1h-1zM30 24h1v1h-1zM32 24h2v1h-2zM36 24h2v1h-2zM40 24h1v1h-1zM1 25h1v1h-1zM3 25h1v1h-1zM5 25h1v1h-1zM7 25h1v1h-1zM9 25h3v1h-3zM13 25h1v1h-1zM15 25h1v1h-1zM18 25h1v1h-1zM23 25h1v1h-1zM25 25h1v1h-1zM27 25h1v1h-1zM30 25h1v1h-1zM33 25h1v1h-1zM35 25h1v1h-1zM39 25h1v1h-1zM0 26h1v1h-1zM6 26h3v1h-3zM10 26h1v1h-1zM12 26h1v1h-1zM14 26h6v1h-6zM21 26h2v1h-2zM24 26h2v1h-2zM28 26h1v1h-1zM30 26h1v1h-1zM33 26h1v1h-1zM35 26h1v1h-1zM38 26h1v1h-1zM0 27h4v1h-4zM5 27h1v1h-1zM11 27h3v1h-3zM16 27h4v1h-4zM28 27h1v1h-1zM31 27h2v1h-2zM35 27h4v1h-4zM40 27h1v1h-1zM1 28h2v1h-2zM5 28h2v1h-2zM8 28h5v1h-5zM16 28h4v1h-4zM21 28h1v1h-1zM27 28h1v1h-1zM29 28h1v1h-1zM32 28h2v1h-2zM35 28h1v1h-1zM37 28h1v1h-1zM40 28h1v1h-1zM1 29h2v1h-2zM4 29h2v1h-2zM13 29h1v1h-1zM16 29h1v1h-1zM20 29h3v1h-3zM24 29h1v1h-1zM29 29h7v1h-7zM38 29h3v1h-3zM0 30h1v1h-1zM4 30h3v1h-3zM10 30h1v1h-1zM13 30h1v1h-1zM15 30h2v1h-2zM18 30h1v1h-1zM20 30h1v1h-1zM22 30h2v1h-2zM25 30h1v1h-1zM32 30h1v1h-1zM36 30h1v1h-1zM38 30h3v1h-3zM3 31h1v1h-1zM5 31h1v1h-1zM8 31h1v1h-1zM11 31h1v1h-1zM18 31h1v1h-1zM28 31h2v1h-2zM31 31h9v1h-9zM1 32h3v1h-3zM5 32h4v1h-4zM12 32h3v1h-3zM17 32h1v1h-1zM23 32h1v1h-1zM27 32h2v1h-2zM31 32h6v1h-6zM39 32h2v1h-2zM8 33h2v1h-2zM14 33h1v1h-1zM21 33h1v1h-1zM24 33h7v1h-7zM32 33h1v1h-1zM36 33h1v1h-1zM38 33h1v1h-1zM0 34h7v1h-7zM10 34h2v1h-2zM14 34h1v1h-1zM17 34h1v1h-1zM21 34h1v1h-1zM23 34h4v1h-4zM29 34h4v1h-4zM34 34h1v1h-1zM36 34h4v1h-4zM0 35h1v1h-1zM6 35h1v1h-1zM11 35h1v1h-1zM13 35h2v1h-2zM18 35h3v1h-3zM23 35h1v1h-1zM26 35h3v1h-3zM30 35h1v1h-1zM32 35h1v1h-1zM36 35h1v1h-1zM38 35h1v1h-1zM0 36h1v1h-1zM2 36h3v1h-3zM6 36h1v1h-1zM9 36h2v1h-2zM12 36h1v1h-1zM15 36h1v1h-1zM18 36h2v1h-2zM21 36h3v1h-3zM28 36h1v1h-1zM30 36h1v1h-1zM32 36h6v1h-6zM39 36h2v1h-2zM0 37h1v1h-1zM2 37h3v1h-3zM6 37h1v1h-1zM8 37h1v1h-1zM10 37h3v1h-3zM16 37h1v1h-1zM18 37h3v1h-3zM22 37h4v1h-4zM30 37h1v1h-1zM32 37h2v1h-2zM36 37h1v1h-1zM0 38h1v1h-1zM2 38h3v1h-3zM6 38h1v1h-1zM8 38h1v1h-1zM10 38h2v1h-2zM13 38h1v1h-1zM15 38h3v1h-3zM20 38h1v1h-1zM22 38h2v1h-2zM28 38h1v1h-1zM30 38h2v1h-2zM38 38h1v1h-1zM40 38h1v1h-1zM0 39h1v1h-1zM6 39h1v1h-1zM8 39h2v1h-2zM11 39h1v1h-1zM16 39h1v1h-1zM18 39h2v1h-2zM21 39h2v1h-2zM24 39h1v1h-1zM26 39h3v1h-3zM33 39h4v1h-4zM38 39h3v1h-3zM0 40h7v1h-7zM8 40h1v1h-1zM12 40h1v1h-1zM15 40h3v1h-3zM20 40h1v1h-1zM24 40h4v1h-4zM29 40h1v1h-1zM31 40h1v1h-1zM34 40h1v1h-1zM36 40h3v1h-3z"/></svg><figcaption>Scan to save our details</figcaption></figure>
+      </div>
     </footer>
 
     <span class="mhole mhole--bl" aria-hidden="true" data-keepout></span>
@@ -218,7 +241,7 @@
 
   <div class="cursor" id="cursor" aria-hidden="true"><span class="cursor-ring"><span class="cursor-label"></span></span><span class="cursor-dot"></span></div>
 
-  <script src="/main.js?v=26" defer></script>
-  <script src="/work.js?v=26" defer></script>
+  <script src="/main.js?v=38" defer></script>
+  <script src="/work.js?v=38" defer></script>
 </body>
 </html>

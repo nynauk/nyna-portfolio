@@ -6,7 +6,10 @@
    small charges running along the traces. Leave the page alone and the light
    wanders across the board by itself. Holes (honeycomb, mounting holes, the work
    window, mouse bites) are CSS and show the light directly, with soft bore walls
-   that shift as you scroll. */
+   that shift as you scroll. On a touch screen there is no light to hold: the
+   current simply runs through all of the copper on screen, steadily, by itself.
+   Printed on the board, in a slot before each section, are rows of real circuits
+   that run on their own: supplies, a clock, the optical link, drivers, sensors. */
 (() => {
   'use strict';
 
@@ -20,6 +23,9 @@
   const mqReduce = matchMedia('(prefers-reduced-motion: reduce)');
   let reduce = mqReduce.matches;
   const fine = matchMedia('(hover: hover) and (pointer: fine)').matches;
+  // no pointer to hold a light with: no glow, just the current flowing through the board
+  const flow = !fine;
+  if (flow) root.classList.add('flow');
 
   // iOS ignores background-attachment: fixed, so holes fall back to the plain bench there.
   const iOS = /iP(hone|ad|od)/.test(navigator.userAgent) || (/Mac/.test(navigator.userAgent) && navigator.maxTouchPoints > 1);
@@ -37,6 +43,7 @@
   const WANDER_AFTER = 2600;   // ms without input before the light starts wandering on its own
   const NUDGE_AFTER = 6000;    // ms without input before the call to action starts pulsing
   const REST_AFTER = 60000;    // ms without input before everything settles and the animation loop stops
+  const FLOW_REST = 180000;    // the same on a touch screen, where the current is the whole show
   const WARM_MS = 1500;
   const NS = 'http://www.w3.org/2000/svg';
 
@@ -49,6 +56,7 @@
       copper: 'rgb(12, 58, 90)', inner: 'rgb(22, 88, 128)', innerAlpha: 0.5,
       drill: 'rgb(236, 250, 255)', fall: [0.8, 0.5],
       head: '255,255,255', halo: '0,150,230', tail: '0,128,212',
+      run: { head: '0,108,178', halo: '94,207,249', tail: '18,150,210' },
       meta: '#1A222C'
     },
     dark: {
@@ -56,6 +64,7 @@
       copper: 'rgb(94, 207, 249)', inner: 'rgb(34, 132, 186)', innerAlpha: 0.66,
       drill: 'rgb(9, 12, 16)', fall: [0.78, 0.46],
       head: '255,255,255', halo: '94,207,249', tail: '170,236,255',
+      run: { head: '226,247,255', halo: '94,207,249', tail: '94,207,249' },
       meta: '#07090C'
     }
   };
@@ -68,7 +77,7 @@
   let tiles = [];
   let dpr = Math.min(1.5, window.devicePixelRatio || 1);
   let cacheKey = '';
-  const vis = { top: [], inner: [] };
+  const vis = { top: [], inner: [], run: [] };
   let raf = 0, lastT = 0, lastPaint = 0, warmFrom = 0, lastScrollY = -1, prevSY = scrollY;
   let chargeA = 0, chargeT = 0, surge = 0;
   let wander = 0, lastInput = performance.now(), isIdle = false;
@@ -113,7 +122,7 @@
     $$(sel).forEach(el => { if (litIO) litIO.observe(el); else litEls.add(el); });
   }
   const perfs = [];
-  let surfaceOn = false, surfaceSvg = null, holes = [];
+  let surfaceOn = false, surfaceSvg = null, silkSvg = null, holes = [];
   let bench = null, benchT = 0, benchKey = '', benchLast = 0;
   const win = $('#window');
   const sections = $$('main section[id]');
@@ -219,9 +228,8 @@
         const pl = parseFloat(cs.left) || 40, pr = parseFloat(cs.right) || 30, mid = (left + right) / 2;
         for (let x = left + pl + 4.5; x < right - pr; x += 24) {
           for (const side of [-1, 1]) {
-            if (rnd() < 0.28) continue;
             const y0 = side < 0 ? top - 12 : bottom + 12, out = x < mid ? -1 : 1;
-            const l1 = 10 + rnd() * 12, l2 = 8 + rnd() * 30, l3 = rnd() < 0.55 ? 0 : 8 + rnd() * 22;
+            const l1 = 12, l2 = 12, l3 = 0;
             const p1 = [x, y0 + side * l1], p2 = [p1[0] + out * l2, p1[1] + side * l2];
             const path = l3 ? [[x, y0], p1, p2, [p2[0], p2[1] + side * l3]] : [[x, y0], p1, p2];
             let t = null;
@@ -234,11 +242,22 @@
             if (!t) continue;
             measure(t);
             // current leaves the pin and heads out to the via
-            if (t.L > 20 && rnd() < 0.45) t.ch = [charge(rnd, t.L, 24 + rnd() * 30, undefined, t.L + 40 + rnd() * 140, false)];
+            if (t.L > 20 && rnd() < (flow ? 0.7 : 0.45)) t.ch = [charge(rnd, t.L, 24 + rnd() * 30, undefined, t.L + 40 + rnd() * 140, false)];
             traces.push(t);
           }
         }
       });
+    }
+
+    // 1b. the printed circuits' own copper and fibre, laid out with them: each trace arrives
+    // already carrying the current its circuit sends down it
+    if (opts.pre) {
+      for (const t0 of opts.pre.traces) {
+        const t = measure({ p: t0.p, w: t0.w, net: 1, fib: t0.fib, gate: t0.gate });
+        if (t0.ch.length) t.ch = t0.ch;
+        traces.push(t);
+      }
+      vias.push(...opts.pre.vias);
     }
 
     // 2. buses: parallel runs that bend together, ends staggered so the vias clear each other
@@ -299,7 +318,7 @@
       }
       if (p.length < 2) continue;
       const t = measure({ p, w: rnd() < 0.12 ? 2.4 : 1.2 });
-      if (t.L >= 48 && rnd() < pc) {
+      if (t.L >= (flow ? 30 : 48) && rnd() < pc) {
         const c = charge(rnd, t.L, 40 + rnd() * 90);
         t.ch = [c];
         if (t.L > 280 && rnd() < 0.5) t.ch.push({ sp: c.sp, per: c.per, ph: c.ph + c.per / 2, rev: c.rev });
@@ -324,6 +343,622 @@
     return { traces, vias, tb, vb, bc, bn, B, seen: new Uint32Array(traces.length), stamp: 0 };
   }
 
+  /* ------------------------------------------------------------------ circuits */
+
+  // Real circuits printed onto the board: working blocks of one NYNA design (power in, a clock,
+  // the optical link, drivers, sensors), each named in silkscreen. Every part sits on one 10px
+  // pitch, so the copper runs dead straight, and signal flows left to right. A block also says
+  // how it behaves: what current runs where (a steady supply, clock ticks, bursts of data) and
+  // which of its LEDs are lit when, so the board does what the real one would.
+  const turn = (q, x, y) => (q === 1 ? [-y, x] : q === 2 ? [-x, -y] : q === 3 ? [y, -x] : [x, y]);
+  const SIDES = { L: [[-1, 0], [0, 1]], B: [[0, 1], [1, 0]], R: [[1, 0], [0, -1]], T: [[0, -1], [-1, 0]] };
+  // one row of n pins at pitch p along a side of a package, pad centres d from the middle; pins
+  // count anticlockwise from the top of the left side, as on a real package
+  function pins(side, n, p, d, len, wid) {
+    const [[ux, uy], [tx, ty]] = SIDES[side], out = [];
+    for (let i = 0; i < n; i++) {
+      const a = (i - (n - 1) / 2) * p;
+      out.push({ x: ux * d + tx * a, y: uy * d + ty * a, w: ux ? len : wid, h: ux ? wid : len, u: [ux, uy], shape: 'r' });
+    }
+    return out;
+  }
+  const pad = (x, y, w, h, shape = 'r') => ({ x, y, w, h, u: [0, 0], shape });
+  const pair = (x, w, h) => [pad(-x, 0, w, h), pad(x, 0, w, h)];
+  const ring = (r, x = 0, y = 0) => `M${x + r} ${y}A${r} ${r} 0 1 0 ${x - r} ${y}A${r} ${r} 0 1 0 ${x + r} ${y}Z`;
+  const rect = (w, h) => `M${-w} ${-h}H${w}V${h}H${-w}Z`;
+  const row = (ys, x, shape) => ys.map((y, i) => pad(x, y, shape ? 8 : 9, shape ? 8 : 5.5, shape ? (i ? 'c' : 's') : 'r'));
+  const CHIP = pair(9, 7, 7);                                    // the two pads of every small part
+  const PKG = {
+    SO8: { ic: 1, legs: 1, body: [26, 42], pads: [...pins('L', 4, 10, 23, 12, 6), ...pins('R', 4, 10, 23, 12, 6)] },
+    SO18: { ic: 1, legs: 1, body: [30, 96], pads: [...pins('L', 9, 10, 25, 12, 5.5), ...pins('R', 9, 10, 25, 12, 5.5)] },
+    SOT5: { ic: 1, legs: 1, body: [18, 32], pads: [...pins('L', 3, 10, 17, 10, 5.5), ...pins('R', 2, 20, 17, 10, 5.5)] },
+    SOT3: { ic: 1, legs: 1, pre: 'Q', body: [14, 30], pads: [...pins('L', 2, 20, 15, 9, 5.5), ...pins('R', 1, 20, 15, 9, 5.5)] },
+    DFN8: { ic: 1, body: [28, 44], pads: [...pins('L', 4, 10, 15.5, 7, 5), ...pins('R', 4, 10, 15.5, 7, 5)] },
+    QFN16: { ic: 1, body: [44, 44], pads: ['L', 'B', 'R', 'T'].flatMap(s => pins(s, 4, 10, 24, 8, 5)) },
+    R: { pre: 'R', ext: [12.5, 5], pads: CHIP, silk: 'M-3.5 -5H3.5M-3.5 5H3.5' },
+    C: { pre: 'C', ext: [13, 5.5], pads: CHIP, silk: 'M-11.5 -5.5H11.5A1.5 1.5 0 0 1 13 -4V4A1.5 1.5 0 0 1 11.5 5.5H-11.5A1.5 1.5 0 0 1 -13 4V-4A1.5 1.5 0 0 1 -11.5 -5.5Z' },
+    D: { pre: 'D', ext: [12.5, 5], pads: CHIP, silk: 'M-2.5 -3.5L3 0L-2.5 3.5ZM3.5 -3.5V3.5' },
+    F: { pre: 'F', ext: [12.5, 5], pads: CHIP, silk: rect(4, 5) },
+    Y: { pre: 'Y', ext: [16, 7], pads: pair(10, 7, 9), silk: 'M-9 -7H9A7 7 0 0 1 9 7H-9A7 7 0 0 1 -9 -7Z' },
+    SW: { pre: 'SW', ext: [11, 13], pads: pair(15, 8, 9), silk: rect(11, 13) + ring(6) },
+    PD: { pre: 'PD', ext: [20, 14], pads: pair(12, 9, 11), silk: rect(20, 14) + rect(7, 8) },
+    // parts that give off light (or sound): a lens that is dull until it is on, and how far its glow reaches
+    LED: { pre: 'D', ext: [12.5, 5], pads: CHIP, silk: 'M-4.5 -5H4.5M-4.5 5H4.5', lens: 'M-4.5 -3.5H4.5V3.5H-4.5Z', glow: 13 },
+    LD: { pre: 'LD', ext: [20, 14], pads: pair(12, 9, 11), silk: rect(20, 14), lens: ring(5.5), glow: 16 },
+    PX: { pre: 'D', ext: [11, 11], pads: [pad(-13, -6, 7, 6), pad(-13, 6, 7, 6), pad(13, 6, 7, 6), pad(13, -6, 7, 6)], silk: rect(11, 11), lens: ring(6), glow: 15 },
+    LS: { pre: 'LS', ext: [19, 19], pads: [pad(0, -5, 8, 6), pad(0, 5, 8, 6)], silk: ring(19) + ring(12), glow: 27 },
+    USB: { pre: 'J', ext: [16, 26], pads: row([-15, -5, 5, 15], 14), silk: 'M-16 -26H6V26H-16ZM-11 -18H-3V18H-11Z' },
+    J9: { pre: 'J', hole: 1.9, ext: [6, 46], silk: rect(6, 46), pads: row([-40, -30, -20, -10, 0, 10, 20, 30, 40], 0, 1) },
+    J4: { pre: 'J', hole: 1.9, ext: [6, 21], silk: rect(6, 21), pads: row([-15, -5, 5, 15], 0, 1) },
+    J2: { pre: 'J', hole: 1.9, ext: [6, 11], silk: rect(6, 11), pads: row([-5, 5], 0, 1) }
+  };
+
+  const polyLen = p => { let L = 0; for (let k = 1; k < p.length; k++) L += Math.hypot(p[k][0] - p[k - 1][0], p[k][1] - p[k - 1][1]); return L; };
+  const DC = { sp: 26, every: 52 };                              // a supply: slow, steady, always there
+  const DATA = { n: 5, dt: 0.14, T: 3.4, sp: 100 };              // one frame on the optical link
+  const LIGHT_SP = 320;                                          // px/s down a fibre
+
+  // Build a circuit around (0,0): its parts, the copper joining them, its labels, and what it does.
+  function circuit(title, build) {
+    const parts = [], traces = [], vias = [], vip = [], labels = [], leds = [], ports = {};
+    const grow = (b, x0, y0, x1, y1) => { b[0] = Math.min(b[0], x0); b[1] = Math.min(b[1], y0); b[2] = Math.max(b[2], x1); b[3] = Math.max(b[3], y1); };
+    const trace = (pts, w, fib) => { const t = { p: pts, w, fib, ch: [], gate: null }; traces.push(t); return t; };
+    const m = {
+      add(key, x, y, q = 0, mark = null, refAt = 'above') {
+        const P = PKG[key], [ew, eh] = P.body || [P.ext[0] * 2, P.ext[1] * 2], [bw, bh] = q % 2 ? [eh, ew] : [ew, eh];
+        const part = { P, q, cx: x, cy: y, mark, refAt, own: [x - bw / 2, y - bh / 2, x + bw / 2, y + bh / 2] };
+        part.pads = P.pads.map(pd => {
+          const [px, py] = turn(q, pd.x, pd.y), odd = q % 2, w = odd ? pd.h : pd.w, h = odd ? pd.w : pd.h;
+          grow(part.own, x + px - w / 2, y + py - h / 2, x + px + w / 2, y + py + h / 2);
+          return { x: x + px, y: y + py, shape: pd.shape };
+        });
+        parts.push(part);
+        return parts.length - 1;
+      },
+      // a column of identical parts on the pitch, labelled once as a range
+      stack(key, x, ys) {
+        const ids = ys.map(y => m.add(key, x, y, 0, null, null));
+        labels.push({ kind: 'group', ids, x, y: parts[ids[0]].own[1] - 5, anchor: 'middle' });
+        return ids;
+      },
+      pad(i, k) { const pd = parts[i].pads[k]; return [pd.x, pd.y]; },
+      wire(...pts) { return trace(pts, 1.2); },
+      power(...pts) { return trace(pts, 2.4); },
+      fibre(...pts) { return trace(pts, 1.2, 1); },                // light, not copper
+      via(x, y) { vias.push([x, y]); },
+      vip(i, ...ks) { for (const k of ks) vip.push(m.pad(i, k)); },   // a via in the pad: straight down to a plane
+      net(text, x, y, anchor = 'middle', port = null) { labels.push({ kind: 'net', text, x, y, anchor, port }); },
+      group(ids, x, y) { labels.push({ kind: 'group', ids, x, y, anchor: 'middle' }); },
+      title(x, y) { labels.push({ kind: 'title', text: title, x, y, anchor: 'start' }); },
+      port(name, x, y) { ports[name] = [x, y]; },
+      // steady current: charges an even distance apart, moving all the time
+      flow({ sp, every }, ...ws) {
+        for (const t of ws) {
+          const L = polyLen(t.p), n = Math.max(1, Math.round(L / every));
+          for (let i = 0; i < n; i++) t.ch.push({ sp, per: L, ph: i * L / n, rev: false });
+        }
+      },
+      // a train of n pulses dt seconds apart, sent every T seconds from `at`, down the wires in turn
+      // as one path (the way through a part between two wires counts as distance too)
+      send({ n = 1, dt = 0.14, T = 3, sp = 100, at = 0, rev = false }, ...ws) {
+        let D = 0, last = null;
+        for (const t of ws) {
+          const a = rev ? t.p[t.p.length - 1] : t.p[0], b = rev ? t.p[0] : t.p[t.p.length - 1];
+          if (last) D += Math.hypot(a[0] - last[0], a[1] - last[1]);
+          for (let j = 0; j < n; j++) t.ch.push({ sp, per: sp * T, ph: -D - sp * (at + j * dt), rev });
+          D += polyLen(t.p); last = b;
+        }
+        return {
+          L: D,
+          at: d => at + d / sp,                                    // when the first pulse is d px down the path
+          hits: (d, on) => Array.from({ length: n }, (_, j) => [T, at + d / sp + j * dt, on])   // an LED there flickers with each pulse
+        };
+      },
+      led(i, win) { const rec = { i, win }; leds.push(rec); return rec; },
+      gate(rec, ...ws) { for (const t of ws) t.gate = rec; }       // current that only runs while that LED is lit
+    };
+    build(m);
+    parts.forEach((part, i) => {
+      if (part.P.ic || !part.refAt) return;
+      const [x0, y0, x1, y1] = part.own;
+      const at = { above: [part.cx, y0 - 5, 'middle'], below: [part.cx, y1 + 10, 'middle'],
+        left: [x0 - 4, part.cy + 3, 'end'], right: [x1 + 4, part.cy + 3, 'start'] }[part.refAt];
+      labels.push({ kind: 'ref', ids: [i], x: at[0], y: at[1], anchor: at[2] });
+    });
+    const box = [Infinity, Infinity, -Infinity, -Infinity];
+    for (const part of parts) grow(box, ...part.own);
+    for (const t of traces) for (const [x, y] of t.p) grow(box, x - 3, y - 3, x + 3, y + 3);
+    for (const [x, y] of vias) grow(box, x - 4.5, y - 4.5, x + 4.5, y + 4.5);
+    for (const l of labels) {
+      const n = l.kind === 'net' || l.kind === 'title' ? l.text.length : l.kind === 'ref' ? 3 : l.ids.length > 2 ? 7 : l.ids.length * 3.5;
+      const w = n * (l.kind === 'net' ? 6.6 : l.kind === 'title' ? 7.6 : 7.4), a = l.anchor;
+      const lx = a === 'start' ? l.x : a === 'end' ? l.x - w : l.x - w / 2;
+      grow(box, lx, l.y - 8, lx + w, l.y + 2);
+    }
+    return { title, parts, traces, vias, vip, labels, leds, ports, box, w: box[2] - box[0], h: box[3] - box[1] };
+  }
+
+  // an I2C exchange: the address clocked out, then the reading clocked back
+  const i2c = (m, sda, scl) => {
+    const T = 3.1;
+    m.send({ n: 8, dt: 0.085, T }, scl); m.send({ n: 3, dt: 0.17, T }, sda);
+    m.send({ n: 8, dt: 0.085, T, at: 1.15 }, scl); m.send({ n: 4, dt: 0.13, T, at: 1.15, rev: true }, sda);
+  };
+
+  const KITS = {
+    // USB-C in: both CC pins pulled down through 5K1 so a charger will supply 5V, a fuse, and a bulk capacitor
+    USB: circuit('USB-C POWER', m => {
+      const j = m.add('USB', -60, 0);
+      const f = m.add('F', -16, -15, 0, null, null), r1 = m.add('R', -16, -5, 0, null, null), r2 = m.add('R', -16, 5, 0, null, null);
+      const c = m.add('C', 30, 4, 1, null, 'right');
+      m.group([f, r1, r2], -16, -25);
+      const bus = m.wire(m.pad(j, 0), m.pad(f, 0), m.pad(f, 1), [30, -15], [48, -15]);
+      m.wire([30, -15], m.pad(c, 0));
+      m.wire(m.pad(j, 1), m.pad(r1, 0), m.pad(r1, 1), [6, -5], [6, 26]);
+      m.wire(m.pad(j, 2), m.pad(r2, 0), m.pad(r2, 1), [6, 5]);
+      m.wire(m.pad(j, 3), [-46, 26]); m.wire(m.pad(c, 1), [30, 26]);
+      const gnd = m.power([40, 26], [-46, 26]);
+      m.net('5V', 52, -12, 'start', 'out'); m.net('GND', 44, 29, 'start'); m.net('5K1', -16, 20);
+      m.flow(DC, bus, gnd);
+      m.port('out', 48, -15); m.title(-76, -44);
+    }),
+    // 5V down to 3V3: an AP2112K with its input and output capacitors, enable tied high, and a power LED
+    REG: circuit('3V3 REGULATOR', m => {
+      const j = m.add('J2', -92, -5);
+      const c1 = m.add('C', -52, -1, 1, null, 'left'), u = m.add('SOT5', 0, 0, 0, 'AP2112K'), c2 = m.add('C', 44, -1, 1, null, 'right');
+      const r = m.add('R', 84, -10), d = m.add('LED', 116, -10);
+      const vin = m.wire(m.pad(j, 0), m.pad(c1, 0), m.pad(u, 0));
+      m.wire(m.pad(u, 2), [-32, 10], [-32, -10]);
+      const out = m.wire(m.pad(u, 4), m.pad(c2, 0), m.pad(r, 0), m.pad(r, 1), m.pad(d, 0), m.pad(d, 1), [140, -10], [140, 30]);
+      m.wire(m.pad(j, 1), [-92, 30]); m.wire(m.pad(c1, 1), [-52, 30]); m.wire(m.pad(c2, 1), [44, 30]);
+      const gnd = m.power([140, 30], [-92, 30]);
+      m.net('5V', -102, -7, 'end', 'in'); m.net('3V3', 61, -15); m.net('PWR', 116, 7); m.net('GND', 144, 33, 'start');
+      m.vip(u, 1);
+      m.flow(DC, vin, out, gnd); m.led(d, 'on');
+      m.port('in', -98, -10); m.title(-116, -36);
+    }),
+    // the microcontroller's clock: a crystal and its two load capacitors
+    XTAL: circuit('8MHZ CRYSTAL', m => {
+      const y = m.add('Y', 0, -10), c1 = m.add('C', -24, 8, 1, null, 'left'), c2 = m.add('C', 24, 8, 1, null, 'right');
+      const osc = m.wire([-44, -10], [-24, -10], m.pad(y, 0), m.pad(y, 1), [24, -10], [44, -10]);
+      m.wire([-24, -10], m.pad(c1, 0)); m.wire([24, -10], m.pad(c2, 0));
+      m.wire(m.pad(c1, 1), [-24, 28]); m.wire(m.pad(c2, 1), [24, 28]);
+      m.power([-34, 28], [34, 28]);
+      m.net('XI', -48, -7, 'end'); m.net('XO', 48, -7, 'start'); m.net('GND', 38, 31, 'start');
+      m.flow({ sp: 150, every: 30 }, osc);
+      m.title(-62, -36);
+    }),
+    // reset: a button to ground, held high through 10K and debounced by a capacitor
+    RST: circuit('RESET', m => {
+      const sw = m.add('SW', -40, 0, 0, null, 'below'), r = m.add('R', -8, -19, 1, null, 'right'), c = m.add('C', 14, 15, 1, null, 'right');
+      m.wire(m.pad(sw, 1), [-8, 0], [14, 0], [34, 0]);
+      const up = m.wire([-8, -36], m.pad(r, 0), m.pad(r, 1), [-8, 0]);
+      m.wire([14, 0], m.pad(c, 0));
+      m.power([-30, -36], [14, -36]);
+      m.net('3V3', -34, -33, 'end'); m.net('EN', 38, 3, 'start');
+      m.vip(sw, 0); m.vip(c, 1);
+      m.flow({ sp: 14, every: 60 }, up);
+      m.title(-59, -46);
+    }),
+    // the link's transmitter: data switches a transistor, the transistor switches a laser into the fibre
+    TX: circuit('LASER TX', m => {
+      const rb = m.add('R', -44, 10, 0, null, 'below'), q = m.add('SOT3', -4, 0), rs = m.add('R', 20, -26), ld = m.add('LD', 52, 0, 0, null, 'below');
+      const din = m.wire([-70, 10], m.pad(rb, 0), m.pad(rb, 1), m.pad(q, 1));
+      const vcc = m.wire([-70, -26], m.pad(rs, 0), m.pad(rs, 1), [64, -26], m.pad(ld, 1));
+      const sink = m.wire(m.pad(ld, 0), m.pad(q, 2));
+      const out = m.fibre([72, 0], [100, 0]);
+      m.vip(q, 0);
+      m.net('TX', -74, 13, 'end'); m.net('5V', -74, -23, 'end');
+      const a = m.send(DATA, din);                                           // each bit reaches the base,
+      const b = m.send({ ...DATA, sp: 260, at: a.at(a.L) }, vcc, sink);      // pulls current through the laser,
+      const lit = b.at(polyLen(vcc.p));
+      m.led(ld, b.hits(polyLen(vcc.p), 0.085));
+      m.send({ ...DATA, sp: LIGHT_SP, at: lit }, out);                       // and leaves as light
+      m.port('out', 100, 0); m.title(-88, -38);
+    }),
+    // the link's receiver: photodiode, transimpedance amplifier with Rf and Cf, a comparator with
+    // hysteresis, a series resistor out to the microcontroller and an LED on the recovered data
+    RX: circuit('OPTICAL RX', m => {
+      const pd = m.add('PD', -100, -5);
+      const a = m.add('SO8', -34, 0, 0, 'OPA356'), b = m.add('SO8', 62, 0, 0, 'TLV3501');
+      const cf = m.add('C', -34, -52, 0, null, null), rf = m.add('R', -34, -32, 0, null, null);
+      const rh = m.add('R', 62, -32), rs = m.add('R', 120, 5);
+      const rl = m.add('R', 118, 27, 0, null, 'below'), d = m.add('LED', 148, 27, 0, null, 'below');
+      m.group([rf, cf], -34, -63);
+      const fin = m.fibre([-138, -5], [-120, -5]);
+      const i1 = m.wire(m.pad(pd, 1), m.pad(a, 1));                          // photocurrent into the inverting input
+      m.wire(m.pad(pd, 0), [-112, 18]); m.via(-112, 18);                     // reverse bias
+      const o1 = m.wire(m.pad(a, 5), [2, 5], m.pad(b, 2));                   // the amplifier's output into the comparator
+      m.wire([2, 5], [2, -52], m.pad(cf, 1)); m.wire([2, -32], m.pad(rf, 1));   // and back over the top,
+      m.wire(m.pad(cf, 0), [-70, -52], [-70, -5]); m.wire(m.pad(rf, 0), [-70, -32]);   // through Cf and Rf to the input
+      const o2 = m.wire(m.pad(b, 5), [98, 5], m.pad(rs, 0), m.pad(rs, 1), [150, 5]);
+      m.wire([98, 5], [98, -32], m.pad(rh, 1)); m.wire(m.pad(rh, 0), [26, -32], [26, 5]);   // hysteresis
+      const ind = m.wire([98, 5], [98, 27], m.pad(rl, 0), m.pad(rl, 1), m.pad(d, 0), m.pad(d, 1), [168, 27]); m.via(168, 27);
+      m.net('RX', 154, 8, 'start'); m.vip(a, 2, 3, 6); m.vip(b, 1, 3, 6);
+      const f = m.send({ ...DATA, sp: LIGHT_SP }, fin);                      // light in,
+      const s = m.send({ ...DATA, at: f.at(f.L) }, i1, o1, o2);              // and the same bits come out the far end
+      const tap = s.at(187);                                                 // where the LED's branch leaves the output
+      const t = m.send({ ...DATA, at: tap }, ind);
+      m.led(d, t.hits(72, 0.085));
+      m.port('in', -138, -5); m.title(-138, -64);
+    }),
+    // a 555 running free: RA and RB charge the timing capacitor, the output blinks an LED and clocks whatever follows
+    T555: circuit('555 TIMER', m => {
+      const u = m.add('SO8', 0, 0, 2, 'NE555');
+      const ra = m.add('R', -56, 24, 1, null, 'left'), rb = m.add('R', -56, -12, 1, null, 'left'), c = m.add('C', -78, -29);
+      const rl = m.add('R', 62, 22, 0, null, 'below'), d = m.add('LED', 94, 22, 0, null, 'below');
+      m.power([-78, 40], [40, 40]);
+      m.wire(m.pad(u, 7), [-23, 40]);
+      const up = m.wire([-56, 40], m.pad(ra, 1), m.pad(ra, 0), [-56, 5]);
+      const cap = m.wire([-56, 5], m.pad(rb, 1), m.pad(rb, 0), [-56, -29], m.pad(c, 1));
+      const dis = m.wire([-56, 5], m.pad(u, 6));
+      m.wire([-56, -29], [-40, -29], [-40, -5], m.pad(u, 5));
+      const clk = m.wire(m.pad(u, 2), [40, -5], [112, -5]);
+      const ind = m.wire([40, -5], [40, 22], m.pad(rl, 0), m.pad(rl, 1), m.pad(d, 0), m.pad(d, 1), [114, 22]); m.via(114, 22);
+      m.vip(u, 0, 1, 3, 4); m.vip(c, 0);
+      m.net('5V', -82, 43, 'end'); m.net('CLK', 116, -2, 'start');
+      const T = 1.3;
+      m.send({ T, sp: 130 }, up, cap);                                       // charging through RA and RB: output high,
+      m.send({ T, sp: 130, at: T / 2, rev: true }, cap); m.send({ T, sp: 130, at: T / 2 + polyLen(cap.p) / 130 }, dis);   // discharging through RB: low
+      m.send({ T, sp: 110 }, clk);
+      const b = m.send({ T, sp: 110, at: 17 / 110 }, ind);
+      m.led(d, [[T, b.at(81), T / 2]]);
+      m.title(-96, -52);
+    }),
+    // eight outputs through a ULN2803 Darlington driver, 330R resistors and LEDs on a 5V rail, driven one after another
+    LED: circuit('LED DRIVER', m => {
+      const j = m.add('J9', -92, 0, 0, null, 'below'), u = m.add('SO18', 0, 0, 0, 'ULN2803');
+      const ys = [-40, -30, -20, -10, 0, 10, 20, 30];
+      const rs = m.stack('R', 62, ys), ds = m.stack('LED', 120, ys);
+      const step = 0.42, T = step * 8;
+      ys.forEach((y, i) => {
+        const w = m.wire(m.pad(j, i), m.pad(u, i), m.pad(u, 17 - i), m.pad(rs[i], 0), m.pad(rs[i], 1), m.pad(ds[i], 0), m.pad(ds[i], 1), [140, y]);
+        const s = m.send({ T, sp: 240, at: i * step }, w);
+        m.led(ds[i], [[T, s.at(212), step]]);                                // lit from when its pulse arrives until the next channel's does
+      });
+      m.wire(m.pad(j, 8), m.pad(u, 8));
+      m.wire(m.pad(u, 9), [34, 40], [46, 52], [140, 52]);                    // the clamp diodes' common to the supply
+      m.power([140, 52], [140, -40]);
+      m.net('5V', 146, -37, 'start'); m.net('330R', 62, 44);
+      m.title(-98, -51);
+    }),
+    // three addressable LEDs on one data line: each takes its colour from the frame and passes the rest on
+    RGB: circuit('STATUS LEDS', m => {
+      const px = [-40, 0, 40].map(x => m.add('PX', x, 0, 0, null, null));
+      m.group(px, 0, 21);
+      const run = [m.wire([-70, 6], m.pad(px[0], 1)), m.wire(m.pad(px[0], 2), m.pad(px[1], 1)), m.wire(m.pad(px[1], 2), m.pad(px[2], 1)), m.wire(m.pad(px[2], 2), [68, 6])];
+      m.via(68, 6);
+      const rail = m.wire([-66, -26], [27, -26], m.pad(px[2], 0));
+      m.wire([-53, -26], m.pad(px[0], 0)); m.wire([-13, -26], m.pad(px[1], 0));
+      px.forEach(i => m.vip(i, 3));
+      m.net('DIN', -74, 9, 'end'); m.net('5V', -70, -23, 'end');
+      const T = 2.7, s = m.send({ n: 3, dt: 0.09, T, sp: 90 }, ...run);
+      px.forEach((i, k) => m.led(i, [[T, s.at(17 + 40 * k), 1.35]]));
+      m.flow(DC, rail);
+      m.title(-94, -40);
+    }),
+    // a light-activated switch: light on the photodiode turns the transistor on, and the transistor turns the LED on
+    LIGHT: circuit('LIGHT SWITCH', m => {
+      const pd = m.add('PD', -50, -10), q = m.add('SOT3', 8, -20), r1 = m.add('R', -20, 6, 1, null, 'right');
+      const d = m.add('LED', 54, -20), r2 = m.add('R', 84, -20);
+      const sense = m.wire([-86, -10], m.pad(pd, 0), m.pad(pd, 1), m.pad(q, 1));
+      m.wire([-20, -10], m.pad(r1, 0));
+      const load = m.wire([106, -20], m.pad(r2, 1), m.pad(r2, 0), m.pad(d, 1), m.pad(d, 0), m.pad(q, 2));
+      m.vip(q, 0); m.vip(r1, 1);
+      m.net('3V3', -90, -7, 'end'); m.net('3V3', 110, -17, 'start');
+      m.flow({ sp: 40, every: 40 }, sense, load);
+      m.gate(m.led(d, 'light'), sense, load);
+      m.title(-110, -46);
+    }),
+    // a temperature and humidity sensor on the I2C bus, both lines pulled up to 3V3 through 4K7
+    I2C: circuit('I2C SENSOR', m => {
+      const sn = m.add('DFN8', 30, 0, 0, 'SHT31');
+      const r1 = m.add('R', -20, -30, 1, null, 'left'), r2 = m.add('R', -20, 30, 1, null, 'left'), c = m.add('C', 80, 28, 1, null, 'right');
+      const sda = m.wire([-60, -15], m.pad(sn, 0)), scl = m.wire([-60, 15], m.pad(sn, 3));
+      m.wire(m.pad(r1, 1), [-20, -15]); m.wire(m.pad(r1, 0), [-20, -46]);
+      m.wire(m.pad(r2, 0), [-20, 15]); m.wire(m.pad(r2, 1), [-20, 46]);
+      const vdd = m.wire([60, 46], [60, 15], m.pad(sn, 4));
+      m.wire(m.pad(c, 1), [80, 46]); m.wire(m.pad(c, 0), [80, 8]); m.via(80, 8);
+      m.power([-60, -46], [96, -46]); m.power([-60, 46], [96, 46]);
+      m.net('SDA', -64, -12, 'end'); m.net('SCL', -64, 18, 'end');
+      m.net('3V3', 100, -43, 'start'); m.net('3V3', 100, 49, 'start');
+      m.vip(sn, 1, 7);
+      i2c(m, sda, scl); m.flow(DC, vdd);
+      m.title(-84, -56);
+    }),
+    // memory on the same bus: a 24LC64 with its address pins grounded and a decoupling capacitor
+    ROM: circuit('I2C EEPROM', m => {
+      const u = m.add('SO8', 0, 0, 2, '24LC64'), c = m.add('C', 22, 34, 0, null, 'below');
+      const sda = m.wire([-60, -15], m.pad(u, 4)), scl = m.wire([-60, -5], m.pad(u, 5));
+      const vcc = m.wire([-60, 34], [-36, 34], [-36, 15], m.pad(u, 7));
+      m.wire([-36, 34], m.pad(c, 0)); m.wire(m.pad(c, 1), [44, 34]); m.via(44, 34);
+      m.net('SDA', -64, -12, 'end'); m.net('SCL', -64, -2, 'end'); m.net('3V3', -64, 37, 'end');
+      m.vip(u, 0, 1, 2, 3, 6);
+      i2c(m, sda, scl); m.flow(DC, vcc);
+      m.title(-84, -30);
+    }),
+    // digital audio in, a speaker out: a MAX98357 class D amplifier with its supply decoupled
+    AMP: circuit('I2S AUDIO AMP', m => {
+      const u = m.add('QFN16', 0, 0, 0, 'MAX98357'), c = m.add('C', 30, -40), ls = m.add('LS', 84, 0);
+      const bck = m.wire([-70, -15], m.pad(u, 0)), lrc = m.wire([-70, -5], m.pad(u, 1)), din = m.wire([-70, 5], m.pad(u, 2));
+      const op = m.wire(m.pad(u, 10), m.pad(ls, 0)), on = m.wire(m.pad(u, 9), m.pad(ls, 1));
+      const vdd = m.wire([-20, -40], [5, -40], m.pad(u, 13));
+      m.wire([5, -40], m.pad(c, 0)); m.wire(m.pad(c, 1), [52, -40]); m.via(52, -40);
+      m.vip(u, 3, 5, 6);
+      m.net('BCLK', -74, -12, 'end'); m.net('LRC', -74, -2, 'end'); m.net('DIN', -74, 8, 'end'); m.net('5V', -24, -37, 'end');
+      const T = 1.5;
+      m.flow({ sp: 150, every: 24 }, bck); m.send({ n: 2, dt: T / 2, T, sp: 120 }, lrc); m.send({ n: 4, dt: 0.1, T, sp: 120 }, din);
+      const a = m.send({ n: 3, dt: 0.17, T, sp: 110, at: 0.5 }, op); m.send({ n: 3, dt: 0.17, T, sp: 110, at: 0.585 }, on);
+      m.led(ls, a.hits(a.L, 0.1)); m.flow(DC, vdd);
+      m.title(-100, -58);
+    }),
+    // a motor on a logic pin: PWM into a MOSFET's gate, the motor in its drain, a diode to catch the kick-back
+    PWM: circuit('MOTOR DRIVER', m => {
+      const rg = m.add('R', -46, 10), q = m.add('SOT3', -4, 0), rp = m.add('R', -28, 26, 1, null, 'right');
+      const d = m.add('D', 36, -14, 1, null, 'left'), j = m.add('J2', 62, -5, 0, null, 'below');
+      const pwm = m.wire([-70, 10], m.pad(rg, 0), m.pad(rg, 1), m.pad(q, 1));
+      m.wire([-28, 10], m.pad(rp, 0)); m.vip(rp, 1); m.vip(q, 0);
+      const vm = m.wire([-70, -28], [62, -28], m.pad(j, 0)), drn = m.wire(m.pad(j, 1), m.pad(q, 2));
+      m.wire([36, -28], m.pad(d, 0)); m.wire(m.pad(d, 1), [36, 0]);
+      m.net('PWM', -74, 13, 'end'); m.net('5V', -74, -25, 'end'); m.net('MOTOR', 62, 27);
+      m.flow({ sp: 120, every: 26 }, pwm); m.flow({ sp: 60, every: 44 }, vm, drn);
+      m.title(-94, -42);
+    }),
+    // a serial port for debugging: 3V3, TXD, RXD and ground on a header, a resistor in series with each data line
+    UART: circuit('DEBUG UART', m => {
+      const j = m.add('J4', 40, 0), r1 = m.add('R', 0, -5, 0, null, null), r2 = m.add('R', 0, 5, 0, null, null);
+      m.group([r1, r2], 0, -15);
+      const tx = m.wire([-40, -5], m.pad(r1, 0), m.pad(r1, 1), m.pad(j, 1)), rx = m.wire(m.pad(j, 2), m.pad(r2, 1), m.pad(r2, 0), [-40, 5]);
+      m.net('TXD', -44, -2, 'end'); m.net('RXD', -44, 8, 'end');
+      m.send({ n: 6, dt: 0.1, T: 4.4 }, tx); m.send({ n: 4, dt: 0.1, T: 4.4, at: 2.1 }, rx);
+      m.title(-64, -40);
+    }),
+    // a single-cell charger: a TP4056 with its charge current set by one resistor, one LED while charging, one when full
+    CHG: circuit('LI-ION CHARGER', m => {
+      const u = m.add('SO8', 0, 0, 0, 'TP4056'), rp = m.add('R', -50, -5);
+      const d1 = m.add('LED', 50, -5, 0, null, null), d2 = m.add('LED', 50, 5, 0, null, null);
+      const rl = m.add('R', 88, -5), c = m.add('C', 46, 29, 1, null, 'right');
+      m.group([d1, d2], 50, -15);
+      const vin = m.wire([-70, 15], m.pad(u, 3));
+      m.wire(m.pad(u, 1), m.pad(rp, 1)); m.vip(rp, 0); m.vip(u, 0, 2, 7);
+      const bat = m.wire(m.pad(u, 4), [46, 15], [70, 15]);
+      m.wire([46, 15], m.pad(c, 0)); m.vip(c, 1);
+      const l1 = m.wire([110, -5], m.pad(rl, 1), m.pad(rl, 0), [72, -5], m.pad(d1, 1), m.pad(d1, 0), m.pad(u, 6));
+      const l2 = m.wire([72, -5], [72, 5], m.pad(d2, 1), m.pad(d2, 0), m.pad(u, 5));
+      m.net('5V', -74, 18, 'end'); m.net('5V', 114, -2, 'start'); m.net('BAT', 74, 18, 'start', 'out');
+      const T = 9;
+      m.flow(DC, vin, bat, l1, l2);
+      m.gate(m.led(d1, [[T, 0, 6.2]]), vin, bat, l1);                        // charging,
+      m.gate(m.led(d2, [[T, 6.2, 2.8]]), l2);                                // then full
+      m.port('out', 70, 15); m.title(-88, -32);
+    }),
+    // the battery's voltage halved for the ADC, with a capacitor to hold it steady while it is sampled
+    DIV: circuit('V-DIVIDER', m => {
+      const r1 = m.add('R', -20, -10), r2 = m.add('R', 4, 6, 1, null, 'left'), c = m.add('C', 24, 6, 1, null, 'right');
+      const top = m.wire([-48, -10], m.pad(r1, 0), m.pad(r1, 1), [4, -10], [24, -10], [38, -10]);
+      const dn = m.wire([4, -10], m.pad(r2, 0), m.pad(r2, 1), [4, 26]);
+      m.wire([24, -10], m.pad(c, 0)); m.wire(m.pad(c, 1), [24, 26]);
+      m.power([-6, 26], [34, 26]);
+      m.net('VBAT', -52, -7, 'end', 'in'); m.net('ADC', 42, -7, 'start'); m.net('GND', 38, 29, 'start');
+      m.flow(DC, top, dn);
+      m.port('in', -48, -10); m.title(-78, -34);
+    })
+  };
+  KITS.TX.emit = (() => { const t = KITS.TX.traces.find(x => x.fib), c = t.ch[0]; return -c.ph / c.sp + polyLen(t.p) / c.sp; })();
+
+  // one part, drawn around (0,0) in silkscreen: its pads, its outline or moulded body, and the lens of anything that lights
+  function partArt(part) {
+    const P = part.P, f = n => Math.round(n * 10) / 10;
+    const padRect = pd => `<rect class="k-pad" x="${f(pd.x - pd.w / 2)}" y="${f(pd.y - pd.h / 2)}" width="${pd.w}" height="${pd.h}" rx="${Math.min(pd.w, pd.h) > 7 ? 1 : 0.8}"/>`;
+    let body = '';
+    if (P.ic) {
+      const [bw, bh] = P.body, hw = bw / 2, hh = bh / 2;
+      // a populated package: its leads, its pads, a soft shadow and the moulded body over them
+      if (P.legs) for (const pd of P.pads) {
+        const ux = pd.u[0], xa = ux * hw, xb = pd.x - ux * pd.w / 2;
+        body += `<rect class="k-lead" x="${f(Math.min(xa, xb))}" y="${f(pd.y - pd.h * 0.3)}" width="${f(Math.abs(xb - xa))}" height="${f(pd.h * 0.6)}"/>`;
+      }
+      for (const pd of P.pads) body += padRect(pd);
+      body += `<rect class="k-shadow" x="${-hw + 1}" y="${-hh + 2}" width="${bw}" height="${bh}" rx="2.5"/>`;
+      body += `<rect class="k-body" x="${-hw}" y="${-hh}" width="${bw}" height="${bh}" rx="2"/>`;
+      // pin 1: marked on the body, or beside it on a package too small to carry the mark and the label
+      if (Math.min(bw, bh) < 24) body += `<circle class="k-dot" cx="${-hw - 4}" cy="${-hh - 4}" r="1.5"/>`;
+      else body += `<circle class="k-dot" cx="${-hw + 5}" cy="${-hh + 5}" r="1.7"/>`;
+    } else {
+      for (const pd of P.pads) {
+        if (pd.shape === 'r') { body += padRect(pd); continue; }
+        // a through-hole pad: a ring (square for pin 1) around its drill
+        const o = pd.w / 2, hr = P.hole, x = pd.x, y = pd.y;
+        const outer = pd.shape === 's' ? `M${x - o} ${y - o}h${pd.w}v${pd.w}h${-pd.w}Z` : ring(o, x, y);
+        body += `<path class="k-pad" fill-rule="evenodd" d="${outer}${ring(hr, x, y)}"/>`;
+        if (!surfaceOn) body += `<circle class="k-drill" cx="${x}" cy="${y}" r="${hr}"/>`;
+      }
+      if (P.silk) body += `<path class="k-silk" d="${P.silk}"/>`;
+      if (P.lens) body += `<path class="k-lens" d="${P.lens}"/>`;
+    }
+    return `<g transform="translate(${f(part.cx)} ${f(part.cy)})${part.q ? ` rotate(${part.q * 90})` : ''}">${body}</g>`;
+  }
+
+  // a whole circuit in its own coordinates: parts, vias in pads, the fibre it sends or takes, and every label
+  function kitArt(M, refs, hide) {
+    const f = n => Math.round(n * 10) / 10;
+    let art = '', text = '';
+    for (const t of M.traces) if (t.fib) art += fibreArt(t.p, 2.4);
+    M.parts.forEach((part, i) => {
+      art += partArt(part);
+      if (!part.P.ic) return;
+      // the reference and the part number, laser-marked along the body's long side
+      const [bw, bh] = part.P.body, dw = part.q % 2 ? bh : bw, dh = part.q % 2 ? bw : bh, small = Math.min(dw, dh) < 24;
+      const lines = small || !part.mark ? `<text class="k-icref" y="0">${refs[i]}</text>`
+        : `<text class="k-icref" y="-4">${refs[i]}</text><text class="k-mark" y="5">${part.mark}</text>`;
+      text += `<g transform="translate(${f(part.cx)} ${f(part.cy)})${dh > dw * 1.15 ? ' rotate(-90)' : ''}">${lines}</g>`;
+    });
+    for (const [x, y] of M.vip) art += `<circle class="k-vip" cx="${f(x)}" cy="${f(y)}" r="1.6"/>`;
+    for (const l of M.labels) {
+      if (l.port && hide && hide.has(l.port)) continue;
+      let s = l.text;
+      if (l.ids) {
+        const rs = l.ids.map(i => refs[i]), pre = rs[0].replace(/\d+$/, ''), nums = rs.map(r => +r.slice(pre.length));
+        s = rs.length > 2 && rs.every(r => r.startsWith(pre)) && nums.every((n, i) => !i || n === nums[i - 1] + 1) ? `${rs[0]}-${rs[rs.length - 1]}` : rs.join(' ');
+      }
+      text += `<text class="k-${l.kind === 'net' ? 'net' : l.kind === 'title' ? 'title' : 'ref'}" x="${f(l.x)}" y="${f(l.y)}" text-anchor="${l.anchor}">${s}</text>`;
+    }
+    return art + text;
+  }
+  // a fibre: two fine lines with the light running between them
+  function fibreArt(pts, d) {
+    const line = p => 'M' + p.map(q => (Math.round(q[0] * 10) / 10) + ' ' + (Math.round(q[1] * 10) / 10)).join('L');
+    return `<path class="k-fibre" d="${line(offsetPath(pts, d))}${line(offsetPath(pts, -d))}"/>`;
+  }
+
+  // Where each circuit goes. A row of them has a slot in the page (a .kit element, before a
+  // section): an ordinary layout box whose size the stylesheet sets at every width. The row is laid
+  // into it the way words are laid into a paragraph: every block at one scale, wrapped onto a second
+  // line where the slot is tall enough, spread edge to edge across the text column, and trimmed,
+  // least important first, to what fits. In the lists the number after a name is that importance
+  // (1 stays longest); the order is the order across the row.
+  const ROWS = {
+    power: ['XTAL:3', 'USB:2', 'REG:1', 'RST:4'],
+    link: ['TX:1', 'RX:1'],
+    drive: ['T555:2', 'LED:1', 'RGB:3'],
+    sense: ['LIGHT:2', 'I2C:1', 'ROM:3'],
+    output: ['AMP:1', 'PWM:2', 'UART:3'],
+    battery: ['CHG:1', 'DIV:2']
+  };
+  // neighbours that really are joined: one's output is the next one's input, by a trace or by fibre
+  const LINKS = { 'USB>REG': 'trace', 'TX>RX': 'fibre', 'CHG>DIV': 'trace' };
+
+  function placeKits(base, g) {
+    const { W, C, R, rnd } = g;
+    const out = { kits: [], traces: [], vias: [], drills: [], leds: [], fibres: [], notes: [] };
+    const br = board.getBoundingClientRect();
+    const slots = $$('.kit').map(el => ({ row: ROWS[el.dataset.kit], r: el.getBoundingClientRect() })).filter(s => s.row && s.r.width > 200 && s.r.height > 80);
+    if (!slots.length) return out;
+    const all = Object.values(KITS), TALL = Math.max(...all.map(M => M.h)), WIDE = Math.max(...all.map(M => M.w)) + 16;
+    // one scale for the whole page: the tallest block fits the shortest slot, the widest the narrowest
+    // (never enlarged on a phone, where the slots are sized for two lines of blocks at their own size)
+    let k = W < 700 ? 1 : 1.5;
+    for (const s of slots) k = Math.min(k, (s.r.height - 12) / TALL, s.r.width / WIDE);
+    k = Math.max(0.7, Math.floor(k * 100) / 100);
+    const GAP = (W < 700 ? 16 : 26) * k, LG = 18 * k, IN = 16 * k, MAR = 14, count = {};
+    const at = (o, q) => [o.ox + q[0] * k, o.oy + q[1] * k];
+    const mark = (x0, y0, x1, y1) => {
+      const i0 = Math.max(0, Math.floor(x0 / P)), i1 = Math.min(C, Math.floor(x1 / P) + 1);
+      if (i1 > i0) for (let j = Math.max(0, Math.floor(y0 / P)); j <= Math.min(R - 1, Math.floor(y1 / P)); j++) base.fill(1, j * C + i0, j * C + i1);
+    };
+
+    for (const s of slots) {
+      const X0 = s.r.left - br.left, Y0 = s.r.top - br.top, Hs = s.r.height;
+      // whatever already stands in the slot (a honeycomb column reaching up into it) narrows the row
+      let Ws = s.r.width;
+      for (let j = Math.max(0, Math.ceil((Y0 + 10) / P)); j < Math.min(R, Math.floor((Y0 + Hs - 10) / P)); j++) {
+        for (let i = Math.max(0, Math.floor((X0 + 6) / P)); i < C && i * P < X0 + Ws; i++) if (base[j * C + i]) { Ws = Math.max(0, i * P - X0); break; }
+      }
+      if (Ws < 150) continue;
+
+      // wrap the row into lines, and drop the least important block until the lines fit the slot
+      let items = s.row.map(spec => { const [id, pr] = spec.split(':'); return { id, M: KITS[id], pr: +pr }; });
+      let lines = null, total = 0;
+      while (items.length) {
+        lines = [];
+        let line = null;
+        items.forEach((it, n) => {
+          const w = it.M.w * k;
+          if (!line || line.w + GAP + w > Ws + 0.5) {
+            // a fibre coming round from the line above needs room at the left to get in
+            const inset = line && LINKS[items[n - 1].id + '>' + it.id] === 'fibre' ? IN : 0;
+            lines.push(line = { items: [], inset, w: inset - GAP, h: 0 });
+          }
+          line.items.push(it); line.w += GAP + w; line.h = Math.max(line.h, it.M.h * k);
+        });
+        total = lines.reduce((a, l) => a + l.h, 0) + (lines.length - 1) * LG;
+        if (total <= Hs - 12 && lines.every(l => l.w <= Ws + 0.5)) break;
+        const worst = items.reduce((a, b) => (b.pr >= a.pr ? b : a));
+        items = items.filter(it => it !== worst); lines = null;
+      }
+      if (!lines) continue;
+
+      let y = Y0 + (Hs - total) / 2, prev = null, prevLine = null, prevBottom = 0;
+      for (const line of lines) {
+        const n = line.items.length, gap = n > 1 ? GAP + (Ws - line.w) / (n - 1) : 0;
+        // the blocks hang from the top of their line, so their names sit level; one joined to its
+        // neighbour drops a little, where it has the room, so the trace or fibre between them is straight
+        line.items.forEach((it, i) => {
+          it.drop = 0;
+          const was = line.items[i - 1];
+          if (!was || !LINKS[was.id + '>' + it.id]) return;
+          const d = (was.drop + (was.M.ports.out[1] - was.M.box[1]) * k) - (it.M.ports.in[1] - it.M.box[1]) * k;
+          if (d > 0 && d <= line.h - it.M.h * k + 0.5) it.drop = d;
+          else if (d < 0 && was.drop - d <= line.h - was.M.h * k + 0.5) was.drop -= d;
+        });
+        let x = X0 + line.inset;
+        for (const it of line.items) {
+          const M = it.M;
+          const o = { M, id: it.id, k, ox: Math.round(x - M.box[0] * k), oy: Math.round(y + it.drop - M.box[1] * k), tOff: rnd() * 6, hide: new Set() };
+          x += M.w * k + gap;
+          // joined to the block before it?
+          const kind = prev && LINKS[prev.id + '>' + it.id];
+          if (kind && (prevLine === line || kind === 'fibre')) {
+            const A = at(prev, prev.M.ports.out), B = at(o, M.ports.in);
+            let path;
+            if (prevLine === line) {
+              const dy = B[1] - A[1], mx = (A[0] + B[0]) / 2, h = Math.min(Math.abs(dy) / 2, (B[0] - A[0]) / 2 - 2);
+              path = Math.abs(dy) < 0.5 ? [A, B] : [A, [mx - h, A[1]], [mx + h, B[1]], B];
+            } else {
+              const c = 6 * k, xr = A[0] + 10 * k, xl = B[0] - 10 * k, ym = prevBottom + LG / 2;
+              path = [A, [xr - c, A[1]], [xr, A[1] + c], [xr, ym - c], [xr - c, ym], [xl + c, ym], [xl, ym + c], [xl, B[1] - c], [xl + c, B[1]], B];
+            }
+            const L = polyLen(path), t = { p: path, w: 1.2, fib: kind === 'fibre' ? 1 : 0, gate: null, ch: [] };
+            if (t.fib) {
+              // the light leaves when the transmitter fires, and the receiver's clock starts when it arrives
+              const sp = LIGHT_SP * k, t0 = prev.tOff + prev.M.emit;
+              for (let j = 0; j < DATA.n; j++) t.ch.push({ sp, per: sp * DATA.T, ph: -sp * (t0 + j * DATA.dt), rev: false });
+              o.tOff = t0 + L / sp;
+              out.fibres.push({ p: path, k });
+            } else {
+              const m = Math.max(1, Math.round(L / (DC.every * k)));
+              for (let i = 0; i < m; i++) t.ch.push({ sp: DC.sp * k, per: L, ph: i * L / m, rev: false });
+            }
+            out.traces.push(t);
+            // a long join is named along its length: the fibre, or the net the trace carries
+            if (prevLine === line && B[0] - A[0] > 150) {
+              const lab = prev.M.labels.find(l => l.port === 'out');
+              out.notes.push({ text: t.fib ? 'TOSLINK' : lab ? lab.text : '', x: A[0] + (B[0] - A[0]) / 4, y: A[1] - 8 * k, k });
+            }
+            for (let q = 1; q < path.length; q++) {
+              mark(Math.min(path[q - 1][0], path[q][0]) - 8, Math.min(path[q - 1][1], path[q][1]) - 8, Math.max(path[q - 1][0], path[q][0]) + 8, Math.max(path[q - 1][1], path[q][1]) + 8);
+            }
+            prev.hide.add('out'); o.hide.add('in');
+          }
+          o.refs = M.parts.map(part => { const pre = part.P.pre || (part.P.ic ? 'U' : 'X'), num = count[pre] = (count[pre] || (pre === 'U' ? 4 : 0)) + 1; return pre + num; });
+          out.kits.push(o);
+          for (const part of M.parts) if (part.P.hole) for (const pd of part.pads) out.drills.push([...at(o, [pd.x, pd.y]), part.P.hole * k]);
+          const leds = M.leds.map(rec => {
+            const part = M.parts[rec.i], [lx, ly] = at(o, [part.cx, part.cy]);
+            const d = { x: lx, y: ly, k, q: part.q, P: part.P, win: rec.win, o, on: false, el: null };
+            if (rec.win === 'light') { const eye = M.parts.find(q => q.P === PKG.PD); [d.sx, d.sy] = at(o, [eye.cx, eye.cy]); }
+            out.leds.push(d);
+            return d;
+          });
+          for (const t of M.traces) {
+            out.traces.push({ p: t.p.map(q => at(o, q)), w: t.w, fib: t.fib, gate: t.gate ? leds[M.leds.indexOf(t.gate)] : null,
+              ch: t.ch.map(c => ({ sp: c.sp * k, per: c.per * k, ph: (c.ph - c.sp * o.tOff) * k, rev: c.rev })) });
+          }
+          for (const v of M.vias) out.vias.push(at(o, v));
+          // nothing else gets routed through a circuit
+          const [bx0, by0] = at(o, [M.box[0], M.box[1]]), [bx1, by1] = at(o, [M.box[2], M.box[3]]);
+          mark(bx0 - MAR, by0 - MAR, bx1 + MAR, by1 + MAR);
+          prev = o; prevLine = line;
+        }
+        prevBottom = y + line.h;
+        y += line.h + LG;
+      }
+    }
+    // every phase inside its own period, so each charge is where it belongs from the first frame
+    for (const t of out.traces) for (const c of t.ch) c.ph = ((c.ph % c.per) + c.per) % c.per;
+    return out;
+  }
+
   function generate() {
     const br = board.getBoundingClientRect();
     const W = Math.round(br.width), H = Math.round(br.height);
@@ -331,11 +966,6 @@
     const base = new Uint8Array(C * R);
     const rnd = mulberry32(0x4E594E41 ^ Math.imul(W, 73856093) ^ Math.imul(H, 19349663));
     const EDGE = 3;                                    // cells reserved for the ground ring
-
-    for (let j = 0; j < R; j++) {
-      if (j < EDGE || j >= R - EDGE) { base.fill(1, j * C, j * C + C); continue; }
-      base.fill(1, j * C, j * C + EDGE); base.fill(1, j * C + C - EDGE, j * C + C);
-    }
     const block = (x, y, w, h, pad) => {
       const i0 = Math.max(0, Math.floor((x - pad) / P)), i1 = Math.min(C - 1, Math.floor((x + w + pad) / P));
       const j0 = Math.max(0, Math.floor((y - pad) / P)), j1 = Math.min(R - 1, Math.floor((y + h + pad) / P));
@@ -374,7 +1004,7 @@
       const mode = el.dataset.keepout;
       if (mode === 'text') { textRects(el).forEach(r => blockRect(r, 16)); return; }
       const r = el.getBoundingClientRect();
-      if (r.width && r.height) blockRect(r, mode === '0' ? 0 : 14);
+      if (r.width && r.height) blockRect(r, mode === '0' ? 0 : el.classList.contains('perf') ? 26 : 14);
     });
     // the vertical section marker owns a clear channel down the left margin
     if (railv && getComputedStyle(railv).display !== 'none') {
@@ -383,8 +1013,13 @@
     }
 
     const g = { W, H, C, R, rnd, br, EDGE };
-    const top = route(base.slice(), g, { fanout: true, vias: true, busDiv: 42000, trDiv: 4200, chargeP: 0.6 });
-    const inner = route(base.slice(), g, { fanout: false, vias: false, busDiv: 56000, trDiv: 6200, chargeP: 0.36 });
+    const kit = placeKits(base, g);
+    for (let j = 0; j < R; j++) {
+      if (j < EDGE || j >= R - EDGE) { base.fill(1, j * C, j * C + C); continue; }
+      base.fill(1, j * C, j * C + EDGE); base.fill(1, j * C + C - EDGE, j * C + C);
+    }
+    const top = route(base.slice(), g, { fanout: true, vias: true, busDiv: 46000, trDiv: 5400, chargeP: flow ? 0.85 : 0.6, pre: kit });
+    const inner = route(base.slice(), g, { fanout: false, vias: false, busDiv: 60000, trDiv: 8000, chargeP: 0.36 });
 
     // stitching vias along the ground ring, then bucket every via on the top layer
     for (let x = 40; x < W - 40; x += 56) top.vias.push([x, 9], [x, H - 9]);
@@ -395,7 +1030,7 @@
     });
 
     const rr = parseFloat(getComputedStyle(board).borderTopLeftRadius) || 20;
-    net = { W, H, top, inner, ring: { x: 9, y: 9, w: W - 18, h: H - 18, r: Math.max(4, rr - 9) } };
+    net = { W, H, top, inner, kits: kit.kits, leds: kit.leds, fibres: kit.fibres, notes: kit.notes, drills: kit.drills, ring: { x: 9, y: 9, w: W - 18, h: H - 18, r: Math.max(4, rr - 9) } };
     cacheKey = '';
     buildGhost();
   }
@@ -407,12 +1042,13 @@
     const bands = [];
     const put = (y, kind, d) => {
       const k = Math.max(0, Math.floor(y / BAND));
-      (bands[k] || (bands[k] = { thin: '', wide: '', via: '' }))[kind] += d;
+      (bands[k] || (bands[k] = { thin: '', wide: '', via: '', 'net-thin': '', 'net-wide': '' }))[kind] += d;
     };
     for (const t of T.traces) {
+      if (t.fib) continue;                               // fibre is drawn with the silkscreen, not the copper
       let d = `M${f(t.p[0][0])} ${f(t.p[0][1])}`;
       for (let i = 1; i < t.p.length; i++) d += `L${f(t.p[i][0])} ${f(t.p[i][1])}`;
-      put(t.p[0][1], t.w > 2 ? 'wide' : 'thin', d);
+      put(t.p[0][1], (t.net ? 'net-' : '') + (t.w > 2 ? 'wide' : 'thin'), d);
     }
     for (const [x, y] of T.vias) put(y, 'via', `M${f(x + 2.6)} ${f(y)}a2.6 2.6 0 1 0 -5.2 0a2.6 2.6 0 1 0 5.2 0`);
     const svg = document.createElementNS(NS, 'svg');
@@ -426,7 +1062,7 @@
     svg.appendChild(ring);
     for (const b of bands) {
       if (!b) continue;
-      for (const kind of ['thin', 'wide', 'via']) {
+      for (const kind of ['thin', 'wide', 'via', 'net-thin', 'net-wide']) {
         if (!b[kind]) continue;
         const p = document.createElementNS(NS, 'path');
         p.setAttribute('class', 'g-' + kind);
@@ -462,6 +1098,8 @@
       }
       tiles.push({ el, y, h, ctx: null, box: null, clip });
     }
+    // silkscreen is ink on top of the mask: it sits over the glow, not under it
+    if (silkSvg) tilesEl.appendChild(silkSvg);
   }
   function wake(t) {
     if (t.ctx) return;
@@ -480,11 +1118,12 @@
   const inC = document.createElement('canvas');
   let octx = off.getContext('2d'), tctx = topC.getContext('2d'), ictx = inC.getContext('2d');
 
-  function strokeLayer(ctx, L, x0, y0, S, out, wThin) {
+  // every trace with a piece inside a rectangle, each listed once
+  function gather(L, x0, y0, w, h, out) {
     const stamp = ++L.stamp;
     out.length = 0;
-    const bi0 = Math.max(0, Math.floor(x0 / L.B)), bi1 = Math.min(L.bc - 1, Math.floor((x0 + S) / L.B));
-    const bj0 = Math.max(0, Math.floor(y0 / L.B)), bj1 = Math.min(L.bn - 1, Math.floor((y0 + S) / L.B));
+    const bi0 = Math.max(0, Math.floor(x0 / L.B)), bi1 = Math.min(L.bc - 1, Math.floor((x0 + w) / L.B));
+    const bj0 = Math.max(0, Math.floor(y0 / L.B)), bj1 = Math.min(L.bn - 1, Math.floor((y0 + h) / L.B));
     for (let bj = bj0; bj <= bj1; bj++) for (let bi = bi0; bi <= bi1; bi++) {
       for (const idx of L.tb[bj * L.bc + bi]) {
         if (L.seen[idx] === stamp) continue;
@@ -492,19 +1131,23 @@
         out.push(idx);
       }
     }
+    return { bi0, bi1, bj0, bj1 };
+  }
+  function strokeLayer(ctx, L, x0, y0, S, out, wThin) {
+    const span = gather(L, x0, y0, S, S, out);
     // one path per width: a few hundred traces become two stroke calls
     for (const wide of [false, true]) {
       ctx.lineWidth = wide ? 2.4 : wThin;
       ctx.beginPath();
       for (const idx of out) {
         const t = L.traces[idx];
-        if ((t.w > 2) !== wide) continue;
+        if ((t.w > 2) !== wide || t.fib) continue;
         ctx.moveTo(t.p[0][0], t.p[0][1]);
         for (let k = 1; k < t.p.length; k++) ctx.lineTo(t.p[k][0], t.p[k][1]);
       }
       ctx.stroke();
     }
-    return { bi0, bi1, bj0, bj1 };
+    return span;
   }
 
   function renderCopper(ox, oy, S, vx, vy) {
@@ -556,35 +1199,37 @@
     pts.push(pointAt(t, b));
     return pts;
   }
-  function runCharges(L, list, time, A, sharp) {
+  function runCharges(ctx, L, list, time, A, sharp, col, only) {
     for (const idx of list) {
       const t = L.traces[idx];
-      if (!t.ch) continue;
+      // `only` the printed circuits; and a circuit's switched current runs only while it is switched on
+      if (!t.ch || (only && !t.net) || (t.gate && !t.gate.on)) continue;
+      const ramp = t.net ? 5 : 16, reach = t.net ? 13 : 30;      // a circuit's wires are short and its pulses close together
       for (const c of t.ch) {
         let s = (c.ph + c.sp * time) % c.per;
         if (s > t.L) continue;                          // resting between pulses
-        const a = A * Math.min(1, s / 16, (t.L - s) / 16);
+        const a = A * Math.min(1, s / ramp, (t.L - s) / ramp);
         if (a < 0.03) continue;
         if (c.rev) s = t.L - s;
-        const tail = Math.min(30, t.L * 0.45);
+        const tail = Math.min(reach, t.L * 0.45);
         const s0 = c.rev ? Math.min(t.L, s + tail) : Math.max(0, s - tail);
         const pts = subPath(t, s0, s), q = pts[0], h = pts[pts.length - 1];
         if (Math.abs(h[0] - q[0]) + Math.abs(h[1] - q[1]) > 0.5) {
-          const gr = octx.createLinearGradient(q[0], q[1], h[0], h[1]);
-          gr.addColorStop(0, `rgba(${pal.tail},0)`);
-          gr.addColorStop(1, `rgba(${pal.tail},${(0.95 * a).toFixed(3)})`);
-          octx.strokeStyle = gr;
-          octx.lineWidth = t.w > 2 ? 2.6 : 1.6;
-          octx.beginPath(); octx.moveTo(q[0], q[1]);
-          for (let k = 1; k < pts.length; k++) octx.lineTo(pts[k][0], pts[k][1]);
-          octx.stroke();
+          const gr = ctx.createLinearGradient(q[0], q[1], h[0], h[1]);
+          gr.addColorStop(0, `rgba(${col.tail},0)`);
+          gr.addColorStop(1, `rgba(${col.tail},${(0.95 * a).toFixed(3)})`);
+          ctx.strokeStyle = gr;
+          ctx.lineWidth = t.w > 2 ? 2.6 : 1.6;
+          ctx.beginPath(); ctx.moveTo(q[0], q[1]);
+          for (let k = 1; k < pts.length; k++) ctx.lineTo(pts[k][0], pts[k][1]);
+          ctx.stroke();
         }
         if (sharp) {
-          octx.fillStyle = `rgba(${pal.halo},${(0.45 * a).toFixed(3)})`;
-          octx.beginPath(); octx.arc(h[0], h[1], 3.8, 0, TAU); octx.fill();
+          ctx.fillStyle = `rgba(${col.halo},${(0.45 * a).toFixed(3)})`;
+          ctx.beginPath(); ctx.arc(h[0], h[1], 3.8, 0, TAU); ctx.fill();
         }
-        octx.fillStyle = `rgba(${pal.head},${a.toFixed(3)})`;
-        octx.beginPath(); octx.arc(h[0], h[1], sharp ? 1.5 : 1.8, 0, TAU); octx.fill();
+        ctx.fillStyle = `rgba(${col.head},${a.toFixed(3)})`;
+        ctx.beginPath(); ctx.arc(h[0], h[1], sharp ? 1.5 : 1.8, 0, TAU); ctx.fill();
       }
     }
   }
@@ -616,10 +1261,10 @@
       if (chargeA > 0.01) {
         octx.lineCap = 'round'; octx.lineJoin = 'round';
         octx.setTransform(dpr, 0, 0, dpr, -ox * dpr, -oy * dpr);
-        runCharges(net.top, vis.top, chargeT, chargeA, true);
+        runCharges(octx, net.top, vis.top, chargeT, chargeA, true, pal);
         const s = IN_S;
         octx.setTransform(dpr * s, 0, 0, dpr * s, dpr * (vx * (1 - s) - ox), dpr * (vy * (1 - s) - oy));
-        runCharges(net.inner, vis.inner, chargeT, chargeA * 0.5, false);
+        runCharges(octx, net.inner, vis.inner, chargeT, chargeA * 0.5, false, pal);
       }
 
       // everything fades out with distance from the light
@@ -633,25 +1278,49 @@
       octx.globalCompositeOperation = 'source-over';
     }
 
+    // Into the tiles: first the current running on its own wherever the board is on screen (in the
+    // printed circuits; on a touch screen, in all of the copper), then whatever the light is showing.
+    const M = 90, y0 = -br.top - M, y1 = innerHeight - br.top + M;
+    let run = chargeA > 0.01;
+    if (run) {
+      gather(net.top, 0, y0, net.W, y1 - y0, vis.run);
+      if (!flow) run = vis.run.some(i => net.top.traces[i].net);
+    }
     for (const t of tiles) {
+      const a = Math.max(t.y, y0), b = Math.min(t.y + t.h, y1), runs = run && b > a;
       const hit = lit && oy + S > t.y && oy < t.y + t.h;
-      if (!hit) {
-        if (t.ctx && t.box) { t.ctx.clearRect(t.box[0], t.box[1], t.box[2], t.box[3]); t.box = null; }
-        if (t.ctx && Math.abs(t.y + t.h / 2 - ly) > 2000) sleep(t);
+      if (t.ctx) {
+        if (t.box) { t.ctx.clearRect(t.box[0], t.box[1], t.box[2], t.box[3]); t.box = null; }
+        if (t.rbox) { t.ctx.clearRect(t.rbox[0], t.rbox[1], t.rbox[2], t.rbox[3]); t.rbox = null; }
+      }
+      if (!runs && !hit) {
+        if (t.ctx && Math.abs(t.y + t.h / 2 - (y0 + y1) / 2) > 2000) sleep(t);
         continue;
       }
       wake(t);
-      const c = t.ctx, y = oy - t.y;
-      if (t.box) c.clearRect(t.box[0], t.box[1], t.box[2], t.box[3]);
-      if (t.clip) { c.save(); c.translate(0, -t.y); c.clip(t.clip, 'evenodd'); c.translate(0, t.y); }
-      // the board itself glowing where the light is
-      const glow = c.createRadialGradient(lx, ly - t.y, 0, lx, ly - t.y, G);
-      for (const [at, rgb, a] of pal.glow) glow.addColorStop(at, `rgba(${rgb},${(a * I).toFixed(3)})`);
-      c.fillStyle = glow; c.fillRect(ox, y, S, S);
-      c.drawImage(off, 0, 0, off.width, off.height, ox, y, S, S);
-      if (t.clip) c.restore();
-      t.box = [ox - 2, y - 2, S + 4, S + 4];
+      const c = t.ctx;
+      if (runs) {
+        t.rbox = [0, a - t.y, net.W, b - a];
+        c.save();
+        c.beginPath(); c.rect(0, a - t.y, net.W, b - a); c.clip();
+        c.translate(0, -t.y);
+        c.lineCap = 'round'; c.lineJoin = 'round';
+        runCharges(c, net.top, vis.run, chargeT, chargeA, true, pal.run, !flow);
+        c.restore();
+      }
+      if (hit) {
+        const y = oy - t.y;
+        if (t.clip) { c.save(); c.translate(0, -t.y); c.clip(t.clip, 'evenodd'); c.translate(0, t.y); }
+        // the board itself glowing where the light is
+        const glow = c.createRadialGradient(lx, ly - t.y, 0, lx, ly - t.y, G);
+        for (const [at, rgb, al] of pal.glow) glow.addColorStop(at, `rgba(${rgb},${(al * I).toFixed(3)})`);
+        c.fillStyle = glow; c.fillRect(ox, y, S, S);
+        c.drawImage(off, 0, 0, off.width, off.height, ox, y, S, S);
+        if (t.clip) c.restore();
+        t.box = [ox - 2, y - 2, S + 4, S + 4];
+      }
     }
+    runLeds(br);
 
     // the bench under the board, with the same light shining up through it
     if (bench) {
@@ -670,6 +1339,28 @@
       lastVars = vars; litDirty = false;
       litI = I; litR = R * 0.95;
       paintLit();
+    }
+  }
+
+  // The circuits' LEDs. Each is lit when its own circuit says so: the power LED while the board
+  // is on, a driven LED from when its pulse arrives, the light switch's when light actually falls
+  // on its photodiode (the cursor's light, or on a touch screen the middle of the screen).
+  function runLeds(br) {
+    const leds = net.leds;
+    if (!leds.length) return;
+    const top = -br.top - 80, bottom = innerHeight - br.top + 80, live = light.on && chargeA > 0.5;
+    for (const d of leds) {
+      if (d.y < top || d.y > bottom) continue;
+      let on = false;
+      if (d.win === 'on') on = light.on;
+      else if (d.win === 'light') {
+        on = live && (flow ? Math.abs(d.sy + br.top - innerHeight / 2) < innerHeight * 0.2
+          : light.i > 0.3 && Math.hypot(light.x - br.left - d.sx, light.y - br.top - d.sy) < light.r * 0.8);
+      } else if (live) {
+        const t = chargeT - d.o.tOff;
+        for (const [T, t0, dur] of d.win) if ((((t - t0) % T) + T) % T < dur) { on = true; break; }
+      }
+      if (on !== d.on) { d.on = on; d.el.classList.toggle('is-on', on); }
     }
   }
 
@@ -716,8 +1407,9 @@
 
   function frame(now) {
     raf = 0;
-    // once nobody is moving the pointer or scrolling, 30 frames a second is plenty for a drifting light
-    if (lastPaint && now - lastPaint < 30 && now - lastInput > 700 && !warmFrom) {
+    // once nobody is moving the pointer or scrolling, 30 frames a second is plenty for a drifting light,
+    // and it is always plenty for current running on its own
+    if (lastPaint && now - lastPaint < 30 && (flow || now - lastInput > 700) && !warmFrom) {
       raf = requestAnimationFrame(frame);
       return;
     }
@@ -728,8 +1420,8 @@
 
     // left alone, the light drifts off across the board; touch or move and it comes straight back.
     // After a minute it stops where it is, so an untouched tab costs nothing.
-    const resting = !reduce && now - lastInput > REST_AFTER;
-    if (!resting) {
+    const resting = !reduce && now - lastInput > (flow ? FLOW_REST : REST_AFTER);
+    if (!resting && !flow) {
       const wantWander = !reduce && light.on && now - lastInput > WANDER_AFTER;
       if (wantWander) wander += (1 - wander) * ease(0.012); else wander = 0;
       if (wander > 0.0005) {
@@ -743,7 +1435,7 @@
 
     light.x += (light.tx - light.x) * ease(0.3);
     light.y += (light.ty - light.y) * ease(0.3);
-    const target = light.on ? 1 : 0;
+    const target = light.on && !flow ? 1 : 0;
     let busy = false;
     if (warmFrom) {
       // the one orchestrated moment: the lightbox warming up behind the board
@@ -764,7 +1456,7 @@
     if (!want && chargeA < 0.01) chargeA = 0;
     const sv = Math.abs(scrollY - prevSY) / Math.max(dt, 1 / 240);
     prevSY = scrollY;
-    const st = Math.min(1.6, sv / 1400);
+    const st = flow ? 0 : Math.min(1.6, sv / 1400);             // on a phone it just flows, steadily
     surge += (st - surge) * (st > surge ? ease(0.3) : ease(0.035));
     chargeT += dt * (1 + surge * 2);
 
@@ -783,7 +1475,7 @@
       || Math.abs(light.tx - light.x) > 0.15 || Math.abs(light.ty - light.y) > 0.15
       || Math.abs(target - light.i) > 0.002 || Math.abs(light.tr - light.r) > 0.25
       || light.boost > 0.003 || (wander > 0.0005 && !resting)
-      || (chargeA > 0 && light.i > 0.004)
+      || chargeA > 0
       || (railOn && Math.abs(railTarget - railP) > 0.0005)
       || (!!bench && !reduce && !document.hidden && !resting);
     if (busy) raf = requestAnimationFrame(frame); else lastT = 0;
@@ -898,28 +1590,71 @@
 
   /* ------------------------------------------------------------------ honeycomb */
 
-  // whole hexes only: each field gets its own mask sized to fit, like a real board edge.
-  // The back opening uses the same hexes, softened, so the bore wall reads as shading.
+  // Squared-off honeycomb: a hex lattice trimmed to a clean rectangle. The top and bottom rows and
+  // the ends of every other row are cut through their centres, so each field has straight edges,
+  // like a machined vent. Three cell sizes, chosen per field in CSS with --hex (s, m or l).
+  const HEX = { s: [15, 11.4], m: [20, 15.6], l: [26, 20.6] };     // lattice pitch, hex radius (px)
+  function clipPoly(pts, x0, y0, x1, y1) {
+    const edges = [
+      [q => q[0] >= x0, (a, b) => [x0, a[1] + (b[1] - a[1]) * (x0 - a[0]) / (b[0] - a[0])]],
+      [q => q[0] <= x1, (a, b) => [x1, a[1] + (b[1] - a[1]) * (x1 - a[0]) / (b[0] - a[0])]],
+      [q => q[1] >= y0, (a, b) => [a[0] + (b[0] - a[0]) * (y0 - a[1]) / (b[1] - a[1]), y0]],
+      [q => q[1] <= y1, (a, b) => [a[0] + (b[0] - a[0]) * (y1 - a[1]) / (b[1] - a[1]), y1]]
+    ];
+    let out = pts;
+    for (const [inside, cut] of edges) {
+      const src = out;
+      out = [];
+      for (let k = 0; k < src.length; k++) {
+        const a = src[k], b = src[(k + 1) % src.length], ia = inside(a), ib = inside(b);
+        if (ia) out.push(a);
+        if (ia !== ib) out.push(cut(a, b));
+      }
+      if (!out.length) break;
+    }
+    return out;
+  }
+  const polyArea = pts => {
+    let a = 0;
+    for (let k = 0; k < pts.length; k++) { const p = pts[k], q = pts[(k + 1) % pts.length]; a += p[0] * q[1] - q[0] * p[1]; }
+    return Math.abs(a) / 2;
+  };
   function buildPerfs() {
     perfs.length = 0;
     $$('.perf').forEach(el => {
       const w = Math.round(el.clientWidth), h = Math.round(el.clientHeight);
       if (w < 30 || h < 30) return;
-      const sp = 15, r = 11.4, m = 3;
-      const hw = r * Math.sqrt(3) / 2, dx = Math.sqrt(3) * sp, dy = 1.5 * sp;
-      const rows = Math.max(1, Math.floor((h - 2 * m - 2 * r) / dy) + 1);
-      const cols = Math.max(1, Math.floor((w - 2 * m - 2 * hw - dx / 2) / dx) + 1);
-      const offY = (h - ((rows - 1) * dy + 2 * r)) / 2 + r;
-      const offX = (w - ((cols - 1) * dx + dx / 2 + 2 * hw)) / 2 + hw;
-      const f = n => Math.round(n * 10) / 10;
-      let d = '';
-      for (let row = 0; row < rows; row++) {
-        const cy = offY + row * dy, shift = row % 2 ? dx / 2 : 0;
-        for (let c = 0; c < cols; c++) {
-          const cx = offX + shift + c * dx;
-          d += `M${f(cx + hw)} ${f(cy + r / 2)}L${f(cx)} ${f(cy + r)}L${f(cx - hw)} ${f(cy + r / 2)}L${f(cx - hw)} ${f(cy - r / 2)}L${f(cx)} ${f(cy - r)}L${f(cx + hw)} ${f(cy - r / 2)}Z`;
+      // The lattice is spaced a hair wider or narrower (never more than a few percent) so it fills
+      // the field exactly: the silkscreen frame round it then lands on the element's own edges,
+      // flush with the text column. Rows stay an even number, the same cut top and bottom.
+      const O = 7, fw = w - 2 * O, fh0 = h - 2 * O;
+      const order = ['l', 'm', 's'];
+      let size = getComputedStyle(el).getPropertyValue('--hex').trim() || 's', sp, r, dx, dy, cols, rows;
+      for (let k = Math.max(0, order.indexOf(size)); k < order.length; k++) {
+        size = order[k];
+        [sp, r] = HEX[size];
+        const dx0 = Math.sqrt(3) * sp, dy0 = 1.5 * sp;
+        cols = Math.round(fw / dx0);
+        if (cols > 1 && fw / cols < dx0 * 0.93) cols--;
+        rows = 2 * Math.round(fh0 / dy0 / 2);
+        if (rows > 2 && fh0 / rows < dy0 * 0.93) rows -= 2;
+        dx = fw / cols; dy = Math.min(dy0 * 1.2, Math.max(dy0 * 0.93, fh0 / rows));
+        if (cols >= 1 && rows >= 2 && dx >= dx0 * 0.93 && rows * dy <= fh0 + 0.5) break;
+        cols = 0;
+      }
+      if (cols < 1 || rows < 2) return;
+      const hw = r * Math.sqrt(3) / 2, fh = rows * dy, ox = O, oy = (h - fh) / 2;
+      const full = 3 * Math.sqrt(3) / 2 * r * r, polys = [];
+      for (let row = 0; row <= rows; row++) {
+        const cy = oy + row * dy, odd = row % 2;
+        for (let c = 0; c < (odd ? cols : cols + 1); c++) {
+          const cx = ox + (odd ? dx / 2 : 0) + c * dx;
+          const pts = clipPoly([[cx + hw, cy + r / 2], [cx, cy + r], [cx - hw, cy + r / 2], [cx - hw, cy - r / 2], [cx, cy - r], [cx + hw, cy - r / 2]], ox, oy, ox + fw, oy + fh);
+          if (pts.length > 2 && polyArea(pts) > full * 0.12) polys.push(pts);
         }
       }
+      const f = n => Math.round(n * 10) / 10;
+      const d = polys.map(pts => 'M' + pts.map(q => f(q[0]) + ' ' + f(q[1])).join('L') + 'Z').join('');
       const head = `<svg xmlns="http://www.w3.org/2000/svg" width="${w}" height="${h}" viewBox="0 0 ${w} ${h}">`;
       const front = `${head}<path d="${d}"/></svg>`;
       const back = `${head}<filter id="s" x="-10%" y="-10%" width="120%" height="120%"><feGaussianBlur stdDeviation="1.4"/></filter><path filter="url(#s)" d="${d}"/></svg>`;
@@ -930,12 +1665,7 @@
       el.style.setProperty('--bw', (w * HOLE_S).toFixed(2) + 'px');
       el.style.setProperty('--bh', (h * HOLE_S).toFixed(2) + 'px');
       el.style.setProperty('--mrep', 'no-repeat');
-      const cells = [];
-      for (let row = 0; row < rows; row++) {
-        const cy = offY + row * dy, shift = row % 2 ? dx / 2 : 0;
-        for (let c = 0; c < cols; c++) cells.push([offX + shift + c * dx, cy]);
-      }
-      perfs.push({ el, cells, r, hw });
+      perfs.push({ el, polys, field: [ox, oy, fw, fh] });
     });
   }
 
@@ -951,13 +1681,20 @@
       const host = el.parentElement, head = host.querySelector('.sec-head, .case-head');
       if (!head) return;
       const hr = host.getBoundingClientRect(), h = head.getBoundingClientRect(), back = host.querySelector('.back');
-      const top = back ? back.getBoundingClientRect().top - hr.top : Math.max(0, (h.top - hr.top) - Math.min(110, (h.top - hr.top) * 0.55));
-      // run on past the heading, down to just above whatever comes next
-      const next = el.nextElementSibling;
-      const nb = next ? next.getBoundingClientRect().top - hr.top - 44 : 0;
-      const bottom = Math.max(h.bottom - hr.top, nb);
+      // start in the empty space above the heading: the gap before the section, or its top padding
+      // (on a case study that gap holds a row of circuits, and the column stands beside the row)
+      const prev = host.previousElementSibling, pr = prev && prev.getBoundingClientRect();
+      const gap = !prev ? 0 : hr.top - (prev.classList.contains('kit') && host.classList.contains('case-sec') ? pr.top : pr.bottom);
+      const top = back ? back.getBoundingClientRect().top - hr.top
+        : gap > 60 ? -(gap - 40)
+        : Math.max(0, (h.top - hr.top) - Math.min(110, (h.top - hr.top) * 0.55));
+      // run on past the heading, down to just above whatever comes next, never into it
+      const next = el.nextElementSibling, headBottom = h.bottom - hr.top;
+      const limit = next && next.getBoundingClientRect().height ? next.getBoundingClientRect().top - hr.top - 44 : headBottom + 260;
+      const bottom = Math.max(headBottom, Math.min(limit, headBottom + 260));
+      if (bottom - top < 110) { el.style.setProperty('--side-h', '0px'); return; }
       el.style.setProperty('--side-top', top.toFixed(0) + 'px');
-      el.style.setProperty('--side-h', Math.max(180, bottom - top).toFixed(0) + 'px');
+      el.style.setProperty('--side-h', (bottom - top).toFixed(0) + 'px');
     });
   }
 
@@ -972,18 +1709,27 @@
     if (!surfaceOn || !net) return;
     const br = board.getBoundingClientRect(), W = net.W, H = net.H;
     const f = n => Math.round(n * 10) / 10;
-    const hex = (cx, cy, r, hw) => `M${f(cx + hw)} ${f(cy + r / 2)}L${f(cx)} ${f(cy + r)}L${f(cx - hw)} ${f(cy + r / 2)}L${f(cx - hw)} ${f(cy - r / 2)}L${f(cx)} ${f(cy - r)}L${f(cx + hw)} ${f(cy - r / 2)}Z`;
+    const poly = (pts, dx, dy) => 'M' + pts.map(q => f(q[0] + dx) + ' ' + f(q[1] + dy)).join('L') + 'Z';
+    const circ = (cx, cy, r) => `M${f(cx + r)} ${f(cy)}A${r} ${r} 0 1 0 ${f(cx - r)} ${f(cy)}A${r} ${r} 0 1 0 ${f(cx + r)} ${f(cy)}Z`;
     const rrect = (x, y, w, h, q) => `M${f(x + q)} ${f(y)}H${f(x + w - q)}A${q} ${q} 0 0 1 ${f(x + w)} ${f(y + q)}V${f(y + h - q)}A${q} ${q} 0 0 1 ${f(x + w - q)} ${f(y + h)}H${f(x + q)}A${q} ${q} 0 0 1 ${f(x)} ${f(y + h - q)}V${f(y + q)}A${q} ${q} 0 0 1 ${f(x + q)} ${f(y)}Z`;
     let cut = '', lip = '';
     for (const p of perfs) {
       const r = p.el.getBoundingClientRect();
       if (!r.width || !r.height) continue;
       const x0 = r.left - br.left, y0 = r.top - br.top;
-      for (const [cx, cy] of p.cells) {
-        const d = hex(x0 + cx, y0 + cy, p.r, p.hw);
-        cut += d; lip += hex(x0 + cx, y0 + cy + WALL, p.r, p.hw);
-        holes.push({ y0: y0 + cy - p.r, y1: y0 + cy + p.r, d });
+      for (const pts of p.polys) {
+        const d = poly(pts, x0, y0);
+        let lo = Infinity, hi = -Infinity;
+        for (const q of pts) { if (q[1] < lo) lo = q[1]; if (q[1] > hi) hi = q[1]; }
+        cut += d; lip += poly(pts, x0, y0 + WALL);
+        holes.push({ y0: y0 + lo, y1: y0 + hi, d });
       }
+    }
+    // the drills of the parts' through-hole pads go right through the board too
+    for (const [cx, cy, r] of net.drills || []) {
+      const d = circ(cx, cy, r);
+      cut += d; lip += circ(cx, cy + 1.2, r);
+      holes.push({ y0: cy - r, y1: cy + r, d });
     }
     // routed windows: the work panel's window, and any other element marked as a hole
     $$('[data-hole]').forEach(el => {
@@ -1003,6 +1749,54 @@
       + `<path class="s-fill" d="${all}${cut}"/>`
       + `<path class="s-wall" clip-path="url(#surface-holes)" d="${all}${lip}"/>`;
     surfaceSvg = svg;
+  }
+
+  /* ------------------------------------------------------------------ silkscreen */
+
+  // Everything printed on top of the mask: the circuits (pads, outlines, references, names and
+  // LEDs), and a keep-out frame with a reference around each honeycomb field. Drawn once per layout.
+  function buildSilk() {
+    silkSvg = null;
+    if (!net) return;
+    const br = board.getBoundingClientRect(), f = n => Math.round(n * 10) / 10;
+    let art = '', text = '';
+    const ref = (x, y, s) => { text += `<text class="k-ref" x="${f(x)}" y="${f(y)}">${s}</text>`; };
+    // the circuits, each in its own coordinates at the page's scale, and the fibre between two of them
+    for (const o of net.kits) art += `<g transform="translate(${o.ox} ${o.oy}) scale(${o.k})">${kitArt(o.M, o.refs, o.hide)}</g>`;
+    for (const t of net.fibres) art += fibreArt(t.p, 2.4 * t.k);
+    for (const n of net.notes) text += `<text class="k-net" x="${f(n.x)}" y="${f(n.y)}" text-anchor="middle" style="font-size:${f(7.5 * n.k)}px">${n.text}</text>`;
+    // over everything, the lit lens and glow of each LED, switched as its circuit runs
+    let lit = '';
+    for (const d of net.leds) {
+      lit += `<g class="k-led" transform="translate(${f(d.x)} ${f(d.y)}) scale(${d.k})${d.q ? ` rotate(${d.q * 90})` : ''}"><circle class="k-halo" r="${d.P.glow}"/>`
+        + (d.P.lens ? `<path class="k-lit" d="${d.P.lens}"/>` : '') + '</g>';
+    }
+    perfs.forEach((p, k) => {
+      const r = p.el.getBoundingClientRect();
+      if (!r.width) return;
+      const [ox, oy, fw, fh] = p.field, o = 7;
+      const x = r.left - br.left + ox - o, y = r.top - br.top + oy - o;
+      art += `<rect class="k-silk" x="${f(x)}" y="${f(y)}" width="${f(fw + 2 * o)}" height="${f(fh + 2 * o)}" rx="3"/>`;
+      ref(x, y - 6, 'V' + (k + 1));
+    });
+    const svg = document.createElementNS(NS, 'svg');
+    svg.setAttribute('class', 'silk');
+    svg.setAttribute('width', net.W); svg.setAttribute('height', net.H);
+    svg.setAttribute('viewBox', `0 0 ${net.W} ${net.H}`);
+    svg.innerHTML = '<defs><radialGradient id="led-halo"><stop offset="0" style="stop-color:var(--glow);stop-opacity:.75"/>'
+      + '<stop offset=".4" style="stop-color:var(--glow);stop-opacity:.28"/><stop offset="1" style="stop-color:var(--glow);stop-opacity:0"/></radialGradient></defs>'
+      + art + text + lit;
+    const els = svg.querySelectorAll('.k-led');
+    net.leds.forEach((d, i) => { d.el = els[i]; d.on = false; });
+    silkSvg = svg;
+  }
+
+  // the footer's dimension line reports its own length, as a drawing would
+  const dimVal = $('#dim-val');
+  function updateDims() {
+    if (!dimVal || !dimVal.parentElement) return;
+    const w = dimVal.parentElement.getBoundingClientRect().width;
+    dimVal.textContent = (w * 25.4 / 96).toFixed(2) + ' mm';
   }
 
   /* ------------------------------------------------------------------ the bench */
@@ -1185,6 +1979,8 @@ void main(){
         if (cur !== key) return;
         vImg.width = +b.dataset.w; vImg.height = +b.dataset.h;
         vImg.alt = b.dataset.alt; vImg.src = src(key);
+        const vRef = $('#viewer-ref');
+        if (vRef) vRef.textContent = b.textContent.trim().toUpperCase();
         const show = () => requestAnimationFrame(() => requestAnimationFrame(() => vImg.classList.remove('is-out')));
         if (vImg.decode) vImg.decode().then(show, show); else show();
       });
@@ -1534,8 +2330,10 @@ void main(){
     generate();
     buildPerfs();
     buildSurface();
+    buildSilk();
     buildTiles();
     watchLight();
+    updateDims();
     lastScrollY = -1;
     depth();
     railP = railTarget;
@@ -1562,7 +2360,8 @@ void main(){
     setBacklight(light.on, true);
     root.classList.add('is-ready');                  // the headline resolves as the light warms up
     lastInput = performance.now();
-    if (reduce) { light.i = light.on ? 1 : 0; light.r = light.tr; kick(); }
+    if (flow) { light.i = 0; light.r = light.tr; kick(); }
+    else if (reduce) { light.i = light.on ? 1 : 0; light.r = light.tr; kick(); }
     else setTimeout(() => { warmFrom = performance.now(); lastInput = warmFrom; kick(); }, 280);
   }
   (document.fonts && document.fonts.ready ? document.fonts.ready : Promise.resolve()).then(start);

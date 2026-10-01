@@ -19,9 +19,12 @@
   --mask: #EEF1F2;
   --mask-deep: #DCE3E6;     /* mask over copper: traces read faintly through */
   --ghost: #E2E8EB;         /* the routing, seen through the mask without the light */
+  --ghost-net: #C2CFD7;     /* the printed circuits' own copper, clear enough to follow */
   --pkg: #F7F9FA;           /* top of a raised part */
   --pkg-lit: #F2F9FC;
+  --silk-deco: rgba(13, 17, 22, .5);
   --led-off: #C3CBD0;
+  --led-on: #1DB3F0;        /* a printed circuit's LED, lit */
   --halo: rgba(255, 255, 255, .55);
   --silk: #0D1116;          /* silkscreen ink */
   --silk-hover: #28313A;
@@ -77,9 +80,12 @@
   --mask: #13181E;
   --mask-deep: #1E252D;
   --ghost: #1A2028;
+  --ghost-net: #2B3744;
   --pkg: #1A2129;
   --pkg-lit: #1B2631;
+  --silk-deco: rgba(242, 242, 242, .44);
   --led-off: #2E3843;
+  --led-on: #C6F1FF;
   --halo: rgba(0, 0, 0, .45);
   --silk: #F2F2F2;
   --silk-hover: #FFFFFF;
@@ -202,11 +208,39 @@ a { color: inherit; }
 .bench { position: fixed; left: 0; top: 0; z-index: -1; display: block; width: 100%; height: 100vh; height: 100lvh; pointer-events: none; }
 .tiles canvas { position: absolute; left: 0; display: block; }
 
+/* the silkscreen: parts, pads, references and honeycomb frames, printed over the light */
+.silk { position: absolute; left: 0; top: 0; overflow: visible; pointer-events: none; }
+.silk .k-silk { fill: none; stroke: var(--silk-deco); stroke-width: 1; stroke-linejoin: round; stroke-linecap: round; }
+.silk .k-pad { fill: var(--hasl); }
+.silk .k-drill { fill: var(--bench); }
+.silk .k-ref { fill: var(--silk-deco); font-family: var(--wide); font-size: 8.5px; font-weight: 600; letter-spacing: .12em; }
+.silk .k-body { fill: var(--pkg); stroke: var(--silk-deco); stroke-width: 1; }
+.silk .k-shadow { fill: rgba(var(--shade), .12); }
+.silk .k-lead { fill: var(--lead); }
+.silk .k-dot { fill: var(--silk-deco); }
+.silk .k-icref, .silk .k-mark { text-anchor: middle; dominant-baseline: central; font-family: var(--wide); }
+.silk .k-net { fill: var(--ink-3); font-family: var(--wide); font-size: 7.5px; font-weight: 600; letter-spacing: .14em; }
+.silk .k-vip { fill: var(--bench); }
+.silk .k-icref { fill: var(--silk); font-size: 7.4px; font-weight: 600; letter-spacing: .1em; }
+.silk .k-mark { fill: var(--ink-3); font-size: 5.4px; font-weight: 500; letter-spacing: .08em; }
+/* each circuit is named, as the blocks on a real board are */
+.silk .k-title { fill: var(--ink-2); font-family: var(--wide); font-size: 8px; font-weight: 700; letter-spacing: .16em; }
+.silk .k-fibre { fill: none; stroke: var(--silk-deco); stroke-width: .9; stroke-linecap: round; stroke-linejoin: round; }
+/* anything that lights: a dull lens, and over it the lit lens and its glow, switched by main.js as the circuit runs */
+.silk .k-lens { fill: var(--led-off); }
+.silk .k-led { opacity: 0; transition: opacity .1s linear; }
+.silk .k-led.is-on { opacity: 1; }
+.silk .k-lit { fill: var(--led-on); }
+.silk .k-halo { fill: url(#led-halo); }
+
 /* the routing, faintly visible through the mask everywhere, even without the light */
 .ghost { position: absolute; left: 0; top: 0; overflow: visible; pointer-events: none; }
 .ghost path, .ghost rect { fill: none; stroke: var(--ghost); stroke-linecap: round; stroke-linejoin: round; transition: stroke .4s; }
 .ghost .g-thin, .ghost .g-via { stroke-width: 1.2; }
 .ghost .g-wide, .ghost .g-ring { stroke-width: 2.4; }
+.ghost .g-net-thin, .ghost .g-net-wide { stroke: var(--ghost-net); }
+.ghost .g-net-thin { stroke-width: 1.2; }
+.ghost .g-net-wide { stroke-width: 2.4; }
 
 .nav, main, .foot { position: relative; z-index: 1; }
 
@@ -451,7 +485,7 @@ a { color: inherit; }
   transition: opacity .7s var(--ease-out);
 }
 .hint.is-done { opacity: 0; }
-.hint-touch { display: none; }
+.flow .hint { display: none; }
 
 /* vertical branding, set the way it is printed on NYNA's boards */
 /* the tag and the name are one lockup: the tag runs the full length of the letters beside it */
@@ -478,7 +512,8 @@ a { color: inherit; }
   -webkit-background-clip: text; background-clip: text;
   user-select: none;
 }
-.perf--hero { width: clamp(96px, 10.5vw, 158px); margin-block: 4px; }
+.perf { --hex: s; }
+.perf--hero { --hex: l; width: clamp(124px, 13.4vw, 214px); margin-block: 4px; }
 
 /* the headline comes into focus as the light warms up */
 @media (prefers-reduced-motion: no-preference) {
@@ -499,10 +534,11 @@ a { color: inherit; }
 /* ---------------------------------------------------------------- services as chips */
 
 .services { --pt: clamp(90px, 10vw, 150px); padding: var(--pt) var(--pad) 0; }
-.has-side { position: relative; --side: clamp(96px, 8.4vw, 136px); }
+.has-side { position: relative; --side: clamp(124px, 10.6vw, 172px); }
 .has-side .sec-head { max-width: min(60rem, calc(100% - var(--side) - 64px)); }
-.perf--side { position: absolute; top: var(--side-top, calc(var(--pt) * .45)); right: var(--pad); width: var(--side); height: var(--side-h, 340px); }
-.perf--note { width: min(100%, 290px); height: 106px; margin-top: clamp(40px, 4vw, 56px); }
+.perf--side { --hex: m; position: absolute; top: var(--side-top, calc(var(--pt) * .45)); right: var(--pad); width: var(--side); height: var(--side-h, 340px); }
+.case-sec .perf--side { right: 0; }   /* a case section is already inside the page margin */
+.perf--note { width: 100%; height: 106px; margin-top: clamp(40px, 4vw, 56px); }
 @media (max-width: 1099px) {
   .perf--side { display: none; }
   .has-side .sec-head { max-width: 60rem; }
@@ -647,6 +683,21 @@ a { color: inherit; }
 
 .viewer { display: grid; gap: 24px; min-width: 0; margin: 0; }
 .viewer-stage { position: relative; aspect-ratio: 5 / 4; min-height: 0; perspective: 1100px; }
+/* PCB1: the board shown sits in a placement courtyard, named in silkscreen */
+.viewer-stage::after {
+  content: ""; position: absolute; inset: -12px; pointer-events: none;
+  --c: linear-gradient(var(--silk-deco), var(--silk-deco));
+  background:
+    var(--c) 0 0 / 18px 1px no-repeat, var(--c) 0 0 / 1px 18px no-repeat,
+    var(--c) 100% 0 / 18px 1px no-repeat, var(--c) 100% 0 / 1px 18px no-repeat,
+    var(--c) 0 100% / 18px 1px no-repeat, var(--c) 0 100% / 1px 18px no-repeat,
+    var(--c) 100% 100% / 18px 1px no-repeat, var(--c) 100% 100% / 1px 18px no-repeat;
+}
+.viewer-ref {
+  position: absolute; left: -12px; top: -32px; z-index: 1;
+  font-family: var(--wide); font-size: .6rem; font-weight: 600; letter-spacing: .14em; color: var(--silk-deco);
+}
+.viewer-ref b { margin-left: 6px; font-weight: 600; color: var(--silk); }
 /* the board tips toward your cursor and floats a little above the page */
 .viewer-tilt {
   position: absolute; inset: 0;
@@ -765,6 +816,10 @@ a { color: inherit; }
 .track { display: flex; flex-direction: column; width: max-content; padding: 0 var(--rail-pad); }
 
 /* each part of the panel casts its own shadow onto the bench below */
+.rail-txt {
+  position: absolute; left: 66px; top: 50%; transform: translateY(-50%);
+  font-family: var(--wide); font-size: .54rem; font-weight: 600; letter-spacing: .16em; white-space: nowrap; color: var(--silk-deco);
+}
 .rail { position: relative; height: 26px; background: var(--mask); border-radius: 5px; box-shadow: inset 0 1px 0 var(--board-hi), 0 10px 18px -10px rgba(0, 0, 0, .45); }
 .thole {
   position: absolute; top: 50%; width: 8px; height: 8px; margin-top: -4px; border-radius: 50%;
@@ -862,6 +917,10 @@ a { color: inherit; }
 /* hover a pillar and you probe its test point */
 .tp:hover .tp-pad {
   box-shadow: inset 0 1.5px 2px -1px var(--wall), 0 0 0 5px var(--glow), 0 0 0 8px rgba(94, 207, 249, .12), 0 0 16px 4px rgba(94, 207, 249, .18);
+}
+.tp-ref {
+  position: absolute; left: 0; top: -17px;
+  font-family: var(--wide); font-size: .56rem; font-weight: 600; letter-spacing: .14em; color: var(--silk-deco);
 }
 .tp h3 { margin: 22px 0 8px; font-family: var(--wide); font-weight: 600; font-size: 1.28rem; line-height: 1.2; letter-spacing: -.015em; }
 .tp p { margin: 0; max-width: 30ch; font-size: .98rem; line-height: 1.5; color: var(--ink-2); }
@@ -961,6 +1020,15 @@ a { color: inherit; }
 
 /* a real 4-way DIP switch: flip the ones you need */
 .dip { position: relative; display: grid; grid-template-columns: repeat(4, 78px); column-gap: 6px; width: max-content; padding: 0 12px; }
+/* SW1: a courtyard round the switch body and its reference beside it */
+.dip::after {
+  content: ""; position: absolute; left: -7px; right: -7px; top: -7px; height: 118px; pointer-events: none;
+  border: 1px solid var(--silk-deco); border-radius: 4px;
+}
+.dip-ref {
+  position: absolute; left: calc(100% + 16px); top: -6px;
+  font-family: var(--wide); font-size: .6rem; font-weight: 600; letter-spacing: .14em; color: var(--silk-deco);
+}
 .dip-body {
   position: absolute; left: 0; right: 0; top: 0; height: 104px; border-radius: 6px;
   background: var(--dip);
@@ -1008,7 +1076,7 @@ a { color: inherit; }
 /* ---------------------------------------------------------------- footer */
 
 .foot { padding: 0 var(--pad) 30px; }
-.perf--foot { height: clamp(58px, 6vw, 88px); margin: 0 calc(-1 * var(--pad) + clamp(12px, 1.8vw, 26px)) clamp(40px, 4.4vw, 60px); }
+.perf--foot { --hex: m; height: clamp(90px, 8vw, 124px); margin: 0 calc(-1 * var(--pad) + clamp(16px, 2.2vw, 30px)) clamp(44px, 4.8vw, 64px); }
 /* centred, one size and one colour throughout, and every piece of contact info is a link */
 .foot-main { display: grid; justify-items: center; gap: 18px; text-align: center; }
 .foot .logo { font-size: 1.6rem; }
@@ -1038,7 +1106,51 @@ a { color: inherit; }
   border-top: 1px solid var(--rule);
 }
 .foot-row p { margin: 0; }
-.fab--foot { margin-top: 18px; text-align: center; }
+/* a dimension line that measures itself, like a fab drawing */
+.dim {
+  --c: var(--silk-deco);
+  position: relative; display: flex; justify-content: center; align-items: center;
+  height: 18px; margin: clamp(34px, 4vw, 48px) 0 0;
+  border-inline: 1px solid var(--c);
+  background: linear-gradient(var(--c), var(--c)) 0 50% / 100% 1px no-repeat;
+}
+.dim::before, .dim::after {
+  content: ""; position: absolute; top: 50%; width: 8px; height: 7px; margin-top: -3.5px; background: var(--c);
+}
+.dim::before { left: 1px; clip-path: polygon(0 50%, 100% 0, 100% 100%); }
+.dim::after { right: 1px; clip-path: polygon(0 0, 100% 50%, 0 100%); }
+.dim-val {
+  padding: 0 12px; background: var(--mask);
+  font-family: var(--wide); font-size: .62rem; font-weight: 600; letter-spacing: .12em; color: var(--ink-3);
+  font-variant-numeric: tabular-nums;
+}
+/* the board's title block, as printed on its back: a grid of fab notes and a contact code */
+.tblock {
+  display: flex; width: max-content; max-width: 100%; margin: 22px auto 0;
+  border: 1px solid var(--silk-deco); border-radius: 3px;
+}
+.tb-grid { display: grid; grid-template-columns: repeat(3, auto); margin: 0; }
+.tb-grid > div { display: grid; align-content: center; padding: 9px 16px 10px; border-right: 1px solid var(--silk-deco); border-bottom: 1px solid var(--silk-deco); }
+.tb-grid > div:nth-child(3n) { border-right: 0; }
+.tb-grid > div:nth-last-child(-n + 3) { border-bottom: 0; }
+.tb-grid dt { font-family: var(--wide); font-size: .54rem; font-weight: 600; letter-spacing: .16em; text-transform: uppercase; color: var(--ink-3); }
+.tb-grid dd { margin: 3px 0 0; font-family: var(--wide); font-size: .8rem; font-weight: 600; letter-spacing: .06em; color: var(--silk); }
+.tb-mask::after { content: "WHITE"; }
+[data-theme="dark"] .tb-mask::after { content: "BLACK"; }
+.tb-qr { display: grid; justify-items: center; align-content: center; gap: 6px; margin: 0; padding: 10px 14px; border-left: 1px solid var(--silk-deco); }
+.tb-code { width: 147px; height: 147px; }   /* 49 modules at exactly 3px each, so it scans off a standard screen */
+.tb-code path { fill: var(--silk); }
+.tb-code-bg { fill: transparent; }
+/* on the black mask the code is a filled silkscreen patch, so it still reads dark-on-light */
+[data-theme="dark"] .tb-code-bg { fill: var(--silk); }
+[data-theme="dark"] .tb-code path { fill: var(--mask); }
+.tb-qr figcaption { font-family: var(--wide); font-size: .5rem; font-weight: 600; letter-spacing: .14em; text-transform: uppercase; color: var(--ink-3); }
+@media (max-width: 700px) {
+  .tb-qr { display: none; }
+  .tblock { width: 100%; }
+  .tb-grid { flex: 1; }
+  .tb-grid > div { padding: 8px 11px 9px; }
+}
 /* on a phone the lists wrap, so they drop the separators and the contact details stack */
 @media (max-width: 700px) {
   .foot-links a + a::before, .foot-contact a + a::before { display: none; }
@@ -1318,7 +1430,7 @@ a { color: inherit; }
 :root { --risk-high: #B42318; --risk-med: #8A6A00; --risk-low: #16794C; }
 :root[data-theme="dark"] { --risk-high: #FF8A7A; --risk-med: #E3C14E; --risk-low: #5BD6A0; }
 
-.case { position: relative; --side: clamp(96px, 8.4vw, 136px); padding: clamp(24px, 4vw, 56px) var(--pad) 0; }
+.case { position: relative; --side: clamp(124px, 10.6vw, 172px); padding: clamp(24px, 4vw, 56px) var(--pad) 0; }
 .back {
   display: inline-flex; align-items: center; gap: 10px; min-height: 44px;
   font-family: var(--wide); font-size: .74rem; font-weight: 600; letter-spacing: .12em; text-transform: uppercase;
@@ -1353,9 +1465,9 @@ a { color: inherit; }
 .case-hero .shot { max-height: 82vh; }
 .case-hero figcaption, .fig-cap { display: flex; flex-wrap: wrap; align-items: baseline; gap: 4px 14px; margin-top: 16px; font-size: .92rem; line-height: 1.45; color: var(--ink-3); }
 :is(.case-hero figcaption, .fig-cap) strong { color: var(--silk); font-weight: 600; }
-.gallery { display: grid; grid-template-columns: repeat(auto-fill, minmax(min(100%, 250px), 1fr)); gap: clamp(10px, 1.2vw, 16px); margin: clamp(28px, 3vw, 40px) 0 0; padding: 0; list-style: none; }
+.gallery { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(100%, 250px), 1fr)); gap: clamp(10px, 1.2vw, 16px); margin: clamp(28px, 3vw, 40px) 0 0; padding: 0; list-style: none; }
 .gallery .shot { aspect-ratio: 4 / 3; }
-.gallery--wide { grid-template-columns: repeat(auto-fill, minmax(min(100%, 420px), 1fr)); }
+.gallery--wide { grid-template-columns: repeat(auto-fit, minmax(min(100%, 420px), 1fr)); }
 .gallery--wide .shot { aspect-ratio: 14 / 9; }
 
 /* the key numbers, set out like a parts list */
@@ -1545,6 +1657,14 @@ table.data { width: 100%; min-width: 520px; border-collapse: collapse; font-size
 .stub-note .led { margin-top: .62em; }
 .stub-cta { margin-top: 26px; }
 
+/* honeycomb bands on the case studies */
+.perf--band { --hex: m; height: clamp(90px, 7.4vw, 116px); margin: clamp(90px, 10vw, 140px) var(--pad) 0; }
+.perf--band + .case-next { margin-top: clamp(48px, 5.6vw, 72px); }
+.perf--band-head { display: none; }
+@media (max-width: 1099px) {
+  .perf--band-head { display: block; height: clamp(70px, 12vw, 96px); margin: clamp(36px, 6vw, 56px) 0 0; }
+}
+
 /* previous and next project */
 .case-next { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 16px; margin: clamp(100px, 11vw, 160px) var(--pad) 0; }
 .next-link {
@@ -1645,7 +1765,8 @@ table.data { width: 100%; min-width: 520px; border-collapse: collapse; font-size
     min-height: 0; padding-top: clamp(24px, 8vw, 56px);
   }
   .hero-copy { grid-column: 1 / -1; padding-right: 0; }
-  .perf--hero { grid-column: 1; grid-row: 2; width: auto; margin: 40px 0 0 calc(-1 * var(--pad) + 10px); }
+  .perf--hero { --hex: m; grid-column: 1; grid-row: 2; width: auto; margin: 40px 0 0; }
+  .perf--foot { margin-inline: 0; }
   .brand-lock { grid-column: 2; grid-row: 2; margin-top: 40px; }
   .tag-v { font-size: .56rem; letter-spacing: .1em; }
   .brand-v { font-size: clamp(3rem, 15vw, 4.8rem); }
@@ -1658,9 +1779,9 @@ table.data { width: 100%; min-width: 520px; border-collapse: collapse; font-size
   .work-head { grid-template-columns: minmax(0, 1fr); grid-template-areas: "h" "note" "ctrl"; }
   .pcb { width: min(78vw, 300px); }
 
-  .tps { grid-template-columns: minmax(0, 1fr); gap: 34px; padding-left: 38px; }
-  .tp:not(:last-child)::after, .tp:nth-child(2)::after { display: block; left: -30px; right: auto; top: 20px; bottom: -34px; width: 4px; height: auto; }
-  .tp-pad { position: absolute; left: -38px; top: 0; }
+  .tps { grid-template-columns: minmax(0, 1fr); gap: 34px; padding-left: 50px; }
+  .tp:not(:last-child)::after, .tp:nth-child(2)::after { display: block; left: -42px; right: auto; top: 20px; bottom: -34px; width: 4px; height: auto; }
+  .tp-pad { position: absolute; left: -50px; top: 0; }
   .tp h3 { margin-top: 0; }
   @media (prefers-reduced-motion: no-preference) {
     .tps.is-in.is-live .tp:not(:last-child)::after {
@@ -1676,6 +1797,32 @@ table.data { width: 100%; min-width: 520px; border-collapse: collapse; font-size
   .contact { grid-template-columns: minmax(0, 1fr); }
 }
 
+@media (max-width: 600px) {
+  .dip-ref { display: none; }
+}
+/* ---------------------------------------------------------------- circuit rows */
+
+/* A row of printed circuits before a section. The slot is an ordinary box in the page, so the row
+   is exactly as wide as the text and as tall as this says at every width; main.js lays the circuits
+   into it, scaled to its height, and reflows them when it changes. */
+.kit { height: clamp(142px, 86px + 4.6vw, 178px); margin: clamp(22px, 2.4vw, 38px) var(--pad) 0; pointer-events: none; }
+main > .kit + section { padding-top: clamp(26px, 2.8vw, 44px); }
+.case .kit { margin-inline: 0; }
+.case .kit + .case-sec { margin-top: clamp(26px, 2.8vw, 44px); }
+/* a phone stacks a row's circuits two lines deep, so those rows are taller there */
+@media (max-width: 576px) {
+  .kit[data-kit="link"] { height: 224px; }             /* the transmitter above the receiver, the fibre looping round */
+}
+@media (max-width: 480px) {
+  .kit[data-kit="power"] { height: 196px; }
+  .kit[data-kit="sense"] { height: 224px; }
+  .kit[data-kit="output"] { height: 218px; }
+  .kit[data-kit="battery"] { height: 190px; }
+}
+@media (max-width: 900px) {
+  .tp-ref { left: -27px; top: 28px; writing-mode: vertical-rl; }
+}
+
 @media (max-width: 420px) {
   .hero-h { font-size: clamp(2rem, .9rem + 5.6vw, 2.45rem); }
   .pwr-label { display: none; }
@@ -1688,8 +1835,7 @@ table.data { width: 100%; min-width: 520px; border-collapse: collapse; font-size
 }
 
 @media (hover: none) {
-  .hint-fine { display: none; }
-  .hint-touch { display: inline; }
+  .hint { display: none; }
 }
 
 @media (prefers-reduced-motion: reduce) {
