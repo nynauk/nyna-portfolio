@@ -127,10 +127,10 @@
 .brand-v, .perf, .window, .model-stage {
   --light:
     radial-gradient(circle calc(var(--lr) * 1px) at calc(var(--lx) * 1px) calc(var(--ly) * 1px),
-      rgba(206, 240, 255, calc(var(--li) * .6)) 0%,
-      rgba(120, 216, 255, calc(var(--li) * .52)) 18%,
-      rgba(31, 192, 255, calc(var(--li) * .4)) 42%,
-      rgba(0, 142, 219, calc(var(--li) * .16)) 72%,
+      rgba(206, 240, 255, calc(var(--li) * .42)) 0%,
+      rgba(120, 216, 255, calc(var(--li) * .34)) 18%,
+      rgba(31, 192, 255, calc(var(--li) * .24)) 42%,
+      rgba(0, 142, 219, calc(var(--li) * .09)) 72%,
       rgba(0, 142, 219, 0) 100%);
   --hole-bg: var(--light), var(--bench);
   --wall-bg: linear-gradient(var(--wall), var(--wall)), var(--light), var(--bench);
@@ -140,17 +140,17 @@
 :is(.perf, .window, .model-stage) {
   --light:
     radial-gradient(circle calc(var(--lr) * 1px) at calc(var(--lx) * 1px) calc(var(--ly) * 1px),
-      rgba(206, 240, 255, calc(var(--li) * .6)) 0%,
-      rgba(120, 216, 255, calc(var(--li) * .52)) 18%,
-      rgba(31, 192, 255, calc(var(--li) * .4)) 42%,
-      rgba(0, 142, 219, calc(var(--li) * .16)) 72%,
+      rgba(206, 240, 255, calc(var(--li) * .42)) 0%,
+      rgba(120, 216, 255, calc(var(--li) * .34)) 18%,
+      rgba(31, 192, 255, calc(var(--li) * .24)) 42%,
+      rgba(0, 142, 219, calc(var(--li) * .09)) 72%,
       rgba(0, 142, 219, 0) 100%) fixed;
 }
 .no-fixed-bg :is(.perf, .window, .model-stage) { --light: linear-gradient(transparent, transparent); }
 /* small plated holes glow as a whole, by how close the light is (main.js writes --hl) */
 .mhole, .tp-pad, .pin-pad, .tab {
   --hole-bg:
-    radial-gradient(circle at 50% 42%, rgba(206, 240, 255, calc(var(--hl, 0) * .7)), rgba(31, 192, 255, calc(var(--hl, 0) * .55)) 55%, rgba(0, 142, 219, calc(var(--hl, 0) * .3))),
+    radial-gradient(circle at 50% 42%, rgba(206, 240, 255, calc(var(--hl, 0) * .52)), rgba(31, 192, 255, calc(var(--hl, 0) * .38)) 55%, rgba(0, 142, 219, calc(var(--hl, 0) * .2))),
     var(--bench);
 }
 
@@ -207,6 +207,11 @@ a { color: inherit; }
 .surface .s-fill { fill: var(--mask); fill-rule: evenodd; }
 .surface .s-wall { fill: rgba(var(--shade), .34); fill-rule: evenodd; }
 .bench { position: fixed; left: 0; top: 0; z-index: -1; display: block; width: 100%; height: 100vh; height: 100lvh; pointer-events: none; }
+/* Preview (/?bench): the site without its board. No mask, copper, circuits, honeycomb or mounting
+   holes: the content sits straight on the moving bench, which turns light under the white theme. */
+.bench-only .board { background: transparent; }
+.bench-only :is(.tiles, main > .kit, .contact > .kit, .perf, .mhole) { display: none !important; }
+:root.bench-only:not([data-theme="dark"]) { --bench: #E7EEF2; }
 .tiles canvas { position: absolute; left: 0; display: block; }
 
 /* the silkscreen: parts, pads, references and honeycomb frames, printed over the light */
@@ -395,6 +400,11 @@ a { color: inherit; }
 [data-theme="dark"] .mode:hover .mode-half { transform: rotate(156deg); }
 .mode:active { transform: scale(.9); }
 .mode svg { width: 22px; height: 22px; }
+/* the circuit board switch: a chip, whose legs go when the board is off */
+.brd svg { fill: none; stroke: currentColor; stroke-width: 1.6; stroke-linecap: round; stroke-linejoin: round; }
+.brd-pins { transition: opacity .3s var(--ease-out); }
+.brd[aria-checked="false"] .brd-pins { opacity: .25; }
+.brd[aria-checked="false"] .brd-body { stroke-dasharray: 2.4 2.2; }
 .mode-ring { fill: none; stroke: currentColor; stroke-width: 1.6; }
 .mode-half { fill: currentColor; transform-origin: 12px 12px; transition: transform .55s var(--ease-out); }
 [data-theme="dark"] .mode-half { transform: rotate(180deg); }
@@ -693,7 +703,7 @@ a { color: inherit; }
    (_board_shadows.py), so it is widened by that tenth to put the board where it belongs. */
 .viewer-img {
   position: absolute; left: -10%; top: -10%;
-  width: 120%; height: 120%; object-fit: contain;
+  width: 120%; height: 120%; max-width: none; object-fit: contain;   /* (pictures are otherwise held to 100%) */
   user-select: none; -webkit-user-drag: none;
   transition: opacity .32s var(--ease-out), transform .5s var(--ease-out);
 }

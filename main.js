@@ -16,6 +16,9 @@
   const $ = (s, r = document) => r.querySelector(s);
   const $$ = (s, r = document) => Array.from(r.querySelectorAll(s));
   const root = document.documentElement;
+  // with the circuit board switched off the page is the moving bench alone (the head script sets
+  // the class before the first paint, from the visitor's choice or /?bench)
+  let benchOnly = root.classList.contains('bench-only');
   const board = $('#board');
   const tilesEl = $('#tiles');
   if (!board || !tilesEl) return;
@@ -52,7 +55,7 @@
   // what the light does to each board: FR4 glow, copper, drills, and the charges
   const PALETTE = {
     light: {
-      glow: [[0, '150,226,255', 0.62], [0.32, '80,206,255', 0.4], [0.64, '0,142,219', 0.13], [1, '0,142,219', 0]],
+      glow: [[0, '150,226,255', 0.36], [0.32, '80,206,255', 0.22], [0.64, '0,142,219', 0.07], [1, '0,142,219', 0]],
       copper: 'rgb(0, 76, 158)', inner: 'rgb(0, 112, 200)', innerAlpha: 0.5,
       drill: 'rgb(226, 247, 255)', fall: [0.8, 0.5],
       head: '255,255,255', halo: '0,150,255', tail: '0,122,235',
@@ -60,9 +63,9 @@
       meta: '#122236'
     },
     dark: {
-      glow: [[0, '31,192,255', 0.3], [0.35, '0,140,240', 0.18], [0.7, '0,92,200', 0.07], [1, '0,92,200', 0]],
+      glow: [[0, '31,192,255', 0.19], [0.35, '0,140,240', 0.1], [0.7, '0,92,200', 0.035], [1, '0,92,200', 0]],
       copper: 'rgb(31, 192, 255)', inner: 'rgb(0, 130, 220)', innerAlpha: 0.66,
-      drill: 'rgb(6, 10, 17)', fall: [0.9, 0.56],
+      drill: 'rgb(6, 10, 17)', fall: [0.82, 0.48],
       head: '255,255,255', halo: '31,192,255', tail: '140,222,255',
       run: { head: '214,243,255', halo: '31,192,255', tail: '31,192,255' },
       meta: '#05090F'
@@ -1381,7 +1384,7 @@
       const key = `${light.x.toFixed(0)}|${light.y.toFixed(0)}|${(R * 0.95).toFixed(0)}|${I.toFixed(3)}|${theme}`;
       const t = performance.now();
       if (key !== benchKey || t - benchLast > 80) {
-        bench.draw(benchT, light.x, light.y, R * 0.95, I);
+        bench.draw(benchT, light.x, light.y, R * 0.95, benchOnly ? I * 0.55 : I);
         benchKey = key; benchLast = t;
       }
     }
@@ -1632,6 +1635,28 @@
     applyTheme(e.matches ? 'dark' : 'light', false); active();
   });
   paintTheme();
+
+  /* ------------------------------------------------------------------ the circuit board on or off */
+
+  // Off, the board's mask, copper, circuits and holes go and the content sits on the moving bench.
+  // The page crossfades from one to the other where the browser can, and the choice is remembered.
+  const BOARD_KEY = 'nyna-board';
+  const boardToggles = $$('[data-board-toggle]');
+  const paintBoard = () => boardToggles.forEach(b => b.setAttribute('aria-checked', String(!benchOnly)));
+  function setBoard(on) {
+    benchOnly = !on;
+    store.set(BOARD_KEY, on ? 'on' : 'off');
+    const apply = () => {
+      root.classList.toggle('bench-only', benchOnly);
+      paintBoard();
+      if (bench) bench.theme();
+      if (net) rebuild();
+    };
+    if (!document.startViewTransition || reduce) { apply(); active(); return; }
+    document.startViewTransition(apply).finished.finally(active);
+  }
+  boardToggles.forEach(b => b.addEventListener('click', () => setBoard(benchOnly)));
+  paintBoard();
 
   /* ------------------------------------------------------------------ honeycomb */
 
@@ -1885,11 +1910,11 @@ void main(){
  float v=n*1.6+t*1.2;
  float lines=1.-smoothstep(0.,.2,abs(fract(v)-.5));
  float field=smoothstep(-.3,.9,n);
- vec3 col=uBench+uLine*(field*.05+lines*uLineA);
+ vec3 col=mix(uBench,uLine,field*.05+lines*uLineA);
  float r=length(css-uLight.xy)/max(uLight.z,1.);
  vec4 L=lamp(r);
- col=mix(col,L.rgb,L.a*uLI*.62);
- col+=uLine*lines*.2*uLI*(1.-smoothstep(0.,1.,r));
+ col=mix(col,L.rgb,L.a*uLI*.44);
+ col+=uLine*lines*.14*uLI*(1.-smoothstep(0.,1.,r));
  gl_FragColor=vec4(col,1.);}`;
     let prog = null, U = {}, view = [innerWidth, innerHeight], lost = false, colBench = [0.1, 0.13, 0.17], lineA = 0.1;
     function init() {
@@ -1925,7 +1950,7 @@ void main(){
       theme() {
         const hex = getComputedStyle(root).getPropertyValue('--bench').trim().replace('#', '');
         if (hex.length === 6) colBench = [0, 2, 4].map(i => parseInt(hex.slice(i, i + 2), 16) / 255);
-        lineA = theme === 'dark' ? 0.085 : 0.11;
+        lineA = theme === 'dark' ? 0.085 : (benchOnly ? 0.05 : 0.11);   // behind text on the light bench, the lines stay faint
       },
       draw(t, lx, ly, lr, li) {
         if (lost) return;
