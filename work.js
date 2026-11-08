@@ -113,7 +113,7 @@
       try { const pm = new THREE.PMREMGenerator(r); scene.environment = pm.fromScene(new RoomEnvironment(), 0.04).texture; } catch (e) { /* no environment light */ }
       scene.add(new THREE.AmbientLight(0xffffff, 0.58));
       const d1 = new THREE.DirectionalLight(0xffffff, 1.55); d1.position.set(5, 3.5, 4); scene.add(d1);
-      const d2 = new THREE.DirectionalLight(0x5ECFF9, 1.0); d2.position.set(-5, 1, -4); scene.add(d2);
+      const d2 = new THREE.DirectionalLight(0x1FC0FF, 1.0); d2.position.set(-5, 1, -4); scene.add(d2);
       const d3 = new THREE.DirectionalLight(0x9BE4FF, 0.45); d3.position.set(0, -4, 2); scene.add(d3);
       const grp = new THREE.Group(); scene.add(grp);
       // the look of an FDM print: layer ridges and a matte speckle
@@ -124,7 +124,7 @@
       for (let i = 0; i < px.length; i += 4) { const n = (Math.random() - 0.5) * 48; px[i] += n; px[i + 1] += n; px[i + 2] += n; }
       bx.putImageData(id, 0, 0);
       const bump = new THREE.CanvasTexture(bc); bump.wrapS = bump.wrapT = THREE.RepeatWrapping; bump.anisotropy = 4;
-      const mat = new THREE.MeshStandardMaterial({ color: 0xc7ced7, roughness: 0.72, metalness: 0.08, bumpMap: bump, bumpScale: 0.22, roughnessMap: bump, envMapIntensity: 0.95 });
+      const mat = new THREE.MeshStandardMaterial({ color: 0xC1CFE1, roughness: 0.72, metalness: 0.08, bumpMap: bump, bumpScale: 0.22, roughnessMap: bump, envMapIntensity: 0.95 });
       const loader = new GLTFLoader();
       let token = 0, current = null;
       const load = key => {
@@ -216,7 +216,7 @@
     const eq = $('#tvEq'), ex = eq.getContext('2d');
     let cur = 0, geo = null, hover = -1;
     const dpr = Math.max(1, Math.min(2, window.devicePixelRatio || 1));
-    const UP = '#2BBE8C', DN = '#E0566A', ACC = '#5ECFF9', GRID = 'rgba(150,170,190,.10)', AXIS = '#7D90A5';
+    const UP = '#10BF8B', DN = '#F5365F', ACC = '#1FC0FF', GRID = 'rgba(133,172,210,.10)', AXIS = '#6D91B9';
     const FONT = '11px Archivo, system-ui, sans-serif';
     S.forEach((s, i) => {
       const b = document.createElement('button');
@@ -248,12 +248,12 @@
       if (hi - lo < 1) { hi += 1; lo -= 1; }
       const pd = (hi - lo) * 0.15; lo -= pd; hi += pd;
       const n = e.length, X = i => 2 + i * (w - 4) / (n - 1), Y = v => h - 2 - (v - lo) / (hi - lo) * (h - 4);
-      if (lo < 0 && hi > 0) { ex.strokeStyle = 'rgba(150,170,190,.25)'; ex.setLineDash([3, 3]); ex.beginPath(); ex.moveTo(0, Y(0)); ex.lineTo(w, Y(0)); ex.stroke(); ex.setLineDash([]); }
+      if (lo < 0 && hi > 0) { ex.strokeStyle = 'rgba(133,172,210,.25)'; ex.setLineDash([3, 3]); ex.beginPath(); ex.moveTo(0, Y(0)); ex.lineTo(w, Y(0)); ex.stroke(); ex.setLineDash([]); }
       const up = e[n - 1] >= 0, col = up ? UP : DN;
       ex.beginPath(); ex.moveTo(X(0), Y(e[0])); e.forEach((v, i) => ex.lineTo(X(i), Y(v)));
       ex.lineTo(X(n - 1), Y(lo)); ex.lineTo(X(0), Y(lo)); ex.closePath();
       const gr = ex.createLinearGradient(0, 0, 0, h);
-      gr.addColorStop(0, up ? 'rgba(43,190,140,.28)' : 'rgba(224,86,106,.24)'); gr.addColorStop(1, 'rgba(0,0,0,0)');
+      gr.addColorStop(0, up ? 'rgba(16,191,139,.28)' : 'rgba(245,54,95,.24)'); gr.addColorStop(1, 'rgba(0,0,0,0)');
       ex.fillStyle = gr; ex.fill();
       ex.strokeStyle = col; ex.lineWidth = 1.8; ex.beginPath();
       e.forEach((v, i) => (i ? ex.lineTo(X(i), Y(v)) : ex.moveTo(X(i), Y(v))));
@@ -293,14 +293,14 @@
       }
       (ann.zones || []).forEach(z => {
         const zx0 = X(z.x0) - 4, zx1 = X(z.x1) + 4, zy0 = Y(z.y1), zy1 = Y(z.y0);
-        ctx.fillStyle = 'rgba(94,207,249,.08)'; ctx.fillRect(zx0, zy0, zx1 - zx0, zy1 - zy0);
-        ctx.strokeStyle = 'rgba(94,207,249,.35)'; ctx.strokeRect(zx0, zy0, zx1 - zx0, zy1 - zy0);
-        ctx.fillStyle = 'rgba(94,207,249,.85)'; ctx.textBaseline = 'bottom'; ctx.fillText(z.label, zx0 + 2, zy0 - 3); ctx.textBaseline = 'middle';
+        ctx.fillStyle = 'rgba(31,192,255,.08)'; ctx.fillRect(zx0, zy0, zx1 - zx0, zy1 - zy0);
+        ctx.strokeStyle = 'rgba(31,192,255,.35)'; ctx.strokeRect(zx0, zy0, zx1 - zx0, zy1 - zy0);
+        ctx.fillStyle = 'rgba(31,192,255,.85)'; ctx.textBaseline = 'bottom'; ctx.fillText(z.label, zx0 + 2, zy0 - 3); ctx.textBaseline = 'middle';
       });
       const poly = (arr, col) => { ctx.strokeStyle = col; ctx.lineWidth = 1.5; ctx.beginPath(); arr.forEach((v, i) => (i ? ctx.lineTo(X(i), Y(v)) : ctx.moveTo(X(i), Y(v)))); ctx.stroke(); };
-      if (ann.upline) poly(ann.upline, 'rgba(94,207,249,.5)');
-      if (ann.loline) poly(ann.loline, 'rgba(150,162,175,.55)');
-      if (ann.maline) poly(ann.maline, 'rgba(94,207,249,.5)');
+      if (ann.upline) poly(ann.upline, 'rgba(31,192,255,.5)');
+      if (ann.loline) poly(ann.loline, 'rgba(139,163,189,.55)');
+      if (ann.maline) poly(ann.maline, 'rgba(31,192,255,.5)');
       const cw = Math.max(2, (x1 - x0) / n * 0.6);
       c.forEach((k, i) => {
         const [o, hg, l, cl] = k, col = cl >= o ? UP : DN, xc = X(i);
@@ -324,13 +324,13 @@
         ctx.moveTo(xc, yy + (up ? 12 : -12)); ctx.lineTo(xc - 6, yy + (up ? 24 : -24)); ctx.lineTo(xc + 6, yy + (up ? 24 : -24));
         ctx.closePath(); ctx.fill();
         const tw = ctx.measureText(m.label).width, lx = Math.min(Math.max(xc - tw / 2, x0 + 2), x1 - tw - 2), ly = yy + (up ? 30 : -42);
-        ctx.fillStyle = 'rgba(94,207,249,.14)'; ctx.strokeStyle = 'rgba(94,207,249,.5)';
+        ctx.fillStyle = 'rgba(31,192,255,.14)'; ctx.strokeStyle = 'rgba(31,192,255,.5)';
         roundRect(lx - 7, ly - 3, tw + 14, 20, 6); ctx.fill(); ctx.stroke();
-        ctx.fillStyle = '#E9F6FB'; ctx.textBaseline = 'top'; ctx.fillText(m.label, lx, ly); ctx.textBaseline = 'middle';
+        ctx.fillStyle = '#E4F7FF'; ctx.textBaseline = 'top'; ctx.fillText(m.label, lx, ly); ctx.textBaseline = 'middle';
       });
       if (hover >= 0 && hover < n) {
         const xc = X(hover), k = c[hover];
-        ctx.strokeStyle = 'rgba(150,170,190,.3)'; ctx.setLineDash([3, 3]);
+        ctx.strokeStyle = 'rgba(133,172,210,.3)'; ctx.setLineDash([3, 3]);
         ctx.beginPath(); ctx.moveTo(xc, y0); ctx.lineTo(xc, y1); ctx.stroke(); ctx.setLineDash([]);
         tip.hidden = false;
         tip.innerHTML = `<b>O</b> ${k[0].toFixed(4)}&nbsp;&nbsp;<b>H</b> ${k[1].toFixed(4)}<br><b>L</b> ${k[2].toFixed(4)}&nbsp;&nbsp;<b>C</b> ${k[3].toFixed(4)}`;

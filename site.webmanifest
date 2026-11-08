@@ -4,8 +4,8 @@
   "description": "Professional IT, web and hardware solutions in London.",
   "start_url": "/",
   "display": "standalone",
-  "background_color": "#1A222C",
-  "theme_color": "#1A222C",
+  "background_color": "#122236",
+  "theme_color": "#122236",
   "icons": [
     {
       "src": "/icons/icon-192.png",

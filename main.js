@@ -52,20 +52,20 @@
   // what the light does to each board: FR4 glow, copper, drills, and the charges
   const PALETTE = {
     light: {
-      glow: [[0, '190,236,253', 0.5], [0.32, '120,214,250', 0.32], [0.64, '12,143,203', 0.1], [1, '12,143,203', 0]],
-      copper: 'rgb(12, 58, 90)', inner: 'rgb(22, 88, 128)', innerAlpha: 0.5,
-      drill: 'rgb(236, 250, 255)', fall: [0.8, 0.5],
-      head: '255,255,255', halo: '0,150,230', tail: '0,128,212',
-      run: { head: '0,108,178', halo: '94,207,249', tail: '18,150,210' },
-      meta: '#1A222C'
+      glow: [[0, '150,226,255', 0.62], [0.32, '80,206,255', 0.4], [0.64, '0,142,219', 0.13], [1, '0,142,219', 0]],
+      copper: 'rgb(0, 76, 158)', inner: 'rgb(0, 112, 200)', innerAlpha: 0.5,
+      drill: 'rgb(226, 247, 255)', fall: [0.8, 0.5],
+      head: '255,255,255', halo: '0,150,255', tail: '0,122,235',
+      run: { head: '0,104,200', halo: '31,192,255', tail: '0,150,240' },
+      meta: '#122236'
     },
     dark: {
-      glow: [[0, '94,207,249', 0.22], [0.35, '30,150,215', 0.11], [0.7, '12,100,160', 0.035], [1, '12,100,160', 0]],
-      copper: 'rgb(94, 207, 249)', inner: 'rgb(34, 132, 186)', innerAlpha: 0.66,
-      drill: 'rgb(9, 12, 16)', fall: [0.78, 0.46],
-      head: '255,255,255', halo: '94,207,249', tail: '170,236,255',
-      run: { head: '226,247,255', halo: '94,207,249', tail: '94,207,249' },
-      meta: '#07090C'
+      glow: [[0, '31,192,255', 0.3], [0.35, '0,140,240', 0.18], [0.7, '0,92,200', 0.07], [1, '0,92,200', 0]],
+      copper: 'rgb(31, 192, 255)', inner: 'rgb(0, 130, 220)', innerAlpha: 0.66,
+      drill: 'rgb(6, 10, 17)', fall: [0.9, 0.56],
+      head: '255,255,255', halo: '31,192,255', tail: '140,222,255',
+      run: { head: '214,243,255', halo: '31,192,255', tail: '31,192,255' },
+      meta: '#05090F'
     }
   };
 
@@ -1425,7 +1425,6 @@
 
   // the far side of each hole, projected toward the screen centre: a soft sliver of bore
   // wall shows on the side away from you and shifts as the board scrolls past
-  let wallKey = '';
   function depth() {
     const cx = innerWidth / 2, cy = innerHeight / 2, k = 1 - HOLE_S;
     // every measurement first, then every change, so the browser lays the page out once per frame
@@ -1445,18 +1444,7 @@
       perfs[i].el.style.setProperty('--bx', ((cx - r.left) * k).toFixed(2) + 'px');
       perfs[i].el.style.setProperty('--by', ((cy - r.top) * k).toFixed(2) + 'px');
     });
-    if (wr && wr.bottom > -60 && wr.top < innerHeight + 60) {
-      // the far wall of the window shows on the side away from you; written straight onto the
-      // window so the panel inside doesn't have to be restyled
-      const clamp = v => Math.max(-5, Math.min(5, v));
-      const wx = clamp((cx - (wr.left + wr.width / 2)) * 0.01).toFixed(1), wy = clamp((cy - (wr.top + wr.height / 2)) * 0.01).toFixed(1);
-      const key = wx + '|' + wy;
-      if (key !== wallKey) {
-        wallKey = key;
-        win.style.boxShadow = `inset ${wx}px ${wy}px 10px -4px var(--wall), inset 0 0 0 1px var(--wall), inset 0 14px 26px -22px rgba(0, 0, 0, .4)`;
-      }
-    }
-    // the window runs nearly edge to edge, so the margin marker steps aside while it passes
+    // the project strip runs edge to edge, so the margin marker steps aside while it passes
     if (railv) railv.classList.toggle('is-under', under);
   }
 
@@ -1883,7 +1871,7 @@ float snoise(vec2 v){const vec4 C=vec4(.211324865405187,.366025403784439,-.57735
 float fbm(vec2 p){float s=0.,a=.55; for(int i=0;i<3;i++){s+=a*snoise(p); p*=2.02; a*=.5;} return s;}
 float fbm2(vec2 p){return .55*snoise(p)+.275*snoise(p*2.02);}
 vec4 lamp(float r){
- vec4 c0=vec4(.933,.984,1.,1.), c1=vec4(.643,.898,.988,.95), c2=vec4(.369,.812,.976,.78), c3=vec4(.047,.561,.796,.34), c4=vec4(.047,.561,.796,0.);
+ vec4 c0=vec4(.82,.95,1.,1.), c1=vec4(.47,.847,1.,.95), c2=vec4(.122,.753,1.,.8), c3=vec4(0.,.557,.859,.36), c4=vec4(0.,.557,.859,0.);
  if(r<.16) return mix(c0,c1,r/.16);
  if(r<.4) return mix(c1,c2,(r-.16)/.24);
  if(r<.7) return mix(c2,c3,(r-.4)/.3);
@@ -1919,7 +1907,7 @@ void main(){
       gl.enableVertexAttribArray(a);
       gl.vertexAttribPointer(a, 2, gl.FLOAT, false, 0, 0);
       ['uRes', 'uView', 'uT', 'uScroll', 'uLI', 'uLineA', 'uLight', 'uBench', 'uLine'].forEach(k => { U[k] = gl.getUniformLocation(prog, k); });
-      gl.uniform3f(U.uLine, 0.36, 0.8, 0.98);
+      gl.uniform3f(U.uLine, 0.2, 0.76, 1);
       return true;
     }
     if (!init()) return null;
@@ -2018,7 +2006,7 @@ void main(){
   if (vImg && vTabs.length) {
     let cur = 'systems';
     const cache = {};
-    const src = key => `/assets/boards/${key}.webp?v=2`;
+    const src = key => `/assets/boards/${key}-cast.webp?v=42`;            // each picture carries its own shadow
     const load = key => cache[key] || (cache[key] = new Promise(res => {
       const im = new Image();
       im.onload = im.onerror = () => res();
@@ -2078,7 +2066,7 @@ void main(){
       s.push(Math.round(m));
       return Array.from(new Set(s)).sort((a, b) => a - b);
     };
-    // the soft edges only appear on a side that still has boards hidden past it
+    // the strip only fades out at a side that still has boards hidden past it
     const edges = () => {
       if (!win) return;
       const m = maxScroll(), s = panel.scrollLeft - tx;

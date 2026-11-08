@@ -17,3 +17,7 @@ node_modules/
 # Logs / temp
 *.log
 *.tmp
+
+# Large media kept out of the site (anything here is deployed): the brand kit's videos and archives
+brand/social/backlit/*.mp4
+brand/social/backlit/*.zip
